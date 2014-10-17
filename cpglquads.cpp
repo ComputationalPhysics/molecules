@@ -1,4 +1,5 @@
 #include <cpglquads.h>
+
 using std::vector;
 
 void CPGLQuads::generateVBOs()
