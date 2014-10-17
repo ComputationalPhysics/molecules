@@ -12,7 +12,16 @@ Item {
         MouseArea {
             anchors.fill: parent
             onPositionChanged: {
-                molecularDynamics.t = mouse.x
+                molecularDynamics.mouseX = mouse.x
+            }
+        }
+
+        Timer {
+            running: true
+            repeat: true
+            interval: 1
+            onTriggered: {
+                molecularDynamics.step()
             }
         }
     }

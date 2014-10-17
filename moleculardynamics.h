@@ -46,12 +46,14 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QMatrix4x4>
 #include <cpglquads.h>
+#include <simulator.h>
 
 //! [1]
 class MolecularDynamicsRenderer : public QObject {
     Q_OBJECT
 public:
     std::vector<float> *m_positions;
+    Simulator m_simulator;
     MolecularDynamicsRenderer() : m_t(0), m_program(0), m_positions(0) {
         m_glQuads = new CPGLQuads();
     }
@@ -78,28 +80,41 @@ private:
 class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(qreal t READ t WRITE setT NOTIFY tChanged)
+    Q_PROPERTY(qreal mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged)
 
 public:
     MolecularDynamics();
+    Q_INVOKABLE void step();
 
-    qreal t() const { return m_t; }
-    void setT(qreal t);
+    qreal mouseX() const
+    {
+        return m_mouseX;
+    }
 
 signals:
-    void tChanged();
+
+    void mouseXChanged(qreal arg);
 
 public slots:
     void sync();
     void cleanup();
+
+    void setMouseX(qreal arg)
+    {
+        if (m_mouseX == arg)
+            return;
+        m_renderer->setT(arg);
+        m_mouseX = arg;
+        emit mouseXChanged(arg);
+    }
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
     std::vector<float> m_positions;
-    qreal m_t;
     MolecularDynamicsRenderer *m_renderer;
+    qreal m_mouseX;
 };
 //! [2]
 

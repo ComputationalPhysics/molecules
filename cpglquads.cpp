@@ -6,12 +6,13 @@ void CPGLQuads::generateVBOs()
     glGenBuffers(2, m_vboIds);
 }
 
-void CPGLQuads::update(vector<float> &positions)
+// void CPGLQuads::update(vector<float> &positions)
+void CPGLQuads::update(double *positions, int n, float deltaX, float deltaY, float deltaZ)
 {
-    int numPoints = positions.size() / 3; // x,y,z
+    int numPoints = n / 3; // x,y,z
     QVector3D up(0,1,0);
     QVector3D right(1,0,0);
-    float scale = 0.5;
+    float scale = 0.3;
     QVector3D ul = (0.5*up - 0.5*right)*scale;
     QVector3D ur = (0.5*up + 0.5*right)*scale;
     QVector3D dl = (-0.5*up - 0.5*right)*scale;
@@ -22,7 +23,7 @@ void CPGLQuads::update(vector<float> &positions)
     m_indices.resize(6*numPoints);
 
     for(int i=0; i<numPoints; i++) {
-        QVector3D position(positions[3*i + 0], positions[3*i + 1], positions[3*i + 2]);
+        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 1] - deltaY, positions[3*i + 2] - deltaZ);
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);

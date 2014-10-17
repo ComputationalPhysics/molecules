@@ -1,7 +1,7 @@
 #include <settings.h>
 Settings::Settings() {
     FCC_b = 1.54478708;
-    temperature = 1.0;
+    temperature = 6.0;
     dt = 0.02;
     r_cut = 2.5;
     thermostat_relaxation_time = 1;
@@ -14,7 +14,7 @@ Settings::Settings() {
     nodes_x = 1;
     nodes_y = 1;
     nodes_z = 1;
-    statistics_interval = 100;
+    statistics_interval = 10;
     max_number_of_atoms = 100000;
     max_number_of_cells = 10000;
     thermostat_enabled = false;

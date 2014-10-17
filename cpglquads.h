@@ -19,6 +19,7 @@ private:
 
 public:
     CPGLQuads();
-    void update(std::vector<float> &positions);
+    // void update(std::vector<float> &positions);
+    void update(double *positions, int n, float deltaX, float deltaY, float deltaZ);
     void render(QOpenGLShaderProgram *program);
 };

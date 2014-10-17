@@ -46,11 +46,11 @@
 #include <QtGui/QOpenGLContext>
 #include <QGLFormat>
 #include <QOpenGLContext>
-
+#include <iostream>
+using namespace std;
 //! [7]
 MolecularDynamics::MolecularDynamics()
-    : m_t(0)
-    , m_renderer(0)
+    : m_renderer(0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
 
@@ -69,19 +69,15 @@ MolecularDynamics::MolecularDynamics()
         }
     }
 }
+
+void MolecularDynamics::step()
+{
+    m_renderer->m_simulator.step();
+    update();
+    if(window()) window()->update();
+}
 //! [7]
 
-//! [8]
-void MolecularDynamics::setT(qreal t)
-{
-    if (t == m_t)
-        return;
-    m_t = t;
-    emit tChanged();
-    if (window())
-        window()->update();
-}
-//! [8]
 
 //! [1]
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
@@ -137,7 +133,6 @@ void MolecularDynamics::sync()
         m_renderer->m_positions = &m_positions;
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
-    m_renderer->setT(m_t);
     m_renderer->resetProjection();
 }
 //! [9]
@@ -183,18 +178,21 @@ void MolecularDynamicsRenderer::paint()
     glClearColor(0, 0, 0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    matrix.translate(0.0, 0.0, -50.0);
+    float systemSizeX = m_simulator.m_system.system_length[0];
+    float systemSizeY = m_simulator.m_system.system_length[1];
+    float systemSizeZ = m_simulator.m_system.system_length[2];
+    // matrix.translate(-systemSizeX/2, -systemSizeY/2,  - 2*systemSizeZ);
+    matrix.translate(0,0,-1.75*systemSizeZ);
     float angle = m_t / m_viewportSize.width()*360;
     matrix.rotate(angle,0,1,0);
 
     // Set modelview-projection matrix
     m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
-    m_glQuads->update(*m_positions);
+
+    int n = 3*m_simulator.m_system.num_atoms;
+    m_glQuads->update(m_simulator.m_system.positions, n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
     m_glQuads->render(m_program);
 
     glDepthMask(GL_TRUE);

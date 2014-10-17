@@ -1,4 +1,6 @@
 #include "simulator.h"
+#include <iostream>
+using namespace std;
 
 Simulator::Simulator()
 {
@@ -9,6 +11,7 @@ Simulator::Simulator()
 }
 
 void Simulator::step() {
+
     m_system.sample_statistics = m_settings.statistics_interval && ((m_system.steps) % m_settings.statistics_interval == 0);
     m_system.step();
     if(m_system.sample_statistics) m_sampler->sample();
