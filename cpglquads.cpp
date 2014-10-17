@@ -11,11 +11,11 @@ void CPGLQuads::update(vector<float> &positions)
     int numPoints = positions.size() / 3; // x,y,z
     QVector3D up(0,1,0);
     QVector3D right(1,0,0);
-
-    QVector3D ul = 0.5*up - 0.5*right;
-    QVector3D ur = 0.5*up + 0.5*right;
-    QVector3D dl = -0.5*up - 0.5*right;
-    QVector3D dr = -0.5*up + 0.5*right;
+    float scale = 0.5;
+    QVector3D ul = (0.5*up - 0.5*right)*scale;
+    QVector3D ur = (0.5*up + 0.5*right)*scale;
+    QVector3D dl = (-0.5*up - 0.5*right)*scale;
+    QVector3D dr = (-0.5*up + 0.5*right)*scale;
 
     int numberOfVertices = numPoints*4;
     m_vertices.resize(numberOfVertices);
@@ -79,7 +79,8 @@ void CPGLQuads::render(QOpenGLShaderProgram *program)
     glVertexAttribPointer(texcoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_TRIANGLES, m_vertices.size(), GL_UNSIGNED_SHORT, 0);
+    // glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
 }
 
 CPGLQuads::CPGLQuads()

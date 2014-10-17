@@ -6,13 +6,14 @@ Item {
     height: 480
 
     MolecularDynamics {
+        id: molecularDynamics
         anchors.fill: parent
-    }
 
-    Rectangle {
-        width: 100
-        height: 200
-        color: "blue"
-        opacity: 0.5
+        MouseArea {
+            anchors.fill: parent
+            onPositionChanged: {
+                molecularDynamics.t = mouse.x
+            }
+        }
     }
 }

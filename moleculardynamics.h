@@ -44,19 +44,22 @@
 
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QMatrix4x4>
 #include <cpglquads.h>
 
 //! [1]
 class MolecularDynamicsRenderer : public QObject {
     Q_OBJECT
 public:
-    MolecularDynamicsRenderer() : m_t(0), m_program(0) {
+    std::vector<float> *m_positions;
+    MolecularDynamicsRenderer() : m_t(0), m_program(0), m_positions(0) {
         m_glQuads = new CPGLQuads();
     }
     ~MolecularDynamicsRenderer();
 
     void setT(qreal t) { m_t = t; }
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
+    void resetProjection();
 
 public slots:
     void paint();
@@ -65,6 +68,8 @@ private:
     QSize m_viewportSize;
     qreal m_t;
     QOpenGLShaderProgram *m_program;
+
+    QMatrix4x4 m_projection;
     CPGLQuads *m_glQuads;
 };
 //! [1]
@@ -92,8 +97,7 @@ private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
-
-    float *m_positions;
+    std::vector<float> m_positions;
     qreal m_t;
     MolecularDynamicsRenderer *m_renderer;
 };

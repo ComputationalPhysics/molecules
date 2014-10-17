@@ -44,6 +44,8 @@
 #include <QtQuick/qquickwindow.h>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLContext>
+#include <QGLFormat>
+#include <QOpenGLContext>
 
 //! [7]
 MolecularDynamics::MolecularDynamics()
@@ -51,13 +53,17 @@ MolecularDynamics::MolecularDynamics()
     , m_renderer(0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
-    m_positions = new float[3*1000];
-    for(int i=0; i<10; i++) {
-        for(int j=0; j<10; j++) {
-            for(int k=0; k<10; k++) {
-                int index = i*100 + j*10 + k;
-                m_positions[3*index + 0] = i;
-                m_positions[3*index + 1] = j;
+
+    int Nx = 10;
+    int Ny = 10;
+    int Nz = 10;
+    m_positions.resize(3*Nx*Ny*Nz);
+    for(int i=0; i<Nx; i++) {
+        for(int j=0; j<Ny; j++) {
+            for(int k=0; k<Nz; k++) {
+                int index = i*Ny*Nz + j*Nz + k;
+                m_positions[3*index + 0] = i-Nx/2.0;
+                m_positions[3*index + 1] = j-Ny/2.0;
                 m_positions[3*index + 2] = k;
             }
         }
@@ -90,6 +96,21 @@ void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
         win->setClearBeforeRendering(false);
     }
 }
+
+void MolecularDynamicsRenderer::resetProjection()
+{
+    // Calculate aspect ratio
+    qreal aspect = qreal(m_viewportSize.width()) / qreal(m_viewportSize.height() ? m_viewportSize.height() : 1);
+
+    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
+    const qreal zNear = 2.0, zFar = 200.0, fov = 45.0;
+
+    // Reset projection
+    m_projection.setToIdentity();
+
+    // Set perspective projection
+    m_projection.perspective(fov, aspect, zNear, zFar);
+}
 //! [3]
 
 //! [6]
@@ -113,9 +134,11 @@ void MolecularDynamics::sync()
     if (!m_renderer) {
         m_renderer = new MolecularDynamicsRenderer();
         connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
+        m_renderer->m_positions = &m_positions;
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->setT(m_t);
+    m_renderer->resetProjection();
 }
 //! [9]
 
@@ -126,19 +149,27 @@ void MolecularDynamicsRenderer::paint()
         m_program = new QOpenGLShaderProgram();
 
         m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                                           "attribute vec4 a_position;\n"
-                                           "attribute vec2 a_texcoord;\n"
-                                           "varying vec2 coords;\n"
+                                           "attribute highp vec4 a_position;\n"
+                                           "attribute highp vec2 a_texcoord;\n"
+                                           "uniform highp mat4 modelViewProjectionMatrix;\n"
+                                           "varying highp vec2 coords;\n"
                                            "void main() {\n"
-                                           "    gl_Position = a_position;\n"
-                                           "    coords = a_texcoord.xy;\n"
+                                           "    gl_Position = modelViewProjectionMatrix*a_position;\n"
+                                           "    coords = a_texcoord;\n"
                                            "}");
 
         m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                           "varying vec2 coords;\n"
+                                           "varying highp vec2 coords;\n"
+                                           "highp vec2 center = vec2(0.5, 0.5);\n"
                                            "void main() {\n"
-                                           "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+                                           "    highp vec2 delta = coords - center;"
+                                           "    highp float r2 = delta.x*delta.x + delta.y*delta.y;"
+                                           "    highp float color = 1.0 - r2/0.25;"
+                                           "    highp float alpha = float(r2<0.25);"
+                                           "    if(alpha < 0.999) { discard; }"
+                                           "    gl_FragColor = vec4(color, 0.0, 0.0, 1.0);\n"
                                            "}");
+
 
         m_program->link();
     }
@@ -146,73 +177,28 @@ void MolecularDynamicsRenderer::paint()
 
     glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
 
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0, 0, 0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    std::vector<float> pos = {0,0,0};
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    m_glQuads->update(pos);
+    // Calculate model view transformation
+    QMatrix4x4 matrix;
+    matrix.translate(0.0, 0.0, -50.0);
+    float angle = m_t / m_viewportSize.width()*360;
+    matrix.rotate(angle,0,1,0);
+
+    // Set modelview-projection matrix
+    m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
+    m_glQuads->update(*m_positions);
     m_glQuads->render(m_program);
 
-    m_program->release();
+    glDepthMask(GL_TRUE);
 
-    return;
-    if (!m_program) {
-        m_program = new QOpenGLShaderProgram();
-        m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                                           "attribute highp vec4 vertices;"
-                                           "varying highp vec2 coords;"
-                                           "void main() {"
-                                           "    gl_Position = vertices;"
-                                           "    coords = vertices.xy;"
-                                           "}");
-
-        m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                           "uniform lowp float t;"
-                                           "varying highp vec2 coords;"
-                                           "void main() {"
-                                           "    lowp float i = 1. - (pow(abs(coords.x), 4.) + pow(abs(coords.y), 4.));"
-                                           "    i = smoothstep(t - 0.1, t + 0.1, i);"
-                                           "    i = floor(i * 20.) / 20.;"
-                                           "    gl_FragColor = vec4(coords * .5 + .5, i, i);"
-                                           "}");
-
-        m_program->bindAttributeLocation("vertices", 0);
-
-        m_program->link();
-    }
-//! [4] //! [5]
-    m_program->bind();
-
-    m_program->enableAttributeArray(0);
-
-    float values[] = {
-        -1, -1,
-        1, -1,
-        -1, 1,
-        1, 1
-    };
-    // m_program->setAttributeArray(0, GL_FLOAT, values, 2);
-    m_program->setAttributeArray(0, GL_FLOAT, values, 2);
-    m_program->setUniformValue("t", (float) m_t);
-
-    glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
-
-    glDisable(GL_DEPTH_TEST);
-
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    m_program->disableAttributeArray(0);
     m_program->release();
 }
 
