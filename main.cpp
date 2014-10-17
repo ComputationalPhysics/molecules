@@ -8,6 +8,13 @@
 #include <QGLFormat>
 #include <QOpenGLContext>
 
+#include <settings.h>
+#include <system.h>
+#include <thermostat.h>
+#include <statisticssampler.h>
+#include <iostream>
+using namespace std;
+
 int main(int argc, char *argv[])
 {
     qmlRegisterType<MolecularDynamics>("MolecularDynamics", 1, 0, "MolecularDynamics");
