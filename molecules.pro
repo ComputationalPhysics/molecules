@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick widgets opengl
+QT += qml quick widgets opengl openglextensions
 CONFIG += c++11
 INCLUDEPATH += simulator
 SOURCES += main.cpp \
@@ -35,5 +35,3 @@ HEADERS += \
     simulator/unitconverter.h \
     simulator/simulator.h
 
-# Needed for Ubuntu to recognize glGenBuffers et. al.
-DEFINES += GL_GLEXT_PROTOTYPES
