@@ -70,11 +70,13 @@ MolecularDynamics::MolecularDynamics()
     }
 }
 
-void MolecularDynamics::step()
+void MolecularDynamics::step(double dt)
 {
     if(!m_renderer) {
         return;
     }
+    double safeDt = min(0.02, dt);
+    m_renderer->m_simulator.m_system.dt = safeDt;
     m_renderer->m_simulator.step();
     update();
     if(window()) window()->update();

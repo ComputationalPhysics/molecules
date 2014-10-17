@@ -84,7 +84,7 @@ class MolecularDynamics : public QQuickItem
 
 public:
     MolecularDynamics();
-    Q_INVOKABLE void step();
+    Q_INVOKABLE void step(double dt);
 
     qreal mouseX() const
     {

@@ -18,11 +18,16 @@ Item {
 
         Timer {
             id: timer
+            property real lastTime: Date.now()
             running: true
             repeat: true
-            interval: 1
+            interval: 10
             onTriggered: {
-                molecularDynamics.step()
+                var currentTime = Date.now()
+                var dt = currentTime - lastTime
+                dt /= 1000
+                molecularDynamics.step(dt)
+                lastTime = currentTime
             }
         }
     }
