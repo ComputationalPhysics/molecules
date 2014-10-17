@@ -34,3 +34,6 @@ HEADERS += \
     simulator/thermostat.h \
     simulator/unitconverter.h \
     simulator/simulator.h
+
+# Needed for Ubuntu to recognize glGenBuffers et. al.
+DEFINES += GL_GLEXT_PROTOTYPES
