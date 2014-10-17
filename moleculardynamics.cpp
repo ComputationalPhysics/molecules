@@ -72,6 +72,9 @@ MolecularDynamics::MolecularDynamics()
 
 void MolecularDynamics::step()
 {
+    if(!m_renderer) {
+        return;
+    }
     m_renderer->m_simulator.step();
     update();
     if(window()) window()->update();
