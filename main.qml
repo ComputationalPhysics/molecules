@@ -3,22 +3,11 @@ import QtQuick.Controls 1.1
 
 ApplicationWindow {
     visible: true
-    width: 640
-    height: 480
-    title: qsTr("Hello World")
+    width: 1280
+    height: 800
+    title: qsTr("Molecules")
 
-    menuBar: MenuBar {
-        Menu {
-            title: qsTr("File")
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
-            }
-        }
-    }
-
-    Text {
-        text: qsTr("Hello World")
-        anchors.centerIn: parent
+    Molecules {
+        anchors.fill: parent
     }
 }

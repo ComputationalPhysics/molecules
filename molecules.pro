@@ -1,8 +1,11 @@
 TEMPLATE = app
 
-QT += qml quick widgets
+QT += qml quick widgets opengl
+CONFIG += c++11
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    moleculardynamics.cpp \
+    cpglquads.cpp
 
 RESOURCES += qml.qrc
 
@@ -11,3 +14,7 @@ QML_IMPORT_PATH =
 
 # Default rules for deployment.
 include(deployment.pri)
+
+HEADERS += \
+    moleculardynamics.h \
+    cpglquads.h
