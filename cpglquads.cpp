@@ -13,6 +13,11 @@ void CPGLQuads::initializeOpenGLFunctions()
     m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
 }
 
+void CPGLQuads::setModelViewMatrix(QMatrix4x4 &matrix)
+{
+    m_modelViewMatrix = matrix;
+}
+
 void CPGLQuads::generateVBOs()
 {
     m_funcs->glGenBuffers(2, m_vboIds);
@@ -22,8 +27,16 @@ void CPGLQuads::generateVBOs()
 void CPGLQuads::update(double *positions, int n, float deltaX, float deltaY, float deltaZ)
 {
     int numPoints = n / 3; // x,y,z
-    QVector3D up(0,1,0);
-    QVector3D right(1,0,0);
+
+    QVector3D right;
+    right.setX(m_modelViewMatrix(0,0));
+    right.setY(m_modelViewMatrix(0,1));
+    right.setZ(m_modelViewMatrix(0,2));
+    QVector3D up;
+    up.setX(m_modelViewMatrix(1,0));
+    up.setY(m_modelViewMatrix(1,1));
+    up.setZ(m_modelViewMatrix(1,2));
+
     float scale = 0.3;
     QVector3D ul = (0.5*up - 0.5*right)*scale;
     QVector3D ur = (0.5*up + 0.5*right)*scale;

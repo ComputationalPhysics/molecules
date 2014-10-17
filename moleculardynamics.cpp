@@ -197,6 +197,7 @@ void MolecularDynamicsRenderer::paint()
     m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
 
     int n = 3*m_simulator.m_system.num_atoms;
+    m_glQuads->setModelViewMatrix(matrix);
     m_glQuads->update(m_simulator.m_system.positions, n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
     m_glQuads->render(m_program);
 
