@@ -89,10 +89,13 @@ private:
 class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
+
     Q_PROPERTY(double xPoint READ xPoint WRITE setxPoint NOTIFY xPointChanged)
     Q_PROPERTY(double yPoint READ yPoint WRITE setyPoint NOTIFY yPointChanged)
     Q_PROPERTY(double pinchScale READ pinchScale WRITE setPinchScale NOTIFY pinchScaleChanged)
     Q_PROPERTY(double pinchRotation READ pinchRotation WRITE setPinchRotation NOTIFY pinchRotationChanged)
+    Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
+    Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
 
 public:
     MolecularDynamics();
@@ -117,6 +120,16 @@ public:
     double pinchScale() const
     {
         return m_pinchScale;
+    }
+
+    double thermostatValue() const
+    {
+        return m_thermostatValue;
+    }
+
+    bool thermostatEnabled() const
+    {
+        return m_thermostatEnabled;
     }
 
 public slots:
@@ -162,6 +175,22 @@ public slots:
         if(m_renderer) m_renderer->setPinchScale(m_pinchScale);
     }
 
+    void setThermostatValue(double arg)
+    {
+        if (m_thermostatValue != arg) {
+            m_thermostatValue = arg;
+            emit thermostatValueChanged(arg);
+        }
+    }
+
+    void setThermostatEnabled(bool arg)
+    {
+        if (m_thermostatEnabled != arg) {
+            m_thermostatEnabled = arg;
+            emit thermostatEnabledChanged(arg);
+        }
+    }
+
 signals:
     void xPointChanged(double arg);
 
@@ -170,6 +199,10 @@ signals:
     void pinchRotationChanged(double arg);
 
     void pinchScaleChanged(double arg);
+
+    void thermostatValueChanged(double arg);
+
+    void thermostatEnabledChanged(bool arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -182,6 +215,8 @@ private:
     double m_pinchRotation;
     double m_pinchScale;
 
+    double m_thermostatValue;
+    bool m_thermostatEnabled;
 };
 //! [2]
 

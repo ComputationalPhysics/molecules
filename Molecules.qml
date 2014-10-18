@@ -1,13 +1,18 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.2
 import MolecularDynamics 1.0
 
 Item {
-    width: 640
-    height: 480
+    id: moleculesRoot
+    width: 1280
+    height: 800
 
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
+
+        thermostatEnabled: thermostatCheckBox.checked
+        thermostatValue: thermostatSlider.value
 
         MouseArea {
             id: mousey
@@ -86,6 +91,34 @@ Item {
                 dt /= 1000
                 molecularDynamics.step(dt)
                 lastTime = currentTime
+            }
+        }
+    }
+
+    Rectangle {
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        width: parent.width * 0.2
+        color: Qt.rgba(239 / 255, 243 / 255, 255 / 255, 200 / 255)
+
+        Column {
+            anchors {
+                fill: parent
+                margins: moleculesRoot.width * 0.01
+            }
+            CheckBox {
+                id: thermostatCheckBox
+                text: "Thermostat: " + thermostatSlider.value.toFixed(1) + " K"
+            }
+
+            Slider {
+                id: thermostatSlider
+                width: parent.width
+                minimumValue: 1
+                maximumValue: 500
             }
         }
     }

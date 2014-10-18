@@ -48,8 +48,10 @@
 #include <QOpenGLContext>
 #include <iostream>
 #include <cmath>
-
+#include "simulator/unitconverter.h"
 using namespace std;
+
+
 
 void MolecularDynamicsRenderer::resetProjection()
 {
@@ -88,13 +90,14 @@ void MolecularDynamicsRenderer::paint()
                                            "attribute highp vec4 a_position;\n"
                                            "attribute highp vec2 a_texcoord;\n"
                                            "uniform highp mat4 modelViewProjectionMatrix;\n"
-                                           "uniform highp mat4 modelViewProjectionNoZoomMatrix;\n"
+                                           "uniform highp mat4 lightModelViewProjectionMatrix;\n"
+                                           "uniform highp float systemSizeZ;\n"
                                            "varying highp vec2 coords;\n"
                                            "varying highp float light;\n"
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
-                                           "    highp vec4 lightDistance = modelViewProjectionNoZoomMatrix*a_position;\n"
-                                           "    light = clamp((12.0 - lightDistance.z) / 5.0, 0.0, 1.0);\n"
+                                           "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
+                                           "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
                                            "    coords = a_texcoord;\n"
                                            "}");
 
@@ -127,7 +130,7 @@ void MolecularDynamicsRenderer::paint()
 
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    QMatrix4x4 matrixNoZoom;
+    QMatrix4x4 lightMatrix;
     float systemSizeX = m_simulator.m_system.system_length[0];
     float systemSizeY = m_simulator.m_system.system_length[1];
     float systemSizeZ = m_simulator.m_system.system_length[2];
@@ -135,21 +138,23 @@ void MolecularDynamicsRenderer::paint()
     float pinchScaleCorrection = m_pinchScale >= 1 ? (m_pinchScale - 1) : -1.0/m_pinchScale + 1;
 
     float zoom = m_zoom + pinchScaleCorrection;
-    // qDebug() << "m_zoom + correction = zoom: " << m_zoom << " + " << correction << " = " << zoom;
 
     matrix.translate(0,0,(-1.75 + zoom)-systemSizeZ);
-    matrixNoZoom.translate(0,0,(-1.75)-systemSizeZ);
-//    float angle = m_t / m_viewportSize.width()*360;
+
     matrix.rotate(m_tilt, 1, 0, 0);
     matrix.rotate(m_pan, 0, 1, 0);
     matrix.rotate(m_roll, 0, 0, 1);
-    matrixNoZoom.rotate(m_tilt, 1, 0, 0);
-    matrixNoZoom.rotate(m_pan, 0, 1, 0);
-    matrixNoZoom.rotate(m_roll, 0, 0, 1);
+
+    lightMatrix.translate(0,0,-systemSizeZ / 2.0);
+
+    lightMatrix.rotate(m_tilt, 1, 0, 0);
+    lightMatrix.rotate(m_pan, 0, 1, 0);
+    lightMatrix.rotate(m_roll, 0, 0, 1);
 
     // Set modelview-projection matrix
+    m_program->setUniformValue("systemSizeZ", systemSizeZ);
     m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
-    m_program->setUniformValue("modelViewProjectionNoZoomMatrix", m_projection * matrixNoZoom);
+    m_program->setUniformValue("lightModelViewProjectionMatrix", m_projection * lightMatrix);
 
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
@@ -224,7 +229,9 @@ void MolecularDynamics::sync()
 }
 
 MolecularDynamics::MolecularDynamics()
-    : m_renderer(0)
+    : m_renderer(0),
+      m_thermostatEnabled(false),
+      m_thermostatValue(1.0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
 
@@ -250,6 +257,10 @@ void MolecularDynamics::step(double dt)
         return;
     }
     double safeDt = min(0.02, dt);
+    if(m_thermostatEnabled) {
+        double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
+        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
+    }
     m_renderer->m_simulator.m_system.dt = safeDt;
     m_renderer->m_simulator.step();
     update();
