@@ -14,7 +14,7 @@ Settings::Settings() {
     nodes_x = 1;
     nodes_y = 1;
     nodes_z = 1;
-    statistics_interval = 10;
+    statistics_interval = 100;
     max_number_of_atoms = 100000;
     max_number_of_cells = 10000;
     thermostat_enabled = false;

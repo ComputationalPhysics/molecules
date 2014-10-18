@@ -15,7 +15,11 @@
 #include <iostream>
 using namespace std;
 
-int main(int argc, char *argv[])
+# if defined (Q_OS_IOS)
+extern "C" int qtmn (int argc, char * argv [])
+#else
+int main (int argc, char * argv [])
+# endif
 {
     qmlRegisterType<MolecularDynamics>("MolecularDynamics", 1, 0, "MolecularDynamics");
 

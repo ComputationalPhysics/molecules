@@ -47,51 +47,9 @@
 #include <QGLFormat>
 #include <QOpenGLContext>
 #include <iostream>
+#include <cmath>
+
 using namespace std;
-
-MolecularDynamics::MolecularDynamics()
-    : m_renderer(0)
-{
-    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
-
-    int Nx = 10;
-    int Ny = 10;
-    int Nz = 10;
-    m_positions.resize(3*Nx*Ny*Nz);
-    for(int i=0; i<Nx; i++) {
-        for(int j=0; j<Ny; j++) {
-            for(int k=0; k<Nz; k++) {
-                int index = i*Ny*Nz + j*Nz + k;
-                m_positions[3*index + 0] = i-Nx/2.0;
-                m_positions[3*index + 1] = j-Ny/2.0;
-                m_positions[3*index + 2] = k;
-            }
-        }
-    }
-}
-
-void MolecularDynamics::step(double dt)
-{
-    if(!m_renderer) {
-        return;
-    }
-    double safeDt = min(0.02, dt);
-    m_renderer->m_simulator.m_system.dt = safeDt;
-    m_renderer->m_simulator.step();
-    update();
-    if(window()) window()->update();
-}
-
-void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
-{
-    if (win) {
-        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(sync()), Qt::DirectConnection);
-        connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(cleanup()), Qt::DirectConnection);
-        // If we allow QML to do the clearing, they would clear what we paint
-        // and nothing would show.
-        win->setClearBeforeRendering(false);
-    }
-}
 
 void MolecularDynamicsRenderer::resetProjection()
 {
@@ -108,59 +66,17 @@ void MolecularDynamicsRenderer::resetProjection()
     m_projection.perspective(fov, aspect, zNear, zFar);
 }
 
-void MolecularDynamicsRenderer::incrementRotation(double deltaPan, double deltaTilt)
+void MolecularDynamicsRenderer::incrementRotation(double deltaPan, double deltaTilt, double deltaRoll)
 {
     m_pan += deltaPan;
     m_tilt += deltaTilt;
     m_tilt = max(-90.0, min(90.0, m_tilt)); // Clamp so that upside-down is not possible
+    m_roll += deltaRoll;
 }
 
 void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
 {
     m_zoom += deltaZoom;
-}
-void MolecularDynamics::cleanup()
-{
-    if (m_renderer) {
-        delete m_renderer;
-        m_renderer = 0;
-    }
-}
-
-void MolecularDynamics::incrementRotation(double deltaPan, double deltaTilt)
-{
-    if(!m_renderer) {
-        return;
-    }
-    m_renderer->incrementRotation(deltaPan, deltaTilt);
-}
-
-void MolecularDynamics::incrementZoom(double deltaZoom)
-{
-    if(!m_renderer) {
-        return;
-    }
-    m_renderer->incrementZoom(deltaZoom);
-}
-
-MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_zoom(0), m_program(0), m_positions(0) {
-    m_glQuads = new CPGLQuads();
-}
-
-MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
-{
-    delete m_program;
-}
-
-void MolecularDynamics::sync()
-{
-    if (!m_renderer) {
-        m_renderer = new MolecularDynamicsRenderer();
-        connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
-        m_renderer->m_positions = &m_positions;
-    }
-    m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
-    m_renderer->resetProjection();
 }
 
 void MolecularDynamicsRenderer::paint()
@@ -215,14 +131,21 @@ void MolecularDynamicsRenderer::paint()
     float systemSizeX = m_simulator.m_system.system_length[0];
     float systemSizeY = m_simulator.m_system.system_length[1];
     float systemSizeZ = m_simulator.m_system.system_length[2];
-    // matrix.translate(-systemSizeX/2, -systemSizeY/2,  - 2*systemSizeZ);
-    matrix.translate(0,0,(-1.75 + m_zoom)*systemSizeZ);
-    matrixNoZoom.translate(0,0,(-1.75)*systemSizeZ);
+
+    float pinchScaleCorrection = m_pinchScale >= 1 ? (m_pinchScale - 1) : -1.0/m_pinchScale + 1;
+
+    float zoom = m_zoom + pinchScaleCorrection;
+    // qDebug() << "m_zoom + correction = zoom: " << m_zoom << " + " << correction << " = " << zoom;
+
+    matrix.translate(0,0,(-1.75 + zoom)-systemSizeZ);
+    matrixNoZoom.translate(0,0,(-1.75)-systemSizeZ);
 //    float angle = m_t / m_viewportSize.width()*360;
     matrix.rotate(m_tilt, 1, 0, 0);
     matrix.rotate(m_pan, 0, 1, 0);
+    matrix.rotate(m_roll, 0, 0, 1);
     matrixNoZoom.rotate(m_tilt, 1, 0, 0);
     matrixNoZoom.rotate(m_pan, 0, 1, 0);
+    matrixNoZoom.rotate(m_roll, 0, 0, 1);
 
     // Set modelview-projection matrix
     m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
@@ -237,4 +160,125 @@ void MolecularDynamicsRenderer::paint()
 
     m_program->release();
 }
+double MolecularDynamicsRenderer::pinchScale() const
+{
+    return m_pinchScale;
+}
+
+void MolecularDynamicsRenderer::setPinchScale(double pinchScale)
+{
+    m_pinchScale = pinchScale;
+}
+
+double MolecularDynamicsRenderer::zoom() const
+{
+    return m_zoom;
+}
+
+void MolecularDynamicsRenderer::setZoom(double zoom)
+{
+    m_zoom = zoom;
+}
+
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(1), m_program(0), m_positions(0), m_pinchScale(1) {
+    m_glQuads = new CPGLQuads();
+}
+
+MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
+{
+    delete m_program;
+}
+
+void MolecularDynamics::cleanup()
+{
+    if (m_renderer) {
+        delete m_renderer;
+        m_renderer = 0;
+    }
+}
+
+void MolecularDynamics::incrementRotation(double deltaPan, double deltaTilt, double deltaRoll)
+{
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->incrementRotation(deltaPan, deltaTilt, deltaRoll);
+}
+
+void MolecularDynamics::incrementZoom(double deltaZoom) {
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->incrementZoom(deltaZoom);
+}
+
+void MolecularDynamics::sync()
+{
+    if (!m_renderer) {
+        m_renderer = new MolecularDynamicsRenderer();
+        connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
+        m_renderer->m_positions = &m_positions;
+    }
+    m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
+    m_renderer->resetProjection();
+}
+
+MolecularDynamics::MolecularDynamics()
+    : m_renderer(0)
+{
+    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
+
+    int Nx = 10;
+    int Ny = 10;
+    int Nz = 10;
+    m_positions.resize(3*Nx*Ny*Nz);
+    for(int i=0; i<Nx; i++) {
+        for(int j=0; j<Ny; j++) {
+            for(int k=0; k<Nz; k++) {
+                int index = i*Ny*Nz + j*Nz + k;
+                m_positions[3*index + 0] = i-Nx/2.0;
+                m_positions[3*index + 1] = j-Ny/2.0;
+                m_positions[3*index + 2] = k;
+            }
+        }
+    }
+}
+
+void MolecularDynamics::step(double dt)
+{
+    if(!m_renderer) {
+        return;
+    }
+    double safeDt = min(0.02, dt);
+    m_renderer->m_simulator.m_system.dt = safeDt;
+    m_renderer->m_simulator.step();
+    update();
+    if(window()) window()->update();
+}
+
+void MolecularDynamics::onPinchedFinished()
+{
+    if(m_renderer) {
+        float pinchScaleCorrection = m_pinchScale >= 1 ? (m_pinchScale - 1) : -1.0/m_pinchScale + 1;
+        float newZoom = m_renderer->zoom() + pinchScaleCorrection;
+
+        m_renderer->setZoom(newZoom);
+        m_renderer->setPinchScale(1);
+    }
+
+}
+
+void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
+{
+    if (win) {
+        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(sync()), Qt::DirectConnection);
+        connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(cleanup()), Qt::DirectConnection);
+        // If we allow QML to do the clearing, they would clear what we paint
+        // and nothing would show.
+        win->setClearBeforeRendering(false);
+    }
+}
+
+
+
 

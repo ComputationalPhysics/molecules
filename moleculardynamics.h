@@ -59,8 +59,14 @@ public:
 
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void resetProjection();
-    void incrementRotation(double deltaPan, double deltaTilt);
+    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
+
+    double zoom() const;
+    void setZoom(double zoom);
+
+    double pinchScale() const;
+    void setPinchScale(double pinchScale);
 
 public slots:
     void paint();
@@ -69,7 +75,9 @@ private:
     QSize m_viewportSize;
     double m_tilt;
     double m_pan;
+    double m_roll;
     double m_zoom;
+    double m_pinchScale;
     QOpenGLShaderProgram *m_program;
 
     QMatrix4x4 m_projection;
@@ -81,17 +89,87 @@ private:
 class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
-//    Q_PROPERTY(qreal mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged)
+    Q_PROPERTY(double xPoint READ xPoint WRITE setxPoint NOTIFY xPointChanged)
+    Q_PROPERTY(double yPoint READ yPoint WRITE setyPoint NOTIFY yPointChanged)
+    Q_PROPERTY(double pinchScale READ pinchScale WRITE setPinchScale NOTIFY pinchScaleChanged)
+    Q_PROPERTY(double pinchRotation READ pinchRotation WRITE setPinchRotation NOTIFY pinchRotationChanged)
 
 public:
     MolecularDynamics();
     Q_INVOKABLE void step(double dt);
+    Q_INVOKABLE void onPinchedFinished();
+
+    double xPoint() const
+    {
+        return m_xPoint;
+    }
+
+    double yPoint() const
+    {
+        return m_yPoint;
+    }
+
+    double pinchRotation() const
+    {
+        return m_pinchRotation;
+    }
+
+    double pinchScale() const
+    {
+        return m_pinchScale;
+    }
 
 public slots:
     void sync();
     void cleanup();
-    void incrementRotation(double deltaPan, double deltaTilt);
+    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
+
+    void setxPoint(double arg)
+    {
+        if (m_xPoint == arg)
+            return;
+
+        m_xPoint = arg;
+        emit xPointChanged(arg);
+    }
+
+    void setyPoint(double arg)
+    {
+        if (m_yPoint == arg)
+            return;
+
+        m_yPoint = arg;
+        emit yPointChanged(arg);
+    }
+
+    void setPinchRotation(double arg)
+    {
+        if (m_pinchRotation == arg)
+            return;
+
+        m_pinchRotation = arg;
+        emit pinchRotationChanged(arg);
+    }
+
+    void setPinchScale(double arg)
+    {
+        if (m_pinchScale == arg)
+            return;
+
+        m_pinchScale = arg;
+        emit pinchScaleChanged(arg);
+        if(m_renderer) m_renderer->setPinchScale(m_pinchScale);
+    }
+
+signals:
+    void xPointChanged(double arg);
+
+    void yPointChanged(double arg);
+
+    void pinchRotationChanged(double arg);
+
+    void pinchScaleChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -99,7 +177,11 @@ private slots:
 private:
     std::vector<float> m_positions;
     MolecularDynamicsRenderer *m_renderer;
-    qreal m_mouseX;
+    double m_xPoint;
+    double m_yPoint;
+    double m_pinchRotation;
+    double m_pinchScale;
+
 };
 //! [2]
 
