@@ -14,32 +14,6 @@ Item {
         thermostatEnabled: thermostatCheckBox.checked
         thermostatValue: thermostatSlider.value
 
-        MouseArea {
-            id: mousey
-            anchors.fill: parent
-            property point lastPosition
-            onPressed: {
-                lastPosition = Qt.point(mouse.x, mouse.y)
-            }
-
-            onPositionChanged: {
-                var deltaX = mouse.x - lastPosition.x
-                var deltaY = mouse.y - lastPosition.y
-                var deltaPan = deltaX / width * 360 // max 3 rounds
-                var deltaTilt = deltaY / height * 180 // max 0.5 round
-                molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
-                lastPosition = Qt.point(mouse.x, mouse.y)
-            }
-
-            onWheel: {
-                molecularDynamics.incrementZoom(wheel.angleDelta.y / 720)
-            }
-
-            onPressAndHold: {
-                pinchy.enabled = true
-            }
-        }
-
         PinchArea {
             id: pinchy
             anchors.fill: parent
@@ -49,7 +23,7 @@ Item {
             property double pinchRotation
             property point lastPosition
             property double lastRoll
-            enabled: false
+            enabled: true
 
             onPinchUpdated: {
                 molecularDynamics.xPoint = pinch.center.x
@@ -62,20 +36,49 @@ Item {
                 var deltaPan = deltaX / width * 360 // max 3 rounds
                 var deltaTilt = deltaY / height * 180 // max 0.5 round
                 var deltaRoll = -(pinch.rotation - lastRoll)
-                deltaPan = 0 // Disable rotation on pinch
+
+                // Disable rotation while pinching?
+                deltaPan = 0
                 deltaTilt = 0
+                deltaRoll = 0
 
                 molecularDynamics.incrementRotation(deltaPan, deltaTilt, deltaRoll)
-                // console.log("deltaPan" + deltaPan)
-                // console.log("deltaTilt" + deltaTilt)
 
                 lastPosition = Qt.point(pinch.center.x, pinch.center.y)
                 lastRoll = pinch.rotation
             }
 
             onPinchFinished: {
+                console.log("Pinch finished")
                 molecularDynamics.onPinchedFinished();
-                pinchy.enabled = false
+                //pinchy.enabled = false
+            }
+
+            MouseArea {
+                id: mousey
+                anchors.fill: parent
+                property point lastPosition
+                onPressed: {
+                    lastPosition = Qt.point(mouse.x, mouse.y)
+                }
+
+                onPositionChanged: {
+                    var deltaX = mouse.x - lastPosition.x
+                    var deltaY = mouse.y - lastPosition.y
+                    var deltaPan = deltaX / width * 360 // max 3 rounds
+                    var deltaTilt = deltaY / height * 180 // max 0.5 round
+                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
+                    lastPosition = Qt.point(mouse.x, mouse.y)
+                }
+
+                onWheel: {
+                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 720)
+                }
+
+                onPressAndHold: {
+                    console.log("press and hold")
+                    pinchy.enabled = true
+                }
             }
         }
 
@@ -96,13 +99,33 @@ Item {
     }
 
     Rectangle {
+        id: settings
+
         anchors {
             right: parent.right
             top: parent.top
             bottom: parent.bottom
         }
-        width: parent.width * 0.2
+
+        width: parent.width * 0.1
         color: Qt.rgba(239 / 255, 243 / 255, 255 / 255, 200 / 255)
+
+        MouseArea {
+            property bool isLarge
+            anchors.fill: parent
+            onPressed: {
+                // It seems like the width and height doesn't switch places in portrait/landscape
+                if(mouse.y > width*0.2) {
+                    if(isLarge) {
+                        settings.width = moleculesRoot.width*0.1
+                    } else {
+                        settings.width = moleculesRoot.width*0.5
+                    }
+
+                    isLarge = !isLarge
+                }
+            }
+        }
 
         Column {
             anchors {

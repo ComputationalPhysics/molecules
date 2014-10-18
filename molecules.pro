@@ -16,6 +16,10 @@ SOURCES += main.cpp \
 
 RESOURCES += qml.qrc
 
+ios {
+    QMAKE_INFO_PLIST = iOS.plist
+}
+
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
@@ -34,4 +38,7 @@ HEADERS += \
     simulator/thermostat.h \
     simulator/unitconverter.h \
     simulator/simulator.h
+
+OTHER_FILES += \
+    iOS.plist
 
