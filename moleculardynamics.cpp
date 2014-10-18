@@ -50,7 +50,9 @@
 using namespace std;
 
 MolecularDynamics::MolecularDynamics()
-    : m_renderer(0)
+    : m_renderer(0),
+      m_thermostatEnabled(false),
+      m_thermostatValue(1.0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
 
@@ -76,6 +78,9 @@ void MolecularDynamics::step(double dt)
         return;
     }
     double safeDt = min(0.02, dt);
+    if(m_thermostatEnabled) {
+        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), m_thermostatValue, false);
+    }
     m_renderer->m_simulator.m_system.dt = safeDt;
     m_renderer->m_simulator.step();
     update();
@@ -178,7 +183,7 @@ void MolecularDynamicsRenderer::paint()
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
                                            "    highp vec4 lightDistance = modelViewProjectionNoZoomMatrix*a_position;\n"
-                                           "    light = clamp((12.0 - lightDistance.z) / 5.0, 0.0, 1.0);\n"
+                                           "    light = clamp((18.0 - lightDistance.z) / 7.0, 0.0, 1.0);\n"
                                            "    coords = a_texcoord;\n"
                                            "}");
 

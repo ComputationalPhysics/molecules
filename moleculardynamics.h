@@ -82,16 +82,49 @@ class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
 //    Q_PROPERTY(qreal mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged)
+    Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
+    Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
 
 public:
     MolecularDynamics();
     Q_INVOKABLE void step(double dt);
+
+    double thermostatValue() const
+    {
+        return m_thermostatValue;
+    }
+
+    bool thermostatEnabled() const
+    {
+        return m_thermostatEnabled;
+    }
 
 public slots:
     void sync();
     void cleanup();
     void incrementRotation(double deltaPan, double deltaTilt);
     void incrementZoom(double deltaZoom);
+
+    void setThermostatValue(double arg)
+    {
+        if (m_thermostatValue != arg) {
+            m_thermostatValue = arg;
+            emit thermostatValueChanged(arg);
+        }
+    }
+
+    void setThermostatEnabled(bool arg)
+    {
+        if (m_thermostatEnabled != arg) {
+            m_thermostatEnabled = arg;
+            emit thermostatEnabledChanged(arg);
+        }
+    }
+
+signals:
+    void thermostatValueChanged(double arg);
+
+    void thermostatEnabledChanged(bool arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -100,6 +133,8 @@ private:
     std::vector<float> m_positions;
     MolecularDynamicsRenderer *m_renderer;
     qreal m_mouseX;
+    double m_thermostatValue;
+    bool m_thermostatEnabled;
 };
 //! [2]
 
