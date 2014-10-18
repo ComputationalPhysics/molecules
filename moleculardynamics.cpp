@@ -48,7 +48,7 @@
 #include <QOpenGLContext>
 #include <iostream>
 using namespace std;
-//! [7]
+
 MolecularDynamics::MolecularDynamics()
     : m_renderer(0)
 {
@@ -81,19 +81,14 @@ void MolecularDynamics::step(double dt)
     update();
     if(window()) window()->update();
 }
-//! [7]
 
-
-//! [1]
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
 {
     if (win) {
         connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(sync()), Qt::DirectConnection);
         connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(cleanup()), Qt::DirectConnection);
-//! [1]
         // If we allow QML to do the clearing, they would clear what we paint
         // and nothing would show.
-//! [3]
         win->setClearBeforeRendering(false);
     }
 }
@@ -103,8 +98,8 @@ void MolecularDynamicsRenderer::resetProjection()
     // Calculate aspect ratio
     qreal aspect = qreal(m_viewportSize.width()) / qreal(m_viewportSize.height() ? m_viewportSize.height() : 1);
 
-    // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 2.0, zFar = 200.0, fov = 45.0;
+    // Set near plane to 3.0, far plane to 7.0, field of view 65 degrees
+    const qreal zNear = 2.0, zFar = 200.0, fov = 65.0;
 
     // Reset projection
     m_projection.setToIdentity();
@@ -112,9 +107,18 @@ void MolecularDynamicsRenderer::resetProjection()
     // Set perspective projection
     m_projection.perspective(fov, aspect, zNear, zFar);
 }
-//! [3]
 
-//! [6]
+void MolecularDynamicsRenderer::incrementRotation(double deltaPan, double deltaTilt)
+{
+    m_pan += deltaPan;
+    m_tilt += deltaTilt;
+    m_tilt = max(-90.0, min(90.0, m_tilt)); // Clamp so that upside-down is not possible
+}
+
+void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
+{
+    m_zoom += deltaZoom;
+}
 void MolecularDynamics::cleanup()
 {
     if (m_renderer) {
@@ -123,13 +127,31 @@ void MolecularDynamics::cleanup()
     }
 }
 
+void MolecularDynamics::incrementRotation(double deltaPan, double deltaTilt)
+{
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->incrementRotation(deltaPan, deltaTilt);
+}
+
+void MolecularDynamics::incrementZoom(double deltaZoom)
+{
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->incrementZoom(deltaZoom);
+}
+
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_zoom(0), m_program(0), m_positions(0) {
+    m_glQuads = new CPGLQuads();
+}
+
 MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
 {
     delete m_program;
 }
-//! [6]
 
-//! [9]
 void MolecularDynamics::sync()
 {
     if (!m_renderer) {
@@ -140,9 +162,7 @@ void MolecularDynamics::sync()
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
 }
-//! [9]
 
-//! [4]
 void MolecularDynamicsRenderer::paint()
 {
     if (!m_program) {
@@ -189,9 +209,10 @@ void MolecularDynamicsRenderer::paint()
     float systemSizeY = m_simulator.m_system.system_length[1];
     float systemSizeZ = m_simulator.m_system.system_length[2];
     // matrix.translate(-systemSizeX/2, -systemSizeY/2,  - 2*systemSizeZ);
-    matrix.translate(0,0,-1.75*systemSizeZ);
-    float angle = m_t / m_viewportSize.width()*360;
-    matrix.rotate(angle,0,1,0);
+    matrix.translate(0,0,(-1.75 + m_zoom)*systemSizeZ);
+//    float angle = m_t / m_viewportSize.width()*360;
+    matrix.rotate(m_tilt, 1, 0, 0);
+    matrix.rotate(m_pan, 0, 1, 0);
 
     // Set modelview-projection matrix
     m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
@@ -206,4 +227,3 @@ void MolecularDynamicsRenderer::paint()
     m_program->release();
 }
 
-//! [5]

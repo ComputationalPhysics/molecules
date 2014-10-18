@@ -54,21 +54,22 @@ class MolecularDynamicsRenderer : public QObject {
 public:
     std::vector<float> *m_positions;
     Simulator m_simulator;
-    MolecularDynamicsRenderer() : m_t(0), m_program(0), m_positions(0) {
-        m_glQuads = new CPGLQuads();
-    }
+    MolecularDynamicsRenderer();
     ~MolecularDynamicsRenderer();
 
-    void setT(qreal t) { m_t = t; }
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void resetProjection();
+    void incrementRotation(double deltaPan, double deltaTilt);
+    void incrementZoom(double deltaZoom);
 
 public slots:
     void paint();
 
 private:
     QSize m_viewportSize;
-    qreal m_t;
+    double m_tilt;
+    double m_pan;
+    double m_zoom;
     QOpenGLShaderProgram *m_program;
 
     QMatrix4x4 m_projection;
@@ -80,33 +81,17 @@ private:
 class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(qreal mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged)
+//    Q_PROPERTY(qreal mouseX READ mouseX WRITE setMouseX NOTIFY mouseXChanged)
 
 public:
     MolecularDynamics();
     Q_INVOKABLE void step(double dt);
 
-    qreal mouseX() const
-    {
-        return m_mouseX;
-    }
-
-signals:
-
-    void mouseXChanged(qreal arg);
-
 public slots:
     void sync();
     void cleanup();
-
-    void setMouseX(qreal arg)
-    {
-        if (m_mouseX == arg)
-            return;
-        m_renderer->setT(arg);
-        m_mouseX = arg;
-        emit mouseXChanged(arg);
-    }
+    void incrementRotation(double deltaPan, double deltaTilt);
+    void incrementZoom(double deltaZoom);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);

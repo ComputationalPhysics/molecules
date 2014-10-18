@@ -11,8 +11,22 @@ Item {
 
         MouseArea {
             anchors.fill: parent
+            property point lastPosition
+            onPressed: {
+                lastPosition = Qt.point(mouse.x, mouse.y)
+            }
+
             onPositionChanged: {
-                molecularDynamics.mouseX = mouse.x
+                var deltaX = mouse.x - lastPosition.x
+                var deltaY = mouse.y - lastPosition.y
+                var deltaPan = deltaX / width * 360 // max 3 rounds
+                var deltaTilt = deltaY / height * 180 // max 0.5 round
+                molecularDynamics.incrementRotation(deltaPan, deltaTilt)
+                lastPosition = Qt.point(mouse.x, mouse.y)
+            }
+
+            onWheel: {
+                molecularDynamics.incrementZoom(wheel.angleDelta.y / 720)
             }
         }
 
