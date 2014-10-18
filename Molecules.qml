@@ -63,14 +63,14 @@ Item {
             anchors.fill: parent
             CheckBox {
                 id: thermostatCheckBox
-                text: "Thermostat: " + thermostatSlider.value.toFixed(1) + " .."
+                text: "Thermostat: " + thermostatSlider.value.toFixed(1) + " K"
             }
 
             Slider {
                 id: thermostatSlider
                 width: parent.width
-                minimumValue: 0.01
-                maximumValue: 10
+                minimumValue: 1
+                maximumValue: 500
             }
         }
     }

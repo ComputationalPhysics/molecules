@@ -47,6 +47,7 @@
 #include <QGLFormat>
 #include <QOpenGLContext>
 #include <iostream>
+#include "simulator/unitconverter.h"
 using namespace std;
 
 MolecularDynamics::MolecularDynamics()
@@ -79,7 +80,8 @@ void MolecularDynamics::step(double dt)
     }
     double safeDt = min(0.02, dt);
     if(m_thermostatEnabled) {
-        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), m_thermostatValue, false);
+        double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
+        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
     }
     m_renderer->m_simulator.m_system.dt = safeDt;
     m_renderer->m_simulator.step();
