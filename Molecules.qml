@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 import MolecularDynamics 1.0
 
 Item {
+    id: moleculesRoot
     width: 1280
     height: 800
 
@@ -60,7 +61,10 @@ Item {
         color: Qt.rgba(239 / 255, 243 / 255, 255 / 255, 200 / 255)
 
         Column {
-            anchors.fill: parent
+            anchors {
+                fill: parent
+                margins: moleculesRoot.width * 0.01
+            }
             CheckBox {
                 id: thermostatCheckBox
                 text: "Thermostat: " + thermostatSlider.value.toFixed(1) + " K"
