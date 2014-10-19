@@ -176,8 +176,9 @@ Item {
             Slider {
                 id: thermostatSlider
                 width: parent.width
+                value: 200
                 minimumValue: 1
-                maximumValue: 500
+                maximumValue: 1000
             }
         }
     }
