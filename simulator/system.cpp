@@ -88,10 +88,9 @@ void System::allocate() {
     memset(is_ghost_cell, 0, max_number_of_cells*sizeof(bool));
 }
 
-void System::setup(int myid_, Settings *settings_) {
+void System::setup(Settings *settings_) {
     unit_converter = new UnitConverter();
 
-    myid = myid_;
     settings = settings_;
     num_atoms = 0;
     num_atoms_ghost = 0;
@@ -102,7 +101,7 @@ void System::setup(int myid_, Settings *settings_) {
     allocate();
 
     steps = 0;
-    int seed = -(myid+1);
+    int seed = -1;
     rnd = new Random(seed);
 
     init_parameters();
@@ -120,11 +119,11 @@ void System::setup(int myid_, Settings *settings_) {
     calculate_accelerations();
 //    half_kick();
 
-    if(myid==0) cout << "System size: " << unit_converter->length_to_SI(system_length[0])*1e10 << " Å " << unit_converter->length_to_SI(system_length[1])*1e10 << " Å " << unit_converter->length_to_SI(system_length[2])*1e10 << " Å" << endl;
-    if(myid==0) cout << "Atoms: " << num_atoms << endl;
-    if(myid==0) cout << "Free atoms: " << num_atoms_free << endl;
-    if(myid==0) cout << "Processors: " << num_nodes << " (" << settings->nodes_x << "," << settings->nodes_y << "," << settings->nodes_z << ")" << endl;
-    if(myid==0) cout << "Free atoms/processor: " << num_atoms_free/num_nodes << endl;
+    cout << "System size: " << unit_converter->length_to_SI(system_length[0])*1e10 << " Å " << unit_converter->length_to_SI(system_length[1])*1e10 << " Å " << unit_converter->length_to_SI(system_length[2])*1e10 << " Å" << endl;
+    cout << "Atoms: " << num_atoms << endl;
+    cout << "Free atoms: " << num_atoms_free << endl;
+    cout << "Processors: " << num_nodes << " (" << settings->nodes_x << "," << settings->nodes_y << "," << settings->nodes_z << ")" << endl;
+    cout << "Free atoms/processor: " << num_atoms_free/num_nodes << endl;
 }
 
 void System::count_frozen_atoms() {
@@ -164,7 +163,7 @@ void System::create_FCC() {
                     }
 
                     atom_type[num_atoms] = ARGON;
-                    atom_ids[num_atoms] = myid*max_number_of_atoms + num_atoms;
+                    atom_ids[num_atoms] = num_atoms;
 
                     num_atoms++;
                     if(!warning_shown && num_atoms >= 0.8*max_number_of_atoms) {
@@ -186,26 +185,16 @@ void System::init_parameters() {
     dt_half = dt/2;
     t = 0;
 
-    num_processors[0] = settings->nodes_x;
-    num_processors[1] = settings->nodes_y;
-    num_processors[2] = settings->nodes_z;
-
-    node_index[0] = myid/(settings->nodes_y*settings->nodes_z);
-    node_index[1] = (myid/settings->nodes_z) % settings->nodes_y;
-    node_index[2] = myid%settings->nodes_z;
-
     // Size of this node
-    node_length[0] = settings->unit_cells_x*settings->FCC_b;
-    node_length[1] = settings->unit_cells_y*settings->FCC_b;
-    node_length[2] = settings->unit_cells_z*settings->FCC_b;
+    system_length[0] = settings->unit_cells_x*settings->FCC_b;
+    system_length[1] = settings->unit_cells_y*settings->FCC_b;
+    system_length[2] = settings->unit_cells_z*settings->FCC_b;
 
     for(a=0;a<3;a++) {
-        system_length[a] = node_length[a]*num_processors[a];
-        origo[a] = (double)node_index[a] * node_length[a];
-        num_cells_local[a] = node_length[a]/r_cut;
-        num_cells_including_ghosts[a] = num_cells_local[a]+2;
+        num_cells[a] = system_length[a]/r_cut;
+        num_cells_including_ghosts[a] = num_cells[a]+2;
 
-        cell_length[a] = node_length[a]/num_cells_local[a];
+        cell_length[a] = system_length[a]/num_cells[a];
         count_periodic[a] = 0;
     }
     volume = system_length[0]*system_length[1]*system_length[2];
@@ -215,11 +204,11 @@ void System::init_parameters() {
     head_all_atoms = new int[num_cells_including_ghosts_xyz];
     head_free_atoms = new int[num_cells_including_ghosts_xyz];
 
-    for(int cx=0;cx<num_cells_local[0]+2;cx++) {
-        for(int cy=0;cy<num_cells_local[1]+2;cy++) {
-            for(int cz=0;cz<num_cells_local[2]+2;cz++) {
+    for(int cx=0;cx<num_cells[0]+2;cx++) {
+        for(int cy=0;cy<num_cells[1]+2;cy++) {
+            for(int cz=0;cz<num_cells[2]+2;cz++) {
                 cell_index_from_ijk(cx,cy,cz,cell_index);
-                if(cx == 0 || cx == num_cells_local[0]+1 || cy == 0 || cy == num_cells_local[1]+1 || cz == 0 || cz == num_cells_local[2]+1) {
+                if(cx == 0 || cx == num_cells[0]+1 || cy == 0 || cy == num_cells[1]+1 || cz == 0 || cz == num_cells[2]+1) {
                     is_ghost_cell[cell_index] = true;
                 } else is_ghost_cell[cell_index] = false;
             }
@@ -245,26 +234,14 @@ void System::set_topology() {
     for (int n=0; n<6; n++) {
         /* Vector index of neighbor ku */
         for (a=0; a<3; a++) {
-            k1[a] = (node_index[a]+integer_vector[n][a]+num_processors[a])%num_processors[a];
+            // k1[a] = (integer_vector[n][a]+num_processors[a])%num_processors[a];
+            k1[a] = integer_vector[n][a];
         }
 
         /* Scalar neighbor ID, nn */
-        neighbor_nodes[n] = k1[0]*num_processors[1]*num_processors[2]+k1[1]*num_processors[2]+k1[2];
+        neighbor_nodes[n] = 0; //k1[0]*num_processors[1]*num_processors[2]+k1[1]*num_processors[2]+k1[2];
         /* Shift vector, sv */
-        for (a=0; a<3; a++) shift_vector[n][a] = node_length[a]*integer_vector[n][a];
-    }
-
-
-
-    /* Set up the node parity table, myparity */
-    for (a=0; a<3; a++) {
-        if (num_processors[a] == 1) {
-            my_parity[a] = 2;
-        } else if (node_index[a]%2 == 0) {
-            my_parity[a] = 0;
-        } else {
-            my_parity[a] = 1;
-        }
+        for (a=0; a<3; a++) shift_vector[n][a] = system_length[a]*integer_vector[n][a];
     }
 }
 
@@ -293,7 +270,7 @@ inline bool System::atom_should_be_copied(atomDataType* ri, int ku) {
     dimension = ku/2; /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
     if (higher == 0) return ri[dimension] < r_cut;
-    else return ri[dimension] > node_length[dimension]-r_cut;
+    else return ri[dimension] > system_length[dimension]-r_cut;
 }
 
 
@@ -302,7 +279,7 @@ inline bool System::atom_did_change_node(atomDataType* ri, int ku) {
     dimension = ku/2;    /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
     if (higher == 0) return ri[dimension] < 0.0;
-    else return ri[dimension] > node_length[dimension];
+    else return ri[dimension] > system_length[dimension];
 }
 
 void System::mpi_move() {
@@ -325,11 +302,11 @@ void System::mpi_move() {
                 // Check if this atom moved
                 if (atom_did_change_node(&positions[3*i],node_lower)) {
                     move_queue[node_lower][ ++move_queue[node_lower][0] ] = i;
-                    if(node_index[dimension] == 0) count_periodic[dimension]--;
+                    count_periodic[dimension]--;
                 }
                 else if (atom_did_change_node(&positions[3*i],node_higher)) {
                     move_queue[node_higher][ ++move_queue[node_higher][0] ] = i;
-                    if(node_index[dimension] == num_processors[dimension]-1) count_periodic[dimension]++;
+                    count_periodic[dimension]++;
                 }
             }
         }

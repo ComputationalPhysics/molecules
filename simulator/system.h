@@ -48,13 +48,8 @@ public:
 
     bool sample_statistics;
     unsigned long steps;
-    int myid;
-    int node_index[3];
-    int num_processors[3];
     int neighbor_nodes[6];
-    short my_parity[3];
     double cell_length[3];
-    double node_length[3];
     double system_length[3];
     int num_nodes;
     int max_number_of_atoms;
@@ -68,12 +63,11 @@ public:
     long i,j,k,n,m,a,b,c, nx, ny, nz;
     long count_periodic[3];
 
-    double origo[3];
     double r_cut, dt, dt_half, potential_energy, t, t0, volume, one_over_r_cut_squared;
     unsigned int mc[3];  // Usually cell index vector
     unsigned int mc1[3]; // Usually cell index vector
     unsigned int num_cells_including_ghosts_yz,cell_index, cell_index_2,num_cells_including_ghosts_xyz;
-    unsigned int num_cells_local[3];
+    unsigned int num_cells[3];
     unsigned int num_cells_including_ghosts[3];
     double dr[3];
     double shift_vector[6][3];
@@ -104,7 +98,7 @@ public:
     void count_frozen_atoms();
 
     System();
-    void setup(int myid_, Settings *settings_);
+    void setup(Settings *settings_);
     void step();
     double get_volume() {
         return system_length[0]*system_length[1]*system_length[2];

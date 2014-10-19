@@ -4,7 +4,7 @@ using namespace std;
 
 Simulator::Simulator()
 {
-    m_system.setup(0, &m_settings);
+    m_system.setup(&m_settings);
 
     m_thermostat = new Thermostat(m_settings.thermostat_relaxation_time);
     m_sampler = new StatisticsSampler(&m_system);
