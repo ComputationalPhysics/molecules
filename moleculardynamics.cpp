@@ -51,7 +51,14 @@
 #include "simulator/unitconverter.h"
 using namespace std;
 
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(-4), m_program(0), m_positions(0) {
+    m_glQuads = new CPGLQuads();
+}
 
+MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
+{
+    delete m_program;
+}
 
 void MolecularDynamicsRenderer::resetProjection()
 {
@@ -139,7 +146,7 @@ void MolecularDynamicsRenderer::paint()
 
     float zoom = m_zoom;
 
-    matrix.translate(0,0,(-1.75 + zoom)-systemSizeZ);
+    matrix.translate(0,0,zoom-systemSizeZ);
 
     matrix.rotate(m_tilt, 1, 0, 0);
     matrix.rotate(m_pan, 0, 1, 0);
@@ -174,15 +181,6 @@ double MolecularDynamicsRenderer::zoom() const
 void MolecularDynamicsRenderer::setZoom(double zoom)
 {
     m_zoom = zoom;
-}
-
-MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(1), m_program(0), m_positions(0) {
-    m_glQuads = new CPGLQuads();
-}
-
-MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
-{
-    delete m_program;
 }
 
 void MolecularDynamics::cleanup()
