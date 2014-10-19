@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
 import MolecularDynamics 1.0
 
 Item {
@@ -11,8 +12,8 @@ Item {
         id: molecularDynamics
         anchors.fill: parent
 
-        thermostatEnabled: thermostatCheckBox.checked
-        thermostatValue: thermostatSlider.value
+        thermostatEnabled: toolsView.thermostatEnabled
+        thermostatValue: toolsView.thermostatValue
 
         PinchArea {
             id: pinchArea
@@ -37,13 +38,23 @@ Item {
                 anchors.fill: parent
                 property point lastPosition
                 property point pressedPosition
+                property real pressedTime
+                property bool movedTooFarToHide: false
 
                 onPressed: {
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
+                    pressedTime = Date.now()
+                    movedTooFarToHide = false
                 }
 
                 onPositionChanged: {
+                    var pressedDeltaX = mouse.x - pressedPosition.x
+                    var pressedDeltaY = mouse.y - pressedPosition.y
+                    if(pressedDeltaX*pressedDeltaX + pressedDeltaY*pressedDeltaY > moleculesRoot.width * 0.1) {
+                        movedTooFarToHide = true
+                    }
+
                     var deltaX = mouse.x - lastPosition.x
                     var deltaY = mouse.y - lastPosition.y
                     var deltaPan = deltaX / width * 360 // max 3 rounds
@@ -53,17 +64,15 @@ Item {
                 }
 
                 onReleased: {
-                    var currentPosition = Qt.point(mouse.x, mouse.y)
-                    if(Math.abs(pressedPosition.x - currentPosition.x) +
-                            Math.abs(pressedPosition.y - currentPosition.y) < moleculesRoot.width * 0.05) {
-                        settings.revealed = false
+                    var currentTime = Date.now()
+                    var timeDiff = (currentTime - pressedTime) / 1000
+                    if(timeDiff < 0.6 && !movedTooFarToHide) {
+                        toolsView.revealed = false
                     }
-
-
                 }
 
                 onWheel: {
-                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 720)
+                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
                 }
             }
         }
@@ -71,7 +80,7 @@ Item {
         Timer {
             id: timer
             property real lastTime: Date.now()
-            running: true
+            running: toolsView.running
             repeat: true
             interval: 1
             onTriggered: {
@@ -85,66 +94,7 @@ Item {
         }
     }
 
-    Rectangle {
-        id: settings
-
-        property bool revealed: false
-
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-            rightMargin: revealed ? 0 : -width
-        }
-
-        width: parent.width * 0.3
-        color: Qt.rgba(239 / 255, 243 / 255, 255 / 255, 200 / 255)
-
-        Behavior on anchors.rightMargin {
-            NumberAnimation {
-                duration: 400
-                easing.type: Easing.InOutQuad
-            }
-        }
-
-        MouseArea {
-            // Dummy area to keep input from being passed through to MD object
-            anchors.fill: parent
-        }
-
-        Rectangle {
-            anchors {
-                right: parent.left
-                bottom: parent.bottom
-            }
-            color: parent.color
-            height: parent.height * 0.1
-            width: height
-
-            MouseArea {
-                anchors.fill: parent
-                onPressed: {
-                    settings.revealed = !settings.revealed
-                }
-            }
-        }
-
-        Column {
-            anchors {
-                fill: parent
-                margins: moleculesRoot.width * 0.01
-            }
-            CheckBox {
-                id: thermostatCheckBox
-                text: "Thermostat: " + thermostatSlider.value.toFixed(1) + " K"
-            }
-
-            Slider {
-                id: thermostatSlider
-                width: parent.width
-                minimumValue: 1
-                maximumValue: 500
-            }
-        }
+    Tools {
+        id: toolsView
     }
 }

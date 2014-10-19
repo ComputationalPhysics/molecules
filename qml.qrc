@@ -2,6 +2,10 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Molecules.qml</file>
-        <file>sphere.png</file>
+        <file>images/sphere.png</file>
+        <file>images/tools.png</file>
+        <file>images/pause.png</file>
+        <file>images/play.png</file>
+        <file>Tools.qml</file>
     </qresource>
 </RCC>
