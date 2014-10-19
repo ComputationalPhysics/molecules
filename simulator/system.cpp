@@ -10,7 +10,8 @@
 #include <atom_types.h>
 #include <string.h>
 
-#include <potential_lennard_jones.h>
+#include "mdio.h"
+#include "potential_lennard_jones.h"
 
 using namespace std;
 System::System() :
@@ -84,6 +85,9 @@ void System::setup(int myid_, Settings *settings_) {
 
     init_parameters();
 
+    mdio = new MDIO();
+    mdio->setup(this);
+
     set_topology();
     create_FCC();
 
@@ -91,7 +95,7 @@ void System::setup(int myid_, Settings *settings_) {
 
     mpi_copy();
     calculate_accelerations();
-    half_kick();
+//    half_kick();
 
     if(myid==0) cout << "System size: " << unit_converter->length_to_SI(system_length[0])*1e10 << " Å " << unit_converter->length_to_SI(system_length[1])*1e10 << " Å " << unit_converter->length_to_SI(system_length[2])*1e10 << " Å" << endl;
     if(myid==0) cout << "Atoms: " << num_atoms << endl;
@@ -457,7 +461,9 @@ void System::move() {
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*dt;
     for(n=0;n<num_atoms;n++) {
-        if(atom_type[n] != FROZEN) velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
+        if(atom_type[n] != FROZEN) {
+            velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
+        }
     }
 }
 
@@ -492,7 +498,9 @@ void System::step() {
     mpi_move();
     mpi_copy();
     reset();
-    if(settings->gravity_direction >= 0) apply_gravity();
+    if(settings->gravity_direction >= 0) {
+        apply_gravity();
+    }
     calculate_accelerations();
     apply_harmonic_oscillator();
     half_kick();

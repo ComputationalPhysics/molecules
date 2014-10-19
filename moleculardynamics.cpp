@@ -49,6 +49,7 @@
 #include <iostream>
 #include <cmath>
 #include "simulator/unitconverter.h"
+#include "simulator/mdio.h"
 using namespace std;
 
 MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
@@ -93,6 +94,7 @@ void MolecularDynamicsRenderer::incrementRotation(double deltaPan, double deltaT
 void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
 {
     m_zoom += deltaZoom;
+
 }
 
 void MolecularDynamicsRenderer::paint()
@@ -102,33 +104,37 @@ void MolecularDynamicsRenderer::paint()
 
         m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                            "attribute highp vec4 a_position;\n"
+                                           "attribute highp vec3 a_color;\n"
                                            "attribute highp vec2 a_texcoord;\n"
                                            "uniform highp mat4 modelViewProjectionMatrix;\n"
                                            "uniform highp mat4 lightModelViewProjectionMatrix;\n"
                                            "uniform highp float systemSizeZ;\n"
                                            "varying highp vec2 coords;\n"
                                            "varying highp float light;\n"
+                                           "varying highp vec3 color;\n"
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
                                            "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
                                            "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
                                            "    coords = a_texcoord;\n"
+                                           "    color = a_color;\n"
                                            "}");
 
         m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
                                            "varying highp vec2 coords;\n"
                                            "varying highp float light;\n"
+                                           "varying highp vec3 color;\n"
                                            "highp vec2 center = vec2(0.5, 0.5);\n"
                                            "void main() {\n"
                                            "    highp vec2 delta = coords - center;\n"
                                            "    highp float r2 = delta.x*delta.x + delta.y*delta.y;\n"
                                            "    highp float gradient = 1.0 - (r2*r2)/0.07;\n"
-                                           "    highp vec3 color1 = vec3(0.25490196,  0.71372549,  0.76862745);\n"
-                                           "    highp vec3 color2 = 0.5 * vec3(0.14509804,  0.20392157,  0.58039216);\n"
-                                           "    highp vec3 color = (color1 * gradient + color2 * (1.0 - gradient));\n"
+                                           "    highp vec3 color1 = color;\n"
+                                           "    highp vec3 color2 = 0.5 * vec3(color.r*0.1, color.g*0.4, color.b*0.2);\n"
+                                           "    highp vec3 finalColor = (color1 * gradient + color2 * (1.0 - gradient));\n"
                                            "    highp float alpha = float(r2<0.25);\n"
                                            "    if(alpha < 0.999) { discard; }\n"
-                                           "    gl_FragColor = vec4(color * light, 1.0);\n"
+                                           "    gl_FragColor = vec4(finalColor * light, 1.0);\n"
                                            "}");
 
 
@@ -172,7 +178,7 @@ void MolecularDynamicsRenderer::paint()
 
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
-    m_glQuads->update(m_simulator.m_system.positions, n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
+    m_glQuads->update(m_simulator.m_system.positions, m_simulator.m_system.atom_type, n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
     m_glQuads->render(m_program);
 
     glDepthMask(GL_TRUE);
@@ -204,6 +210,9 @@ void MolecularDynamics::incrementRotation(double deltaPan, double deltaTilt, dou
         return;
     }
     m_renderer->incrementRotation(deltaPan, deltaTilt, deltaRoll);
+    if(window()) {
+        window()->update();
+    }
 }
 
 void MolecularDynamics::incrementZoom(double deltaZoom) {
@@ -211,6 +220,25 @@ void MolecularDynamics::incrementZoom(double deltaZoom) {
         return;
     }
     m_renderer->incrementZoom(deltaZoom);
+    if(window()) {
+        window()->update();
+    }
+}
+
+void MolecularDynamics::setThermostatValue(double arg)
+{
+    if (m_thermostatValue != arg) {
+        m_thermostatValue = arg;
+        emit thermostatValueChanged(arg);
+    }
+}
+
+void MolecularDynamics::setThermostatEnabled(bool arg)
+{
+    if (m_thermostatEnabled != arg) {
+        m_thermostatEnabled = arg;
+        emit thermostatEnabledChanged(arg);
+    }
 }
 
 void MolecularDynamics::sync()
@@ -252,15 +280,44 @@ void MolecularDynamics::step(double dt)
     if(!m_renderer) {
         return;
     }
-    double safeDt = min(0.01, dt);
+    double safeDt = min(0.02, dt);
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
+        m_renderer->m_simulator.m_thermostat->relaxation_time = 0.1;
         m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
     }
     m_renderer->m_simulator.m_system.dt = safeDt;
+    m_renderer->m_simulator.m_system.dt_half = safeDt / 2.0;
     m_renderer->m_simulator.step();
-    update();
-    if(window()) window()->update();
+    if(window()) {
+        window()->update();
+    }
+}
+
+void MolecularDynamics::save(QString fileName)
+{
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->m_simulator.m_system.mdio->save_state_to_file_binary(fileName);
+}
+
+void MolecularDynamics::load(QString fileName)
+{
+    if(!m_renderer) {
+        return;
+    }
+    m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(fileName);
+}
+
+double MolecularDynamics::thermostatValue() const
+{
+    return m_thermostatValue;
+}
+
+bool MolecularDynamics::thermostatEnabled() const
+{
+    return m_thermostatEnabled;
 }
 
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)

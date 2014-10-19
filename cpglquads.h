@@ -6,6 +6,7 @@
 struct VertexData
 {
     QVector3D position;
+    QVector3D color;
     QVector2D textureCoord;
 };
 
@@ -15,7 +16,7 @@ public:
     CPGLQuads();
     ~CPGLQuads();
     // void update(std::vector<float> &positions);
-    void update(double *positions, int n, float deltaX, float deltaY, float deltaZ);
+    void update(double *positions, unsigned long *atomType, int n, float deltaX, float deltaY, float deltaZ);
     void render(QOpenGLShaderProgram *program);
     void initializeOpenGLFunctions();
     void setModelViewMatrix(QMatrix4x4& matrix);

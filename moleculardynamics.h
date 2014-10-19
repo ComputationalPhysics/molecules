@@ -95,16 +95,11 @@ class MolecularDynamics : public QQuickItem
 public:
     MolecularDynamics();
     Q_INVOKABLE void step(double dt);
+    Q_INVOKABLE void save(QString fileName);
+    Q_INVOKABLE void load(QString fileName);
 
-    double thermostatValue() const
-    {
-        return m_thermostatValue;
-    }
-
-    bool thermostatEnabled() const
-    {
-        return m_thermostatEnabled;
-    }
+    double thermostatValue() const;
+    bool thermostatEnabled() const;
 
 public slots:
     void sync();
@@ -112,21 +107,8 @@ public slots:
     void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
 
-    void setThermostatValue(double arg)
-    {
-        if (m_thermostatValue != arg) {
-            m_thermostatValue = arg;
-            emit thermostatValueChanged(arg);
-        }
-    }
-
-    void setThermostatEnabled(bool arg)
-    {
-        if (m_thermostatEnabled != arg) {
-            m_thermostatEnabled = arg;
-            emit thermostatEnabledChanged(arg);
-        }
-    }
+    void setThermostatValue(double arg);
+    void setThermostatEnabled(bool arg);
 
 signals:
     void thermostatValueChanged(double arg);

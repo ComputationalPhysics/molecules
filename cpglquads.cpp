@@ -24,7 +24,7 @@ void CPGLQuads::generateVBOs()
 }
 
 // void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(double *positions, int n, float deltaX, float deltaY, float deltaZ)
+void CPGLQuads::update(double *positions, long unsigned int* atomType, int n, float deltaX, float deltaY, float deltaZ)
 {
     int numPoints = n / 3; // x,y,z
 
@@ -47,8 +47,12 @@ void CPGLQuads::update(double *positions, int n, float deltaX, float deltaY, flo
     m_vertices.resize(numberOfVertices);
     m_indices.resize(6*numPoints);
 
+    QVector3D normalColor =  QVector3D(0.25490196,  0.71372549,  0.76862745);
+    QVector3D frozenColor =  QVector3D(0.13333333333333333, 0.3686274509803922, 0.6588235294117647);
+
     for(int i=0; i<numPoints; i++) {
-        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 1] - deltaY, positions[3*i + 2] - deltaZ);
+        // NOTE: Y and Z are swapped!
+        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 2] - deltaZ, positions[3*i + 1] - deltaY);
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
@@ -61,6 +65,18 @@ void CPGLQuads::update(double *positions, int n, float deltaX, float deltaY, flo
 
         m_vertices[4*i + 3].position = position + ul;
         m_vertices[4*i + 3].textureCoord= QVector2D(0,0);
+
+        if(atomType[i] == 0) {
+            m_vertices[4*i + 0].color = frozenColor;
+            m_vertices[4*i + 1].color = frozenColor;
+            m_vertices[4*i + 2].color = frozenColor;
+            m_vertices[4*i + 3].color = frozenColor;
+        } else {
+            m_vertices[4*i + 0].color = normalColor;
+            m_vertices[4*i + 1].color = normalColor;
+            m_vertices[4*i + 2].color = normalColor;
+            m_vertices[4*i + 3].color = normalColor;
+        }
 
         m_indices [6*i + 0] = 4*i+0;
         m_indices [6*i + 1] = 4*i+1;
@@ -95,6 +111,14 @@ void CPGLQuads::render(QOpenGLShaderProgram *program)
     int vertexLocation = program->attributeLocation("a_position");
     program->enableAttributeArray(vertexLocation);
     m_funcs->glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
+
+    // Offset for texture coordinate
+    offset += sizeof(QVector3D);
+
+    // Tell OpenGL programmable pipeline how to locate vertex color data
+    int colorLocation = program->attributeLocation("a_color");
+    program->enableAttributeArray(colorLocation);
+    m_funcs->glVertexAttribPointer(colorLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
 
     // Offset for texture coordinate
     offset += sizeof(QVector3D);

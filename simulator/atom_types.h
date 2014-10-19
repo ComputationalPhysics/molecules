@@ -1,4 +1,4 @@
 #pragma once
 
-#define ARGON  0
-#define FROZEN 1
+#define ARGON  18
+#define FROZEN 0

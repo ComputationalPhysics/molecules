@@ -9,6 +9,8 @@ Item {
     width: 1280
     height: 800
 
+    focus: true
+
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
@@ -89,7 +91,6 @@ Item {
                 var currentTime = Date.now()
                 var dt = currentTime - lastTime
                 dt /= 1000
-                dt /= 2.0
                 molecularDynamics.step(dt)
                 lastTime = currentTime
             }
@@ -100,40 +101,17 @@ Item {
         id: toolsView
     }
 
-    SystemsView {
+    SimulationsView {
         id: systemsView
-    }
-
-    Rectangle {
-        id: save
-        anchors {
-            left: parent.left
-            bottom: parent.bottom
-        }
-        width: parent.width * 0.05
-        height: width
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                molecularDynamics.save()
-            }
+        onLoadSimulation: {
+            revealed = false
+            molecularDynamics.load(fileName)
         }
     }
 
-    Rectangle {
-        anchors {
-            left: save.right
-            bottom: parent.bottom
-        }
-        width: parent.width * 0.05
-        height: width
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                molecularDynamics.load()
-            }
+    Keys.onPressed: {
+        if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
+            molecularDynamics.save()
         }
     }
 }

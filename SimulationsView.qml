@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.1
 Item {
     id: systemsViewRoot
     property bool revealed: true
+    signal loadSimulation(var fileName)
     anchors.fill: parent
 
     state: revealed ? "revealed" : "hidden"
@@ -109,7 +110,14 @@ Item {
         border.color: Qt.rgba(0.5, 0.5, 0.5, 0.9)
         color: Qt.rgba(0.05, 0.05, 0.05, 0.8)
 
+        MouseArea {
+            // Dummy mouse area to avoid interacting with underlying simulation
+            enabled: systemsViewRoot.revealed
+            anchors.fill: parent
+        }
+
         ColumnLayout {
+            id: systemsViewColumn
             anchors {
                 fill: parent
                 margins: parent.width * 0.07
@@ -142,50 +150,32 @@ Item {
             Grid {
                 id: systemsGrid
 
-                property real elementWidth: width / 4 - spacing
-                property real elementHeight: elementWidth * 9.0 / 16.0
+                property real elementWidth: systemsViewColumn.width / columns - spacing
+                property real elementHeight: elementWidth * 3.0 / 4.0
+                property var simulations: [
+                    { identifier: "default", name: "Default"},
+                    { identifier: "cylinder", name: "Cylinder"},
+                    { identifier: "pores8", name: "Small pores"},
+                    { identifier: "pores16", name: "Medium pores"},
+                    { identifier: "pores20", name: "Large pores"}
+                ]
 
-                Layout.fillWidth: true
+                columns: 3
                 spacing: systemsViewRectangle.width * 0.01
 
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
-                }
-
-                Rectangle {
-                    width: systemsGrid.elementWidth
-                    height: systemsGrid.elementHeight
+                Component.onCompleted: {
+                    for(var i in simulations) {
+                        var simulation = simulations[i]
+                        var component = Qt.createComponent("SimulationButton.qml")
+                        var properties = {
+                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
+                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
+                            identifier: simulation.identifier,
+                            name: simulation.name
+                        }
+                        var button = component.createObject(systemsGrid, properties)
+                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
+                    }
                 }
             }
 
@@ -193,11 +183,6 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
-        }
-        MouseArea {
-            // Dummy mouse area to avoid interacting with underlying simulation
-            enabled: systemsViewRoot.revealed
-            anchors.fill: parent
         }
     }
 }

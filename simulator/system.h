@@ -29,7 +29,6 @@ private:
     void set_topology();
     void init_parameters();
     void create_FCC();
-    void count_frozen_atoms();
     void reset();
     inline bool atom_did_change_node(double* ri, int ku);
     inline bool atom_should_be_copied(double *ri, int ku);
@@ -39,7 +38,7 @@ public:
     Settings *settings;
     MDIO *mdio;
     Random *rnd;
-    MDTimer *mdtimer;
+//    MDTimer *mdtimer;
     UnitConverter *unit_converter;
     int  *head_all_atoms;
     int  *head_free_atoms;
@@ -93,6 +92,7 @@ public:
     bool *is_ghost_cell;
     double *initial_positions;
     void apply_harmonic_oscillator();
+    void count_frozen_atoms();
 
     System();
     void setup(int myid_, Settings *settings_);
