@@ -100,6 +100,7 @@ Item {
 
     Rectangle {
         id: systemsViewRectangle
+        enabled: revealed // Keeps button presses from being caught by internal MouseAreas
         anchors {
             centerIn: parent
         }
