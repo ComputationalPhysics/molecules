@@ -1,6 +1,8 @@
 #include <system.h>
 #include <settings.h>
 
+// #DEFINE PRECOMPUTED_TABLE
+
 /* Calculates the lennard jones potential between all free atoms within dr<=r_cut.
  * Skips all frozen atom pairs.
  * Calculates potential energy and virial term for pressure calculation.
@@ -27,9 +29,9 @@ void System::calculate_accelerations() {
     double potential_energy_correction = 4*r_cut_6_inverse*(r_cut_6_inverse - 1);
 
     // Loop through all local cells (not including ghosts)
-    for (mc[0]=1; mc[0]<=num_cells_local[0]; mc[0]++) {
-        for (mc[1]=1; mc[1]<=num_cells_local[1]; mc[1]++) {
-            for (mc[2]=1; mc[2]<=num_cells_local[2]; mc[2]++) {
+    for (mc[0]=1; mc[0]<=num_cells[0]; mc[0]++) {
+        for (mc[1]=1; mc[1]<=num_cells[1]; mc[1]++) {
+            for (mc[2]=1; mc[2]<=num_cells[2]; mc[2]++) {
                 cell_index = mc[0]*num_cells_including_ghosts_yz+mc[1]*num_cells_including_ghosts[2]+mc[2];
                 if ( head_all_atoms[cell_index] == EMPTY ) continue;
 
@@ -52,24 +54,29 @@ void System::calculate_accelerations() {
                                         double dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
 
                                         if (dr2<rr_cut) {
+#ifdef PRECOMPUTED_TABLE
                                             int precomputedTableIndex = dr2*one_over_r_cut_squared*numberOfPrecomputedTwoParticleForces;
-
                                             double force0 = precomputed_forces[precomputedTableIndex];
                                             double force1 = precomputed_forces[precomputedTableIndex+1];
                                             // Linearly interpolate between these values
                                             double force = force0 + (force1 - force0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
+#else
+
+                                            double dr2_inverse = 1.0/dr2;
+                                            double dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
+
+                                            double force = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
+#endif
 
                                             bool is_local_atom = j < num_atoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
-//                                            double dr2_inverse = 1.0/dr2;
-//                                            double dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
-
-//                                            double force2 = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
-
                                             if(sample_statistics) {
+#ifdef PRECOMPUTED_TABLE
                                                 double energy0 = precomputed_potential[precomputedTableIndex];
                                                 double energy1 = precomputed_potential[precomputedTableIndex+1];
                                                 double potential_energy_tmp = energy0 + (energy1 - energy0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
-                                                //double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
+#else
+                                                double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
+#endif
                                                 if(is_local_atom) {
                                                     potential_energy += potential_energy_tmp;
                                                     pressure_forces += force*dr2;

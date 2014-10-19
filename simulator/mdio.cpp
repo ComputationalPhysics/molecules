@@ -15,12 +15,10 @@ void MDIO::setup(System *system_) {
     system = system_;
     settings = system->settings;
     movie_file_open = false;
-    if(system->myid==0) {
-        energy_file = fopen("statistics/energy.txt","w");
-        pressure_file = fopen("statistics/pressure.txt","w");
-        velocity_file = fopen("statistics/velocity.txt","w");
-        count_periodic_file = fopen("statistics/count_periodic.txt", "w");
-    }
+    energy_file = fopen("statistics/energy.txt","w");
+    pressure_file = fopen("statistics/pressure.txt","w");
+    velocity_file = fopen("statistics/velocity.txt","w");
+    count_periodic_file = fopen("statistics/count_periodic.txt", "w");
 }
 
 //void MDIO::save_state_to_movie_file() {
@@ -93,9 +91,9 @@ void MDIO::save_state_to_file_binary(QString fileName) {
         offset += 2;
 
         // Position
-        tmp_data[columnCount*i + offset + 0] = system->positions[3*i+0] + system->origo[0];
-        tmp_data[columnCount*i + offset + 1] = system->positions[3*i+1] + system->origo[1];
-        tmp_data[columnCount*i + offset + 2] = system->positions[3*i+2] + system->origo[2];
+        tmp_data[columnCount*i + offset + 0] = system->positions[3*i+0];
+        tmp_data[columnCount*i + offset + 1] = system->positions[3*i+1];
+        tmp_data[columnCount*i + offset + 2] = system->positions[3*i+2];
         offset += 3;
 
         // Velocity
@@ -171,9 +169,9 @@ void MDIO::load_state_from_file_binary(QString fileName) {
         system->atom_type[i] = tmp_data[columnCount*i + offset + 1];
         offset += 2;
 
-        double positionX = tmp_data[columnCount*i+offset+0] - system->origo[0];
-        double positionY = tmp_data[columnCount*i+offset+1] - system->origo[1];
-        double positionZ = tmp_data[columnCount*i+offset+2] - system->origo[2];
+        double positionX = tmp_data[columnCount*i+offset+0];
+        double positionY = tmp_data[columnCount*i+offset+1];
+        double positionZ = tmp_data[columnCount*i+offset+2];
         system->positions[3*i+0] = positionX;
         system->positions[3*i+1] = positionY;
         system->positions[3*i+2] = positionZ;
@@ -198,7 +196,6 @@ void MDIO::finalize() {
         movie_file->close();
     }
 
-    if(system->myid != 0) return;
     fclose(energy_file);
     fclose(pressure_file);
     fclose(velocity_file);
