@@ -12,8 +12,8 @@ using namespace std;
 StatisticsSampler::StatisticsSampler(System *system_) :
     temperature_sampled_at(-1),
     kinetic_energy_sampled_at(-1),
-    potential_energy_sampled_at(-1),
     pressure_sampled_at(-1),
+    potential_energy_sampled_at(-1),
     count_periodic_sampled_at(-1)
 {
     system = system_;
@@ -56,7 +56,7 @@ void StatisticsSampler::sample_potential_energy() {
     if(system->steps == potential_energy_sampled_at) return;
     potential_energy_sampled_at = system->steps;
 
-    potential_energy = system->potential_energy;
+    potential_energy = system->potentialEnergy();
 }
 
 void StatisticsSampler::sample_temperature() {
@@ -88,14 +88,14 @@ void StatisticsSampler::sample_pressure() {
 
     pressure = system->pressure_forces;
 
-    pressure /= 3*system->volume;
-    pressure += system->num_atoms_free/system->volume*temperature;
+    pressure /= 3*system->volume();
+    pressure += system->num_atoms_free/system->volume()*temperature;
 
     pressure_sampled_at = system->steps;
 }
 
 void StatisticsSampler::sample() {
-    double t_in_pico_seconds = system->unit_converter->time_to_SI(system->t)*1e12;
+    double t_in_pico_seconds = system->unit_converter->time_to_SI(system->time())*1e12;
     sample_temperature();
     sample_potential_energy();
     sample_pressure();

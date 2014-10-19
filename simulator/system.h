@@ -56,6 +56,19 @@ private:
     vector<bool> is_ghost_cell;
     vector<double> precomputed_forces;
     vector<double> precomputed_potential;
+    unsigned int num_cells_including_ghosts_yz,cell_index, cell_index_2,num_cells_including_ghosts_xyz;
+    unsigned int num_cells[3];
+    unsigned int num_cells_including_ghosts[3];
+    double shift_vector[6][3];
+    unsigned int **move_queue;
+    unsigned int mc[3];  // Usually cell index vector
+    unsigned int mc1[3]; // Usually cell index vector
+    double m_rCut;
+    double m_dt;
+    double m_potentialEnergy;
+    double m_time;
+    double m_startTime;
+    double one_over_r_cut_squared;
 
 public:
     Settings *settings;
@@ -75,15 +88,8 @@ public:
 
     long count_periodic[3];
 
-    double r_cut, dt, dt_half, potential_energy, t, t0, volume, one_over_r_cut_squared;
-    unsigned int mc[3];  // Usually cell index vector
-    unsigned int mc1[3]; // Usually cell index vector
-    unsigned int num_cells_including_ghosts_yz,cell_index, cell_index_2,num_cells_including_ghosts_xyz;
-    unsigned int num_cells[3];
-    unsigned int num_cells_including_ghosts[3];
-    double dr[3];
-    double shift_vector[6][3];
-    unsigned int **move_queue;
+
+
 
 
     vector<atomDataType> positions;
@@ -98,9 +104,17 @@ public:
     System();
     void setup(Settings *settings_);
     void step();
-    double get_volume() {
-        return m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
-    }
+
     vec3 systemSize() const;
     void setSystemSize(const vec3 &systemSize);
+    double volume();
+    double rCut() const;
+    void setRCut(double rCut);
+    double dt() const;
+    void setDt(double dt);
+    double potentialEnergy() const;
+    double time() const;
+    void setTime(double time);
+    double startTime() const;
+    void setStartTime(double startTime);
 };

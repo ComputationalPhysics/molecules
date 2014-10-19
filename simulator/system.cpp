@@ -15,11 +15,8 @@
 
 using namespace std;
 System::System() :
-    linked_list_all_atoms(NULL),
-    linked_list_free_atoms(NULL),
-    is_ghost_cell(NULL),
     move_queue(NULL),
-    t(0)
+    m_time(0)
 {
 
 }
@@ -40,12 +37,12 @@ void System::createForcesAndPotentialTable() {
     for(int i=0; i<=numberOfPrecomputedTwoParticleForces; i++) {
         double r2 = rMinSquared + i*deltaR2;
 
-        if(r2 > r_cut*r_cut) continue;
+        if(r2 > m_rCut*m_rCut) continue;
         double r = sqrt(r2);
         double oneOverR2 = 1.0/r2;
         double oneOverR6 = oneOverR2*oneOverR2*oneOverR2;
 
-        double oneOverRCut2 = 1.0/(r_cut*r_cut);
+        double oneOverRCut2 = 1.0/(m_rCut*m_rCut);
         double oneOverRCut6 = oneOverRCut2*oneOverRCut2*oneOverRCut2;
 
         double force = 24*(2*oneOverR6-1)*oneOverR6*oneOverR2*mass_inverse;
@@ -54,7 +51,7 @@ void System::createForcesAndPotentialTable() {
         double potential = 4*oneOverR6*(oneOverR6 - 1);
         double potentialAtRCut = 4*oneOverRCut6*(oneOverRCut6 - 1);
 
-        double potentialShifted = potential - potentialAtRCut + (r - r_cut)*forceAtRCut;
+        double potentialShifted = potential - potentialAtRCut + (r - m_rCut)*forceAtRCut;
         double forceShifted = force - forceAtRCut;
 
         precomputed_forces[i] = forceShifted;
@@ -63,6 +60,52 @@ void System::createForcesAndPotentialTable() {
 
     cout << "Did create forces and potential table" << endl;
 }
+double System::startTime() const
+{
+    return m_startTime;
+}
+
+void System::setStartTime(double startTime)
+{
+    m_startTime = startTime;
+}
+
+double System::time() const
+{
+    return m_time;
+}
+
+void System::setTime(double time)
+{
+    m_time = time;
+}
+
+double System::potentialEnergy() const
+{
+    return m_potentialEnergy;
+}
+
+double System::dt() const
+{
+    return m_dt;
+}
+
+void System::setDt(double dt)
+{
+    m_dt = dt;
+}
+
+double System::rCut() const
+{
+    return m_rCut;
+}
+
+void System::setRCut(double rCut)
+{
+    m_rCut = rCut;
+    createForcesAndPotentialTable();
+}
+
 vec3 System::systemSize() const
 {
     return m_systemSize;
@@ -73,22 +116,21 @@ void System::setSystemSize(const vec3 &systemSize)
     m_systemSize = systemSize;
 
     for(int a=0;a<3;a++) {
-        num_cells[a] = m_systemSize[a]/r_cut;
+        num_cells[a] = m_systemSize[a]/m_rCut;
         num_cells_including_ghosts[a] = num_cells[a]+2;
 
         cellLength[a] = m_systemSize[a]/num_cells[a];
         count_periodic[a] = 0;
     }
-    volume = m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
 
     num_cells_including_ghosts_yz = num_cells_including_ghosts[1]*num_cells_including_ghosts[2];
     num_cells_including_ghosts_xyz = num_cells_including_ghosts_yz*num_cells_including_ghosts[0];
     head_all_atoms.resize(num_cells_including_ghosts_xyz);
     head_free_atoms.resize(num_cells_including_ghosts_xyz);
 
-    for(int cx=0;cx<num_cells[0]+2;cx++) {
-        for(int cy=0;cy<num_cells[1]+2;cy++) {
-            for(int cz=0;cz<num_cells[2]+2;cz++) {
+    for(unsigned long cx=0;cx<num_cells[0]+2;cx++) {
+        for(unsigned long cy=0;cy<num_cells[1]+2;cy++) {
+            for(unsigned long cz=0;cz<num_cells[2]+2;cz++) {
                 cell_index_from_ijk(cx,cy,cz,cell_index);
                 if(cx == 0 || cx == num_cells[0]+1 || cy == 0 || cy == num_cells[1]+1 || cz == 0 || cz == num_cells[2]+1) {
                     is_ghost_cell[cell_index] = true;
@@ -98,6 +140,11 @@ void System::setSystemSize(const vec3 &systemSize)
     }
 
     set_topology();
+}
+
+double System::volume()
+{
+    return m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
 }
 
 void System::allocate() {
@@ -208,11 +255,10 @@ void System::create_FCC() {
 
 void System::init_parameters() {
     mass_inverse = 1.0/settings->mass;
-    r_cut = settings->r_cut;
-    one_over_r_cut_squared = 1.0/(r_cut*r_cut);
-    dt = settings->dt;
-    dt_half = dt/2;
-    t = 0;
+    m_rCut = settings->r_cut;
+    one_over_r_cut_squared = 1.0/(m_rCut*m_rCut);
+    m_dt = settings->dt;
+    m_time = 0;
 
     setSystemSize(vec3(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b));
 }
@@ -260,8 +306,8 @@ inline bool System::atom_should_be_copied(atomDataType* ri, int ku) {
     int dimension,higher;
     dimension = ku/2; /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
-    if (higher == 0) return ri[dimension] < r_cut;
-    else return ri[dimension] > m_systemSize[dimension]-r_cut;
+    if (higher == 0) return ri[dimension] < m_rCut;
+    else return ri[dimension] > m_systemSize[dimension]-m_rCut;
 }
 
 
@@ -285,7 +331,7 @@ void System::mpi_move() {
 
     for(short dimension=0;dimension<3;dimension++) {
         /* Scan all the residents & immigrants to list moved-out atoms */
-        for (int i=0; i<num_atoms+new_atoms; i++) {
+        for (unsigned long i=0; i<num_atoms+new_atoms; i++) {
             node_lower = 2*dimension;
             node_higher = 2*dimension+1;
             /* Register a to-be-copied atom in move_queue[kul|kuh][] */
@@ -424,32 +470,32 @@ void System::mpi_copy() {
 
 void System::half_kick() {
     for(int n=0;n<num_atoms;n++) {
-        velocities[3*n+0] += accelerations[3*n+0]*dt_half;
-        velocities[3*n+1] += accelerations[3*n+1]*dt_half;
-        velocities[3*n+2] += accelerations[3*n+2]*dt_half;
+        velocities[3*n+0] += accelerations[3*n+0]*m_dt*0.5;
+        velocities[3*n+1] += accelerations[3*n+1]*m_dt*0.5;
+        velocities[3*n+2] += accelerations[3*n+2]*m_dt*0.5;
     }
 }
 
 void System::full_kick() {
     for(int n=0;n<num_atoms;n++) {
-        velocities[3*n+0] += accelerations[3*n+0]*dt;
-        velocities[3*n+1] += accelerations[3*n+1]*dt;
-        velocities[3*n+2] += accelerations[3*n+2]*dt;
+        velocities[3*n+0] += accelerations[3*n+0]*m_dt;
+        velocities[3*n+1] += accelerations[3*n+1]*m_dt;
+        velocities[3*n+2] += accelerations[3*n+2]*m_dt;
     }
 }
 
 void System::move() {
     for(int n=0;n<num_atoms;n++) {
-        positions[3*n+0] += velocities[3*n+0]*dt;
-        positions[3*n+1] += velocities[3*n+1]*dt;
-        positions[3*n+2] += velocities[3*n+2]*dt;
+        positions[3*n+0] += velocities[3*n+0]*m_dt;
+        positions[3*n+1] += velocities[3*n+1]*m_dt;
+        positions[3*n+2] += velocities[3*n+2]*m_dt;
 
         atom_moved[n] = false;
     }
 }
 
 void System::apply_gravity() {
-    double gravity_force_times_dt = settings->gravity_force*dt;
+    double gravity_force_times_dt = settings->gravity_force*m_dt;
     for(int n=0;n<num_atoms;n++) {
         if(atom_type[n] != FROZEN) {
             velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
@@ -470,7 +516,7 @@ void System::apply_harmonic_oscillator() {
             accelerations[3*n+0] += -spring_constant_times_mass_inverse*dx;
             accelerations[3*n+1] += -spring_constant_times_mass_inverse*dy;
             accelerations[3*n+2] += -spring_constant_times_mass_inverse*dz;
-            potential_energy += 0.5*spring_constant*dr2;
+            m_potentialEnergy += 0.5*spring_constant*dr2;
         }
     }
 }
@@ -478,7 +524,7 @@ void System::apply_harmonic_oscillator() {
 void System::reset() {
     /* Reset the potential, pressure & forces */
     memset(&accelerations[0],0,3*num_atoms*sizeof(double));
-    potential_energy = 0;
+    m_potentialEnergy = 0;
     pressure_forces = 0;
 }
 
@@ -496,5 +542,5 @@ void System::step() {
     half_kick();
 
     steps++;
-    t += dt;
+    m_time += m_dt;
 }

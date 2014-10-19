@@ -9,11 +9,11 @@
  *
  */
 void System::calculate_accelerations() {
-    double rr_cut = r_cut*r_cut;
+    double rr_cut = m_rCut*m_rCut;
 
-    for (int c=0; c<num_cells_including_ghosts_xyz; c++) { head_all_atoms[c] = EMPTY; head_free_atoms[c] = EMPTY; }
+    for (unsigned int c=0; c<num_cells_including_ghosts_xyz; c++) { head_all_atoms[c] = EMPTY; head_free_atoms[c] = EMPTY; }
 
-    for (int i=0; i<num_atoms+num_atoms_ghost; i++) {
+    for (unsigned int i=0; i<num_atoms+num_atoms_ghost; i++) {
         for (int a=0; a<3; a++) mc[a] = (positions[3*i+a]+cellLength[a])/cellLength[a];
         cell_index_from_vector(mc,cell_index);
 
@@ -27,7 +27,7 @@ void System::calculate_accelerations() {
     double r_cut_squared_inverse = 1.0/rr_cut;
     double r_cut_6_inverse = r_cut_squared_inverse*r_cut_squared_inverse*r_cut_squared_inverse;
     double potential_energy_correction = 4*r_cut_6_inverse*(r_cut_6_inverse - 1);
-
+    vec3 dr;
     // Loop through all local cells (not including ghosts)
     for (mc[0]=1; mc[0]<=num_cells[0]; mc[0]++) {
         for (mc[1]=1; mc[1]<=num_cells[1]; mc[1]++) {
@@ -42,10 +42,10 @@ void System::calculate_accelerations() {
                             cell_index_2 = mc1[0]*num_cells_including_ghosts_yz+mc1[1]*num_cells_including_ghosts[2]+mc1[2];
 
                             if(head_all_atoms[cell_index_2] == EMPTY) continue;
-                            int i = head_all_atoms[cell_index]; // Index of local atom i
+                            unsigned long i = head_all_atoms[cell_index]; // Index of local atom i
 
                             while (i != EMPTY) {
-                                int j = head_all_atoms[cell_index_2]; // Index of atom j
+                                unsigned long j = head_all_atoms[cell_index_2]; // Index of atom j
                                 while (j != EMPTY) {
                                     if(i < j) { // Newton's 3rd law
                                         dr[0] = positions[3*i+0]-positions[3*j+0];
@@ -78,11 +78,11 @@ void System::calculate_accelerations() {
                                                 double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
 #endif
                                                 if(is_local_atom) {
-                                                    potential_energy += potential_energy_tmp;
+                                                    m_potentialEnergy += potential_energy_tmp;
                                                     pressure_forces += force*dr2;
                                                 } else {
                                                     pressure_forces += 0.5*force*dr2;
-                                                    potential_energy += 0.5*potential_energy_tmp;
+                                                    m_potentialEnergy += 0.5*potential_energy_tmp;
                                                 }
                                             }
 

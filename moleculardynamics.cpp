@@ -56,9 +56,9 @@ MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
     m_tilt(0),
     m_pan(0),
     m_roll(0),
+    m_positions(0),
     m_zoom(-4),
-    m_program(0),
-    m_positions(0)
+    m_program(0)
 {
     m_glQuads = new CPGLQuads();
 }
@@ -254,8 +254,8 @@ void MolecularDynamics::sync()
 
 MolecularDynamics::MolecularDynamics()
     : m_renderer(0),
-      m_thermostatEnabled(false),
-      m_thermostatValue(1.0)
+      m_thermostatValue(1.0),
+      m_thermostatEnabled(false)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
 
@@ -287,12 +287,13 @@ void MolecularDynamics::step(double dt)
         m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
     }
 
-    m_renderer->m_simulator.m_system.dt = safeDt;
-    m_renderer->m_simulator.m_system.dt_half = safeDt / 2.0;
+    m_renderer->m_simulator.m_system.setDt(safeDt);
     m_renderer->m_simulator.step();
     if(window()) {
         window()->update();
     }
+
+    qDebug() << "fps: " << 1.0/dt;
 }
 
 void MolecularDynamics::save(QString fileName)
