@@ -51,7 +51,14 @@
 #include "simulator/unitconverter.h"
 using namespace std;
 
-MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(-4), m_program(0), m_positions(0) {
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
+    m_tilt(0),
+    m_pan(0),
+    m_roll(0),
+    m_zoom(-4),
+    m_program(0),
+    m_positions(0)
+{
     m_glQuads = new CPGLQuads();
 }
 
@@ -118,7 +125,7 @@ void MolecularDynamicsRenderer::paint()
                                            "    highp float gradient = 1.0 - (r2*r2)/0.07;\n"
                                            "    highp vec3 color1 = vec3(0.25490196,  0.71372549,  0.76862745);\n"
                                            "    highp vec3 color2 = 0.5 * vec3(0.14509804,  0.20392157,  0.58039216);\n"
-                                           "    highp vec3 color = (color1 * gradient + color2 * (1-gradient));\n"
+                                           "    highp vec3 color = (color1 * gradient + color2 * (1.0 - gradient));\n"
                                            "    highp float alpha = float(r2<0.25);\n"
                                            "    if(alpha < 0.999) { discard; }\n"
                                            "    gl_FragColor = vec4(color * light, 1.0);\n"
