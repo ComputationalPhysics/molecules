@@ -12,6 +12,8 @@ class UnitConverter;
 #include <vector>
 #define EMPTY -1
 
+typedef double atomDataType;
+
 using namespace std;
 
 class System {
@@ -31,8 +33,8 @@ private:
     void create_FCC();
     void count_frozen_atoms();
     void reset();
-    inline bool atom_did_change_node(double* ri, int ku);
-    inline bool atom_should_be_copied(double *ri, int ku);
+    inline bool atom_did_change_node(atomDataType* ri, int ku);
+    inline bool atom_should_be_copied(atomDataType *ri, int ku);
     inline void cell_index_from_ijk(const int &i, const int &j, const int &k, unsigned int &cell_index);
     inline void cell_index_from_vector(unsigned int *mc, unsigned int &cell_index);
     void createForcesAndPotentialTable();
@@ -78,13 +80,13 @@ public:
     double shift_vector[6][3];
     unsigned int **move_queue;
 
-    vector<double> mpi_send_buffer;
-    vector<double> mpi_receive_buffer;
+    vector<atomDataType> mpi_send_buffer;
+    vector<atomDataType> mpi_receive_buffer;
     vector<bool> atom_moved;
     vector<unsigned long> atom_ids;
-    vector<double> positions;
-    vector<double> velocities;
-    vector<double> accelerations;
+    vector<atomDataType> positions;
+    vector<atomDataType> velocities;
+    vector<atomDataType> accelerations;
 
     int numberOfPrecomputedTwoParticleForces;
     double deltaR2;
@@ -98,7 +100,7 @@ public:
     int *linked_list_all_atoms;
     int *linked_list_free_atoms;
     bool *is_ghost_cell;
-    double *initial_positions;
+    vector<float> initial_positions;
     void apply_harmonic_oscillator();
 
     System();

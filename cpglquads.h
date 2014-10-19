@@ -2,6 +2,7 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
 #include <vector>
+#include <system.h>
 
 struct VertexData
 {
@@ -15,7 +16,7 @@ public:
     CPGLQuads();
     ~CPGLQuads();
     // void update(std::vector<float> &positions);
-    void update(double *positions, int n, float deltaX, float deltaY, float deltaZ);
+    void update(atomDataType *positions, int n, float deltaX, float deltaY, float deltaZ);
     void render(QOpenGLShaderProgram *program);
     void initializeOpenGLFunctions();
     void setModelViewMatrix(QMatrix4x4& matrix);
