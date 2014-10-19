@@ -25,7 +25,7 @@ Item {
         Image {
             anchors {
                 fill: parent
-                margins: width * 0.05
+                margins: buttonRoot.width * 0.05
             }
             fillMode: Image.PreserveAspectFit
             source: buttonRoot.identifier !== "" ? "simulations/" + buttonRoot.identifier + ".png" : ""
