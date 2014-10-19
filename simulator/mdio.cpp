@@ -155,6 +155,7 @@ void MDIO::load_state_from_file_binary(QString fileName) {
 
     cout << "step: " << step << " atomcount: " << atomCount << " minimumX: " << minimumX << endl;
     cout << "chunk: " << columnCount << " " << chunkCount << " " << chunkLength << endl;
+    cout << "bounds: " << maximumX << " " << maximumY << " " << maximumZ << endl;
 
     system->num_atoms = atomCount;
     system->system_length[0] = maximumX - minimumX;

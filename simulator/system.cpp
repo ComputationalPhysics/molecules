@@ -15,55 +15,77 @@
 
 using namespace std;
 System::System() :
-    positions(NULL),
-    accelerations(NULL),
-    velocities(NULL),
-    atom_type(NULL),
-    atom_moved(NULL),
-    mpi_send_buffer(NULL),
-    mpi_receive_buffer(NULL),
-    atom_ids(NULL),
     linked_list_all_atoms(NULL),
     linked_list_free_atoms(NULL),
     is_ghost_cell(NULL),
-    initial_positions(NULL),
     move_queue(NULL),
     t(0)
 {
 
 }
 
+void System::createForcesAndPotentialTable() {
+    cout << "Will create forces and potential table" << endl;
+    numberOfPrecomputedTwoParticleForces = 8192;
+
+    precomputed_forces.resize(numberOfPrecomputedTwoParticleForces+1);
+    precomputed_potential.resize(numberOfPrecomputedTwoParticleForces+1);
+
+    double rMinSquared = 0;
+    double rMaxSquared = settings->r_cut*settings->r_cut;
+
+    deltaR2 = (rMaxSquared - rMinSquared) / (numberOfPrecomputedTwoParticleForces-1);
+    oneOverDeltaR2 = 1.0/deltaR2;
+
+    for(int i=0; i<=numberOfPrecomputedTwoParticleForces; i++) {
+        double r2 = rMinSquared + i*deltaR2;
+
+        if(r2 > r_cut*r_cut) continue;
+        double r = sqrt(r2);
+        double oneOverR2 = 1.0/r2;
+        double oneOverR6 = oneOverR2*oneOverR2*oneOverR2;
+
+        double oneOverRCut2 = 1.0/(r_cut*r_cut);
+        double oneOverRCut6 = oneOverRCut2*oneOverRCut2*oneOverRCut2;
+
+        double force = 24*(2*oneOverR6-1)*oneOverR6*oneOverR2*mass_inverse;
+        double forceAtRCut = 24*(2*oneOverRCut6-1)*oneOverRCut6*oneOverRCut2*mass_inverse;
+
+        double potential = 4*oneOverR6*(oneOverR6 - 1);
+        double potentialAtRCut = 4*oneOverRCut6*(oneOverRCut6 - 1);
+
+        double potentialShifted = potential - potentialAtRCut + (r - r_cut)*forceAtRCut;
+        double forceShifted = force - forceAtRCut;
+
+        precomputed_forces[i] = forceShifted;
+        precomputed_potential[i] = potentialShifted;
+    }
+
+    cout << "Did create forces and potential table" << endl;
+}
 void System::allocate() {
-    positions = new double[3*max_number_of_atoms];
-    accelerations = new double[3*max_number_of_atoms];
-    velocities = new double[3*max_number_of_atoms];
-    atom_type = new unsigned long[max_number_of_atoms];
-    atom_moved = new bool[max_number_of_atoms];
-    mpi_send_buffer = new double[max_number_of_atoms];
-    mpi_receive_buffer = new double[max_number_of_atoms];
-    atom_ids = new unsigned long[max_number_of_atoms];
+    positions.resize(3*max_number_of_atoms);
+    accelerations.resize(3*max_number_of_atoms);
+    velocities.resize(3*max_number_of_atoms);
+    atom_type.resize(max_number_of_atoms, 0);
+    atom_moved.resize(max_number_of_atoms, false);
+    mpi_send_buffer.resize(max_number_of_atoms);
+    mpi_receive_buffer.resize(max_number_of_atoms);
+    atom_ids.resize(max_number_of_atoms);
 
     linked_list_all_atoms = new int[max_number_of_atoms];
     linked_list_free_atoms = new int[max_number_of_atoms];
     is_ghost_cell = new bool[max_number_of_cells];
-    initial_positions = new double[3*max_number_of_atoms];
+    initial_positions.resize(3*max_number_of_atoms);
     move_queue = new unsigned int*[6];
     for(int i=0; i<6; i++) {
         move_queue[i] = new unsigned int[max_number_of_atoms];
     }
 
-    memset(positions, 0, 3*max_number_of_atoms*sizeof(double));
-    memset(accelerations, 0, 3*max_number_of_atoms*sizeof(double));
-    memset(velocities, 0, 3*max_number_of_atoms*sizeof(double));
-    memset(atom_type, 0, max_number_of_atoms*sizeof(unsigned long));
-    memset(atom_moved, 0, max_number_of_atoms*sizeof(bool));
-    memset(mpi_receive_buffer, 0, max_number_of_atoms*sizeof(double));
-    memset(mpi_send_buffer, 0, max_number_of_atoms*sizeof(double));
-    memset(atom_ids, 0, max_number_of_atoms*sizeof(unsigned long));
+    memset(&atom_ids[0], 0, max_number_of_atoms*sizeof(unsigned long));
     memset(linked_list_free_atoms, 0, max_number_of_atoms*sizeof(int));
     memset(linked_list_all_atoms, 0, max_number_of_atoms*sizeof(int));
     memset(is_ghost_cell, 0, max_number_of_cells*sizeof(bool));
-    memset(initial_positions, 0, 3*max_number_of_atoms*sizeof(double));
 }
 
 void System::setup(int myid_, Settings *settings_) {
@@ -84,6 +106,7 @@ void System::setup(int myid_, Settings *settings_) {
     rnd = new Random(seed);
 
     init_parameters();
+    createForcesAndPotentialTable();
 
     mdio = new MDIO();
     mdio->setup(this);
@@ -158,6 +181,7 @@ void System::create_FCC() {
 void System::init_parameters() {
     mass_inverse = 1.0/settings->mass;
     r_cut = settings->r_cut;
+    one_over_r_cut_squared = 1.0/(r_cut*r_cut);
     dt = settings->dt;
     dt_half = dt/2;
     t = 0;
@@ -264,7 +288,7 @@ inline void System::cell_index_from_vector(unsigned int *mc, unsigned int &cell_
 #endif
 }
 
-inline bool System::atom_should_be_copied(double* ri, int ku) {
+inline bool System::atom_should_be_copied(atomDataType* ri, int ku) {
     int dimension,higher;
     dimension = ku/2; /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
@@ -273,7 +297,7 @@ inline bool System::atom_should_be_copied(double* ri, int ku) {
 }
 
 
-inline bool System::atom_did_change_node(double* ri, int ku) {
+inline bool System::atom_did_change_node(atomDataType* ri, int ku) {
     int dimension,higher;
     dimension = ku/2;    /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
@@ -335,12 +359,12 @@ void System::mpi_move() {
                 mpi_send_buffer[11*(i-1)+ 6 + 0] = initial_positions[ 3*atom_index + 0] - shift_vector[local_node_id][0];
                 mpi_send_buffer[11*(i-1)+ 6 + 1] = initial_positions[ 3*atom_index + 1] - shift_vector[local_node_id][1];
                 mpi_send_buffer[11*(i-1)+ 6 + 2] = initial_positions[ 3*atom_index + 2] - shift_vector[local_node_id][2];
-                mpi_send_buffer[11*(i-1) + 9] = (double)atom_ids[atom_index];
-                mpi_send_buffer[11*(i-1) + 10] = (double)atom_type[atom_index];
+                mpi_send_buffer[11*(i-1) + 9] = (float)atom_ids[atom_index];
+                mpi_send_buffer[11*(i-1) + 10] = (float)atom_type[atom_index];
                 atom_moved[atom_index] = true;
             }
 
-            memcpy(mpi_receive_buffer,mpi_send_buffer,11*num_receive*sizeof(double));
+            memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],11*num_receive*sizeof(atomDataType));
 
             /* Message storing */
             for (i=0; i<num_receive; i++) {
@@ -417,7 +441,7 @@ void System::mpi_copy() {
                 mpi_send_buffer[3*(i-1)+2] = positions[ 3*atom_index + 2]-shift_vector[local_node_id][2];
             }
 
-            memcpy(mpi_receive_buffer,mpi_send_buffer,3*num_receive*sizeof(double));
+            memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],3*num_receive*sizeof(atomDataType));
 
             for (i=0; i<num_receive; i++) {
                 positions[ 3*(num_atoms+new_ghost_atoms+i) + 0] = mpi_receive_buffer[3*i+0];
@@ -487,7 +511,7 @@ void System::apply_harmonic_oscillator() {
 
 void System::reset() {
     /* Reset the potential, pressure & forces */
-    memset(accelerations,0,3*num_atoms*sizeof(double));
+    memset(&accelerations[0],0,3*num_atoms*sizeof(double));
     potential_energy = 0;
     pressure_forces = 0;
 }

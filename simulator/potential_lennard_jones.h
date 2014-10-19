@@ -52,14 +52,24 @@ void System::calculate_accelerations() {
                                         double dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
 
                                         if (dr2<rr_cut) {
-                                            bool is_local_atom = j < num_atoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
-                                            double dr2_inverse = 1.0/dr2;
-                                            double dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
+                                            int precomputedTableIndex = dr2*one_over_r_cut_squared*numberOfPrecomputedTwoParticleForces;
 
-                                            double force = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
+                                            double force0 = precomputed_forces[precomputedTableIndex];
+                                            double force1 = precomputed_forces[precomputedTableIndex+1];
+                                            // Linearly interpolate between these values
+                                            double force = force0 + (force1 - force0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
+
+                                            bool is_local_atom = j < num_atoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
+//                                            double dr2_inverse = 1.0/dr2;
+//                                            double dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
+
+//                                            double force2 = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
 
                                             if(sample_statistics) {
-                                                double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
+                                                double energy0 = precomputed_potential[precomputedTableIndex];
+                                                double energy1 = precomputed_potential[precomputedTableIndex+1];
+                                                double potential_energy_tmp = energy0 + (energy1 - energy0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
+                                                //double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
                                                 if(is_local_atom) {
                                                     potential_energy += potential_energy_tmp;
                                                     pressure_forces += force*dr2;

@@ -178,7 +178,7 @@ void MolecularDynamicsRenderer::paint()
 
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
-    m_glQuads->update(m_simulator.m_system.positions, m_simulator.m_system.atom_type, n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
+    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
     m_glQuads->render(m_program);
 
     glDepthMask(GL_TRUE);
@@ -286,6 +286,7 @@ void MolecularDynamics::step(double dt)
         m_renderer->m_simulator.m_thermostat->relaxation_time = 0.1;
         m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
     }
+
     m_renderer->m_simulator.m_system.dt = safeDt;
     m_renderer->m_simulator.m_system.dt_half = safeDt / 2.0;
     m_renderer->m_simulator.step();

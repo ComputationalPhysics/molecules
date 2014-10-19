@@ -24,7 +24,7 @@ void CPGLQuads::generateVBOs()
 }
 
 // void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(double *positions, long unsigned int* atomType, int n, float deltaX, float deltaY, float deltaZ)
+void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, float deltaX, float deltaY, float deltaZ)
 {
     int numPoints = n / 3; // x,y,z
 
