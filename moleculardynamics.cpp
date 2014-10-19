@@ -135,9 +135,7 @@ void MolecularDynamicsRenderer::paint()
     float systemSizeY = m_simulator.m_system.system_length[1];
     float systemSizeZ = m_simulator.m_system.system_length[2];
 
-    float pinchScaleCorrection = m_pinchScale >= 1 ? (m_pinchScale - 1) : -1.0/m_pinchScale + 1;
-
-    float zoom = m_zoom + pinchScaleCorrection;
+    float zoom = m_zoom;
 
     matrix.translate(0,0,(-1.75 + zoom)-systemSizeZ);
 
@@ -165,15 +163,6 @@ void MolecularDynamicsRenderer::paint()
 
     m_program->release();
 }
-double MolecularDynamicsRenderer::pinchScale() const
-{
-    return m_pinchScale;
-}
-
-void MolecularDynamicsRenderer::setPinchScale(double pinchScale)
-{
-    m_pinchScale = pinchScale;
-}
 
 double MolecularDynamicsRenderer::zoom() const
 {
@@ -185,7 +174,7 @@ void MolecularDynamicsRenderer::setZoom(double zoom)
     m_zoom = zoom;
 }
 
-MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(1), m_program(0), m_positions(0), m_pinchScale(1) {
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() : m_tilt(0), m_pan(0), m_roll(0), m_zoom(1), m_program(0), m_positions(0) {
     m_glQuads = new CPGLQuads();
 }
 
@@ -265,18 +254,6 @@ void MolecularDynamics::step(double dt)
     m_renderer->m_simulator.step();
     update();
     if(window()) window()->update();
-}
-
-void MolecularDynamics::onPinchedFinished()
-{
-    if(m_renderer) {
-        float pinchScaleCorrection = m_pinchScale >= 1 ? (m_pinchScale - 1) : -1.0/m_pinchScale + 1;
-        float newZoom = m_renderer->zoom() + pinchScaleCorrection;
-
-        m_renderer->setZoom(newZoom);
-        m_renderer->setPinchScale(1);
-    }
-
 }
 
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)

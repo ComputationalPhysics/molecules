@@ -89,38 +89,12 @@ private:
 class MolecularDynamics : public QQuickItem
 {
     Q_OBJECT
-
-    Q_PROPERTY(double xPoint READ xPoint WRITE setxPoint NOTIFY xPointChanged)
-    Q_PROPERTY(double yPoint READ yPoint WRITE setyPoint NOTIFY yPointChanged)
-    Q_PROPERTY(double pinchScale READ pinchScale WRITE setPinchScale NOTIFY pinchScaleChanged)
-    Q_PROPERTY(double pinchRotation READ pinchRotation WRITE setPinchRotation NOTIFY pinchRotationChanged)
     Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
     Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
 
 public:
     MolecularDynamics();
     Q_INVOKABLE void step(double dt);
-    Q_INVOKABLE void onPinchedFinished();
-
-    double xPoint() const
-    {
-        return m_xPoint;
-    }
-
-    double yPoint() const
-    {
-        return m_yPoint;
-    }
-
-    double pinchRotation() const
-    {
-        return m_pinchRotation;
-    }
-
-    double pinchScale() const
-    {
-        return m_pinchScale;
-    }
 
     double thermostatValue() const
     {
@@ -137,43 +111,6 @@ public slots:
     void cleanup();
     void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
-
-    void setxPoint(double arg)
-    {
-        if (m_xPoint == arg)
-            return;
-
-        m_xPoint = arg;
-        emit xPointChanged(arg);
-    }
-
-    void setyPoint(double arg)
-    {
-        if (m_yPoint == arg)
-            return;
-
-        m_yPoint = arg;
-        emit yPointChanged(arg);
-    }
-
-    void setPinchRotation(double arg)
-    {
-        if (m_pinchRotation == arg)
-            return;
-
-        m_pinchRotation = arg;
-        emit pinchRotationChanged(arg);
-    }
-
-    void setPinchScale(double arg)
-    {
-        if (m_pinchScale == arg)
-            return;
-
-        m_pinchScale = arg;
-        emit pinchScaleChanged(arg);
-        if(m_renderer) m_renderer->setPinchScale(m_pinchScale);
-    }
 
     void setThermostatValue(double arg)
     {
@@ -192,16 +129,7 @@ public slots:
     }
 
 signals:
-    void xPointChanged(double arg);
-
-    void yPointChanged(double arg);
-
-    void pinchRotationChanged(double arg);
-
-    void pinchScaleChanged(double arg);
-
     void thermostatValueChanged(double arg);
-
     void thermostatEnabledChanged(bool arg);
 
 private slots:
@@ -212,8 +140,6 @@ private:
     MolecularDynamicsRenderer *m_renderer;
     double m_xPoint;
     double m_yPoint;
-    double m_pinchRotation;
-    double m_pinchScale;
 
     double m_thermostatValue;
     bool m_thermostatEnabled;

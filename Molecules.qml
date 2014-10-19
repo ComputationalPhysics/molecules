@@ -15,47 +15,25 @@ Item {
         thermostatValue: thermostatSlider.value
 
         PinchArea {
-            id: pinchy
+            id: pinchArea
             anchors.fill: parent
-            property double xPoint
-            property double yPoint
-            property double pinchScale
-            property double pinchRotation
-            property point lastPosition
-            property double lastRoll
             enabled: true
 
-            onPinchUpdated: {
-                molecularDynamics.xPoint = pinch.center.x
-                molecularDynamics.yPoint = pinch.center.y
-                molecularDynamics.pinchRotation = pinch.rotation
-                molecularDynamics.pinchScale = pinch.scale
+            property double previousScale: 1.0
 
-                var deltaX = pinch.center.x - lastPosition.x
-                var deltaY = pinch.center.y - lastPosition.y
-                var deltaPan = deltaX / width * 360 // max 3 rounds
-                var deltaTilt = deltaY / height * 180 // max 0.5 round
-                var deltaRoll = -(pinch.rotation - lastRoll)
-
-                // Disable rotation while pinching?
-                deltaPan = 0
-                deltaTilt = 0
-                deltaRoll = 0
-
-                molecularDynamics.incrementRotation(deltaPan, deltaTilt, deltaRoll)
-
-                lastPosition = Qt.point(pinch.center.x, pinch.center.y)
-                lastRoll = pinch.rotation
+            onPinchStarted: {
+                previousScale = (pinch.scale - 1.0)
             }
 
-            onPinchFinished: {
-                console.log("Pinch finished")
-                molecularDynamics.onPinchedFinished();
-                //pinchy.enabled = false
+            onPinchUpdated: {
+                var correctScale = pinch.scale >= 1.0 ? (pinch.scale - 1.0) : (-1.0 / pinch.scale + 1.0)
+                var deltaScale = correctScale - previousScale
+                molecularDynamics.incrementZoom(5 * deltaScale)
+                previousScale = correctScale
             }
 
             MouseArea {
-                id: mousey
+                id: mouseArea
                 anchors.fill: parent
                 property point lastPosition
                 onPressed: {
@@ -73,11 +51,6 @@ Item {
 
                 onWheel: {
                     molecularDynamics.incrementZoom(wheel.angleDelta.y / 720)
-                }
-
-                onPressAndHold: {
-                    console.log("press and hold")
-                    pinchy.enabled = true
                 }
             }
         }
