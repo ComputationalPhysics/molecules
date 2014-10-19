@@ -72,7 +72,7 @@ void System::setSystemSize(const vec3 &systemSize)
 {
     m_systemSize = systemSize;
 
-    for(a=0;a<3;a++) {
+    for(int a=0;a<3;a++) {
         num_cells[a] = m_systemSize[a]/r_cut;
         num_cells_including_ghosts[a] = num_cells[a]+2;
 
@@ -110,19 +110,14 @@ void System::allocate() {
     mpi_receive_buffer.resize(max_number_of_atoms);
     atom_ids.resize(max_number_of_atoms);
 
-    linked_list_all_atoms = new int[max_number_of_atoms];
-    linked_list_free_atoms = new int[max_number_of_atoms];
-    is_ghost_cell = new bool[max_number_of_cells];
+    linked_list_all_atoms.resize(max_number_of_atoms);
+    linked_list_free_atoms.resize(max_number_of_atoms);
+    is_ghost_cell.resize(max_number_of_cells, false);
     initial_positions.resize(3*max_number_of_atoms);
     move_queue = new unsigned int*[6];
     for(int i=0; i<6; i++) {
         move_queue[i] = new unsigned int[max_number_of_atoms];
     }
-
-    memset(&atom_ids[0], 0, max_number_of_atoms*sizeof(unsigned long));
-    memset(linked_list_free_atoms, 0, max_number_of_atoms*sizeof(int));
-    memset(linked_list_all_atoms, 0, max_number_of_atoms*sizeof(int));
-    memset(is_ghost_cell, 0, max_number_of_cells*sizeof(bool));
 }
 
 void System::setup(Settings *settings_) {
@@ -190,7 +185,7 @@ void System::create_FCC() {
                     r[0] = (x+xCell[k]) * settings->FCC_b;
                     r[1] = (y+yCell[k]) * settings->FCC_b;
                     r[2] = (z+zCell[k]) * settings->FCC_b;
-                    for(i=0;i<3;i++) {
+                    for(int i=0;i<3;i++) {
                         positions[3*num_atoms+i] = r[i];
                         initial_positions[3*num_atoms+i] = r[i];
                         velocities[3*num_atoms+i] = rnd->nextGauss()*sqrt(T*mass_inverse);
@@ -237,7 +232,7 @@ void System::set_topology() {
     /* Set up neighbor tables, nn & sv */
     for (int n=0; n<6; n++) {
         /* Shift vector, sv */
-        for (a=0; a<3; a++) shift_vector[n][a] = m_systemSize[a]*integer_vector[n][a];
+        for (int a=0; a<3; a++) shift_vector[n][a] = m_systemSize[a]*integer_vector[n][a];
     }
 }
 
@@ -290,7 +285,7 @@ void System::mpi_move() {
 
     for(short dimension=0;dimension<3;dimension++) {
         /* Scan all the residents & immigrants to list moved-out atoms */
-        for (i=0; i<num_atoms+new_atoms; i++) {
+        for (int i=0; i<num_atoms+new_atoms; i++) {
             node_lower = 2*dimension;
             node_higher = 2*dimension+1;
             /* Register a to-be-copied atom in move_queue[kul|kuh][] */
@@ -310,7 +305,7 @@ void System::mpi_move() {
         /* Message passing with neighbor nodes----------------------------*/
 
         /* Loop over the lower & higher directions------------------------*/
-        for (j=0; j<2; j++) {
+        for (int j=0; j<2; j++) {
             local_node_id=2*dimension+j;
             /* Send atom-number information---------------------------------*/
 
@@ -319,7 +314,7 @@ void System::mpi_move() {
             num_receive = num_send;
 
             /* Message buffering */
-            for (i=1; i<=num_send; i++) {
+            for (int i=1; i<=num_send; i++) {
                 int atom_index = move_queue[local_node_id][i];
                 /* Shift the coordinate origin */
                 mpi_send_buffer[11*(i-1)    + 0] = positions[ 3*atom_index + 0] - shift_vector[local_node_id][0];
@@ -339,7 +334,7 @@ void System::mpi_move() {
             memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],11*num_receive*sizeof(atomDataType));
 
             /* Message storing */
-            for (i=0; i<num_receive; i++) {
+            for (int i=0; i<num_receive; i++) {
                 int atom_index = num_atoms+new_atoms+i;
 
                 positions [3*atom_index+0] = mpi_receive_buffer[11*i   + 0];
@@ -365,9 +360,9 @@ void System::mpi_move() {
     }
 
     int ipt = 0;
-    for (i=0; i<num_atoms+new_atoms; i++) {
+    for (int i=0; i<num_atoms+new_atoms; i++) {
         if (!atom_moved[i]) {
-            for (a=0; a<3; a++) {
+            for (int a=0; a<3; a++) {
                 positions [3*ipt+a] = positions [3*i+a];
                 initial_positions [3*ipt+a] = initial_positions [3*i+a];
                 velocities[3*ipt+a] = velocities[3*i+a];
@@ -387,24 +382,24 @@ void System::mpi_move() {
 void System::mpi_copy() {
     int num_send, num_receive;
     int new_ghost_atoms = 0;
-    short higher, local_node_id;
+    short local_node_id;
     for(short dimension=0;dimension<3;dimension++) {
-        for (higher=0; higher<2; higher++) move_queue[2*dimension+higher][0] = 0;
-        for(i=0;i<num_atoms+new_ghost_atoms;i++) {
-            for(higher=0;higher<2;higher++) {
+        for (int higher=0; higher<2; higher++) move_queue[2*dimension+higher][0] = 0;
+        for(int i=0;i<num_atoms+new_ghost_atoms;i++) {
+            for(int higher=0;higher<2;higher++) {
                 local_node_id = 2*dimension + higher;
                 if (atom_should_be_copied(&positions[3*i],local_node_id)) move_queue[local_node_id][++(move_queue[local_node_id][0])] = i;
             }
         }
 
         /* Loop through higher and lower node in this dimension */
-        for(higher=0;higher<2;higher++) {
+        for(int higher=0;higher<2;higher++) {
             local_node_id= 2*dimension+higher;
             num_send = move_queue[local_node_id][0];
 
             num_receive = num_send;
 
-            for (i=1; i<=num_send; i++) {
+            for (int i=1; i<=num_send; i++) {
                 int atom_index = move_queue[local_node_id][i];
                 /* Shift the coordinate origin */
                 mpi_send_buffer[3*(i-1)+0] = positions[ 3*atom_index + 0]-shift_vector[local_node_id][0];
@@ -414,7 +409,7 @@ void System::mpi_copy() {
 
             memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],3*num_receive*sizeof(atomDataType));
 
-            for (i=0; i<num_receive; i++) {
+            for (int i=0; i<num_receive; i++) {
                 positions[ 3*(num_atoms+new_ghost_atoms+i) + 0] = mpi_receive_buffer[3*i+0];
                 positions[ 3*(num_atoms+new_ghost_atoms+i) + 1] = mpi_receive_buffer[3*i+1];
                 positions[ 3*(num_atoms+new_ghost_atoms+i) + 2] = mpi_receive_buffer[3*i+2];
@@ -428,7 +423,7 @@ void System::mpi_copy() {
 }
 
 void System::half_kick() {
-    for(n=0;n<num_atoms;n++) {
+    for(int n=0;n<num_atoms;n++) {
         velocities[3*n+0] += accelerations[3*n+0]*dt_half;
         velocities[3*n+1] += accelerations[3*n+1]*dt_half;
         velocities[3*n+2] += accelerations[3*n+2]*dt_half;
@@ -436,7 +431,7 @@ void System::half_kick() {
 }
 
 void System::full_kick() {
-    for(n=0;n<num_atoms;n++) {
+    for(int n=0;n<num_atoms;n++) {
         velocities[3*n+0] += accelerations[3*n+0]*dt;
         velocities[3*n+1] += accelerations[3*n+1]*dt;
         velocities[3*n+2] += accelerations[3*n+2]*dt;
@@ -444,7 +439,7 @@ void System::full_kick() {
 }
 
 void System::move() {
-    for(n=0;n<num_atoms;n++) {
+    for(int n=0;n<num_atoms;n++) {
         positions[3*n+0] += velocities[3*n+0]*dt;
         positions[3*n+1] += velocities[3*n+1]*dt;
         positions[3*n+2] += velocities[3*n+2]*dt;
@@ -455,7 +450,7 @@ void System::move() {
 
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*dt;
-    for(n=0;n<num_atoms;n++) {
+    for(int n=0;n<num_atoms;n++) {
         if(atom_type[n] != FROZEN) {
             velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
         }
@@ -465,7 +460,7 @@ void System::apply_gravity() {
 void System::apply_harmonic_oscillator() {
     double spring_constant = 1000.0;
     double spring_constant_times_mass_inverse = spring_constant * mass_inverse;
-    for(n=0; n<num_atoms; n++) {
+    for(int n=0; n<num_atoms; n++) {
         if(atom_type[n] == FROZEN) {
             double dx = positions[3*n+0] - initial_positions[3*n+0];
             double dy = positions[3*n+1] - initial_positions[3*n+1];

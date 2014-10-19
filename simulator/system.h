@@ -40,6 +40,9 @@ private:
     inline void cell_index_from_vector(unsigned int *mc, unsigned int &cell_index);
     void createForcesAndPotentialTable();
 
+    int numberOfPrecomputedTwoParticleForces;
+    double deltaR2;
+    double oneOverDeltaR2;
     vec3 m_systemSize;
     vec3 cellLength;
     vector<atomDataType> mpi_send_buffer;
@@ -48,6 +51,11 @@ private:
     vector<unsigned long> atom_ids;
     vector<int> head_all_atoms;
     vector<int> head_free_atoms;
+    vector<int> linked_list_all_atoms;
+    vector<int> linked_list_free_atoms;
+    vector<bool> is_ghost_cell;
+    vector<double> precomputed_forces;
+    vector<double> precomputed_potential;
 
 public:
     Settings *settings;
@@ -63,9 +71,8 @@ public:
     unsigned long num_atoms_free;
     unsigned long num_atoms_frozen;
     unsigned long num_atoms_ghost;
+    double mass_inverse, pressure_forces;
 
-
-    long i,j,k,n,m,a,b,c, nx, ny, nz;
     long count_periodic[3];
 
     double r_cut, dt, dt_half, potential_energy, t, t0, volume, one_over_r_cut_squared;
@@ -83,18 +90,7 @@ public:
     vector<atomDataType> velocities;
     vector<atomDataType> accelerations;
 
-    int numberOfPrecomputedTwoParticleForces;
-    double deltaR2;
-    double oneOverDeltaR2;
-    vector<double> precomputed_forces;
-    vector<double> precomputed_potential;
-
-    double mass_inverse, pressure_forces;
-
     vector<unsigned long> atom_type;
-    int *linked_list_all_atoms;
-    int *linked_list_free_atoms;
-    bool *is_ghost_cell;
     vector<float> initial_positions;
     void apply_harmonic_oscillator();
     void count_frozen_atoms();
