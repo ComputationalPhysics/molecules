@@ -36,8 +36,11 @@ Item {
                 id: mouseArea
                 anchors.fill: parent
                 property point lastPosition
+                property point pressedPosition
+
                 onPressed: {
                     lastPosition = Qt.point(mouse.x, mouse.y)
+                    pressedPosition = Qt.point(mouse.x, mouse.y)
                 }
 
                 onPositionChanged: {
@@ -47,6 +50,16 @@ Item {
                     var deltaTilt = deltaY / height * 180 // max 0.5 round
                     molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
                     lastPosition = Qt.point(mouse.x, mouse.y)
+                }
+
+                onReleased: {
+                    var currentPosition = Qt.point(mouse.x, mouse.y)
+                    if(Math.abs(pressedPosition.x - currentPosition.x) +
+                            Math.abs(pressedPosition.y - currentPosition.y) < moleculesRoot.width * 0.05) {
+                        settings.revealed = false
+                    }
+
+
                 }
 
                 onWheel: {
@@ -60,11 +73,12 @@ Item {
             property real lastTime: Date.now()
             running: true
             repeat: true
-            interval: 10
+            interval: 1
             onTriggered: {
                 var currentTime = Date.now()
                 var dt = currentTime - lastTime
                 dt /= 1000
+                dt /= 3.0
                 molecularDynamics.step(dt)
                 lastTime = currentTime
             }
@@ -74,28 +88,43 @@ Item {
     Rectangle {
         id: settings
 
+        property bool revealed: false
+
         anchors {
             right: parent.right
             top: parent.top
             bottom: parent.bottom
+            rightMargin: revealed ? 0 : -width
         }
 
-        width: parent.width * 0.1
+        width: parent.width * 0.3
         color: Qt.rgba(239 / 255, 243 / 255, 255 / 255, 200 / 255)
 
-        MouseArea {
-            property bool isLarge
-            anchors.fill: parent
-            onPressed: {
-                // It seems like the width and height doesn't switch places in portrait/landscape
-                if(mouse.y > width*0.2) {
-                    if(isLarge) {
-                        settings.width = moleculesRoot.width*0.1
-                    } else {
-                        settings.width = moleculesRoot.width*0.5
-                    }
+        Behavior on anchors.rightMargin {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.InOutQuad
+            }
+        }
 
-                    isLarge = !isLarge
+        MouseArea {
+            // Dummy area to keep input from being passed through to MD object
+            anchors.fill: parent
+        }
+
+        Rectangle {
+            anchors {
+                right: parent.left
+                bottom: parent.bottom
+            }
+            color: parent.color
+            height: parent.height * 0.1
+            width: height
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    settings.revealed = !settings.revealed
                 }
             }
         }
