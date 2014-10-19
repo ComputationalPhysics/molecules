@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     simulator/thermostat.cpp \
     simulator/unitconverter.cpp \
     simulator/simulator.cpp \
-    simulator/mdio.cpp
+    simulator/mdio.cpp \
+    vec3.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,7 +40,8 @@ HEADERS += \
     simulator/thermostat.h \
     simulator/unitconverter.h \
     simulator/simulator.h \
-    simulator/mdio.h
+    simulator/mdio.h \
+    vec3.h
 
 OTHER_FILES += \
     iOS.plist

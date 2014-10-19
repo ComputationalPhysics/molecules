@@ -153,9 +153,9 @@ void MolecularDynamicsRenderer::paint()
     // Calculate model view transformation
     QMatrix4x4 matrix;
     QMatrix4x4 lightMatrix;
-    float systemSizeX = m_simulator.m_system.system_length[0];
-    float systemSizeY = m_simulator.m_system.system_length[1];
-    float systemSizeZ = m_simulator.m_system.system_length[2];
+    float systemSizeX = m_simulator.m_system.systemSize().x();
+    float systemSizeY = m_simulator.m_system.systemSize().y();
+    float systemSizeZ = m_simulator.m_system.systemSize().z();
 
     float zoom = m_zoom;
 

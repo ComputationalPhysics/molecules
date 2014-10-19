@@ -10,6 +10,8 @@ class UnitConverter;
 
 #include <fstream>
 #include <vector>
+#include <vec3.h>
+
 #define EMPTY -1
 
 typedef double atomDataType;
@@ -37,6 +39,10 @@ private:
     inline void cell_index_from_ijk(const int &i, const int &j, const int &k, unsigned int &cell_index);
     inline void cell_index_from_vector(unsigned int *mc, unsigned int &cell_index);
     void createForcesAndPotentialTable();
+
+    vec3 m_systemSize;
+    vec3 cellLength;
+
 public:
     Settings *settings;
     MDIO *mdio;
@@ -49,9 +55,6 @@ public:
     bool sample_statistics;
     unsigned long steps;
     int neighbor_nodes[6];
-    double cell_length[3];
-    double system_length[3];
-    int num_nodes;
     int max_number_of_atoms;
     int max_number_of_cells;
     unsigned long num_atoms;
@@ -101,6 +104,8 @@ public:
     void setup(Settings *settings_);
     void step();
     double get_volume() {
-        return system_length[0]*system_length[1]*system_length[2];
+        return m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
     }
+    vec3 systemSize() const;
+    void setSystemSize(const vec3 &systemSize);
 };

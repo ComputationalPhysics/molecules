@@ -63,6 +63,16 @@ void System::createForcesAndPotentialTable() {
 
     cout << "Did create forces and potential table" << endl;
 }
+vec3 System::systemSize() const
+{
+    return m_systemSize;
+}
+
+void System::setSystemSize(const vec3 &systemSize)
+{
+    m_systemSize = systemSize;
+}
+
 void System::allocate() {
     positions.resize(3*max_number_of_atoms);
     accelerations.resize(3*max_number_of_atoms);
@@ -94,7 +104,6 @@ void System::setup(Settings *settings_) {
     settings = settings_;
     num_atoms = 0;
     num_atoms_ghost = 0;
-    num_nodes = settings->nodes_x*settings->nodes_y*settings->nodes_z;
     max_number_of_atoms = settings->max_number_of_atoms;
     max_number_of_cells = settings->max_number_of_cells;
 
@@ -119,11 +128,9 @@ void System::setup(Settings *settings_) {
     calculate_accelerations();
 //    half_kick();
 
-    cout << "System size: " << unit_converter->length_to_SI(system_length[0])*1e10 << " Å " << unit_converter->length_to_SI(system_length[1])*1e10 << " Å " << unit_converter->length_to_SI(system_length[2])*1e10 << " Å" << endl;
+    cout << "System size: " << unit_converter->length_to_SI(m_systemSize[0])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[1])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[2])*1e10 << " Å" << endl;
     cout << "Atoms: " << num_atoms << endl;
     cout << "Free atoms: " << num_atoms_free << endl;
-    cout << "Processors: " << num_nodes << " (" << settings->nodes_x << "," << settings->nodes_y << "," << settings->nodes_z << ")" << endl;
-    cout << "Free atoms/processor: " << num_atoms_free/num_nodes << endl;
 }
 
 void System::count_frozen_atoms() {
@@ -186,18 +193,18 @@ void System::init_parameters() {
     t = 0;
 
     // Size of this node
-    system_length[0] = settings->unit_cells_x*settings->FCC_b;
-    system_length[1] = settings->unit_cells_y*settings->FCC_b;
-    system_length[2] = settings->unit_cells_z*settings->FCC_b;
+    m_systemSize[0] = settings->unit_cells_x*settings->FCC_b;
+    m_systemSize[1] = settings->unit_cells_y*settings->FCC_b;
+    m_systemSize[2] = settings->unit_cells_z*settings->FCC_b;
 
     for(a=0;a<3;a++) {
-        num_cells[a] = system_length[a]/r_cut;
+        num_cells[a] = m_systemSize[a]/r_cut;
         num_cells_including_ghosts[a] = num_cells[a]+2;
 
-        cell_length[a] = system_length[a]/num_cells[a];
+        cellLength[a] = m_systemSize[a]/num_cells[a];
         count_periodic[a] = 0;
     }
-    volume = system_length[0]*system_length[1]*system_length[2];
+    volume = m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
 
     num_cells_including_ghosts_yz = num_cells_including_ghosts[1]*num_cells_including_ghosts[2];
     num_cells_including_ghosts_xyz = num_cells_including_ghosts_yz*num_cells_including_ghosts[0];
@@ -241,7 +248,7 @@ void System::set_topology() {
         /* Scalar neighbor ID, nn */
         neighbor_nodes[n] = 0; //k1[0]*num_processors[1]*num_processors[2]+k1[1]*num_processors[2]+k1[2];
         /* Shift vector, sv */
-        for (a=0; a<3; a++) shift_vector[n][a] = system_length[a]*integer_vector[n][a];
+        for (a=0; a<3; a++) shift_vector[n][a] = m_systemSize[a]*integer_vector[n][a];
     }
 }
 
@@ -270,7 +277,7 @@ inline bool System::atom_should_be_copied(atomDataType* ri, int ku) {
     dimension = ku/2; /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
     if (higher == 0) return ri[dimension] < r_cut;
-    else return ri[dimension] > system_length[dimension]-r_cut;
+    else return ri[dimension] > m_systemSize[dimension]-r_cut;
 }
 
 
@@ -279,7 +286,7 @@ inline bool System::atom_did_change_node(atomDataType* ri, int ku) {
     dimension = ku/2;    /* x(0)|y(1)|z(2) direction */
     higher = ku%2; /* Lower(0)|higher(1) direction */
     if (higher == 0) return ri[dimension] < 0.0;
-    else return ri[dimension] > system_length[dimension];
+    else return ri[dimension] > m_systemSize[dimension];
 }
 
 void System::mpi_move() {
