@@ -8,9 +8,9 @@ Settings::Settings() {
     gravity_force = 0;
     mass = 39.948;
     gravity_direction = -1;
-    unit_cells_x = 5;
-    unit_cells_y = 5;
-    unit_cells_z = 5;
+    unit_cells_x = 10;
+    unit_cells_y = 10;
+    unit_cells_z = 10;
     nodes_x = 1;
     nodes_y = 1;
     nodes_z = 1;

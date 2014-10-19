@@ -14,9 +14,6 @@
 
 using namespace std;
 System::System() :
-    positions(NULL),
-    accelerations(NULL),
-    velocities(NULL),
     atom_type(NULL),
     atom_moved(NULL),
     mpi_send_buffer(NULL),
@@ -33,9 +30,9 @@ System::System() :
 }
 
 void System::allocate() {
-    positions = new double[3*max_number_of_atoms];
-    accelerations = new double[3*max_number_of_atoms];
-    velocities = new double[3*max_number_of_atoms];
+    positions.resize(3*max_number_of_atoms);
+    accelerations.resize(3*max_number_of_atoms);
+    velocities.resize(3*max_number_of_atoms);
     atom_type = new unsigned long[max_number_of_atoms];
     atom_moved = new bool[max_number_of_atoms];
     mpi_send_buffer = new double[max_number_of_atoms];
@@ -51,9 +48,6 @@ void System::allocate() {
         move_queue[i] = new unsigned int[max_number_of_atoms];
     }
 
-    memset(positions, 0, 3*max_number_of_atoms*sizeof(double));
-    memset(accelerations, 0, 3*max_number_of_atoms*sizeof(double));
-    memset(velocities, 0, 3*max_number_of_atoms*sizeof(double));
     memset(atom_type, 0, max_number_of_atoms*sizeof(unsigned long));
     memset(atom_moved, 0, max_number_of_atoms*sizeof(bool));
     memset(mpi_receive_buffer, 0, max_number_of_atoms*sizeof(double));
@@ -481,7 +475,7 @@ void System::apply_harmonic_oscillator() {
 
 void System::reset() {
     /* Reset the potential, pressure & forces */
-    memset(accelerations,0,3*num_atoms*sizeof(double));
+    memset(&accelerations[0],0,3*num_atoms*sizeof(double));
     potential_energy = 0;
     pressure_forces = 0;
 }

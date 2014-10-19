@@ -81,9 +81,9 @@ public:
     double *mpi_receive_buffer;
     bool *atom_moved;
     unsigned long *atom_ids;
-    double *positions;
-    double *accelerations;
-    double *velocities;
+    vector<double> positions;
+    vector<double> velocities;
+    vector<double> accelerations;
 
     double mass_inverse, pressure_forces;
 
