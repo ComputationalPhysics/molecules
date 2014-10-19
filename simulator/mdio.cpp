@@ -58,9 +58,9 @@ void MDIO::save_state_to_file_binary(QString fileName) {
     double minimumX = 0.0;
     double minimumY = 0.0;
     double minimumZ = 0.0;
-    double maximumX = system->system_length[0];
-    double maximumY = system->system_length[1];
-    double maximumZ = system->system_length[2];
+    double maximumX = system->systemSize().x();
+    double maximumY = system->systemSize().y();
+    double maximumZ = system->systemSize().z();
     double shear = 0.0;
     int columnCount = 1 + 1 + 3 + 3;
     int chunkCount = 1;
@@ -156,9 +156,7 @@ void MDIO::load_state_from_file_binary(QString fileName) {
     cout << "bounds: " << maximumX << " " << maximumY << " " << maximumZ << endl;
 
     system->num_atoms = atomCount;
-    system->system_length[0] = maximumX - minimumX;
-    system->system_length[1] = maximumY - minimumY;
-    system->system_length[2] = maximumZ - minimumZ;
+    system->setSystemSize(vec3(maximumX - minimumX, maximumY - minimumY, maximumZ - minimumZ));
 
     double *tmp_data = new double[chunkLength];
     file.read(reinterpret_cast<char*>(tmp_data),chunkLength*sizeof(double));

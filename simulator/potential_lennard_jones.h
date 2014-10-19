@@ -14,7 +14,7 @@ void System::calculate_accelerations() {
     for (c=0; c<num_cells_including_ghosts_xyz; c++) { head_all_atoms[c] = EMPTY; head_free_atoms[c] = EMPTY; }
 
     for (i=0; i<num_atoms+num_atoms_ghost; i++) {
-        for (a=0; a<3; a++) mc[a] = (positions[3*i+a]+cell_length[a])/cell_length[a];
+        for (a=0; a<3; a++) mc[a] = (positions[3*i+a]+cellLength[a])/cellLength[a];
         cell_index_from_vector(mc,cell_index);
 
         // Set this atom at the head of the linked list, and update its next
