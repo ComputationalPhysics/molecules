@@ -29,6 +29,45 @@ System::System() :
 
 }
 
+void System::createForcesAndPotentialTable() {
+    cout << "Will create forces and potential table" << endl;
+    numberOfPrecomputedTwoParticleForces = 8192;
+
+    precomputed_forces.resize(numberOfPrecomputedTwoParticleForces+1);
+    precomputed_potential.resize(numberOfPrecomputedTwoParticleForces+1);
+
+    double rMinSquared = 0;
+    double rMaxSquared = settings->r_cut*settings->r_cut;
+
+    deltaR2 = (rMaxSquared - rMinSquared) / (numberOfPrecomputedTwoParticleForces-1);
+    oneOverDeltaR2 = 1.0/deltaR2;
+
+    for(int i=0; i<=numberOfPrecomputedTwoParticleForces; i++) {
+        double r2 = rMinSquared + i*deltaR2;
+
+        if(r2 > r_cut*r_cut) continue;
+        double r = sqrt(r2);
+        double oneOverR2 = 1.0/r2;
+        double oneOverR6 = oneOverR2*oneOverR2*oneOverR2;
+
+        double oneOverRCut2 = 1.0/(r_cut*r_cut);
+        double oneOverRCut6 = oneOverRCut2*oneOverRCut2*oneOverRCut2;
+
+        double force = 24*(2*oneOverR6-1)*oneOverR6*oneOverR2*mass_inverse;
+        double forceAtRCut = 24*(2*oneOverRCut6-1)*oneOverRCut6*oneOverRCut2*mass_inverse;
+
+        double potential = 4*oneOverR6*(oneOverR6 - 1);
+        double potentialAtRCut = 4*oneOverRCut6*(oneOverRCut6 - 1);
+
+        double potentialShifted = potential - potentialAtRCut + (r - r_cut)*forceAtRCut;
+        double forceShifted = force - forceAtRCut;
+
+        precomputed_forces[i] = forceShifted;
+        precomputed_potential[i] = potentialShifted;
+    }
+
+    cout << "Did create forces and potential table" << endl;
+}
 void System::allocate() {
     positions.resize(3*max_number_of_atoms);
     accelerations.resize(3*max_number_of_atoms);
@@ -75,6 +114,7 @@ void System::setup(int myid_, Settings *settings_) {
     rnd = new Random(seed);
 
     init_parameters();
+    createForcesAndPotentialTable();
 
     set_topology();
     create_FCC();
@@ -146,6 +186,7 @@ void System::create_FCC() {
 void System::init_parameters() {
     mass_inverse = 1.0/settings->mass;
     r_cut = settings->r_cut;
+    one_over_r_cut_squared = 1.0/(r_cut*r_cut);
     dt = settings->dt;
     dt_half = dt/2;
     t = 0;

@@ -256,7 +256,7 @@ void MolecularDynamics::step(double dt)
     m_renderer->m_simulator.step();
     update();
     if(window()) window()->update();
-    // qDebug() << "1/dt=" << 1/dt;
+    qDebug() << "1/dt=" << 1/dt;
 }
 
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)

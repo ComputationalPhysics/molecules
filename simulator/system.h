@@ -35,6 +35,7 @@ private:
     inline bool atom_should_be_copied(double *ri, int ku);
     inline void cell_index_from_ijk(const int &i, const int &j, const int &k, unsigned int &cell_index);
     inline void cell_index_from_vector(unsigned int *mc, unsigned int &cell_index);
+    void createForcesAndPotentialTable();
 public:
     Settings *settings;
     MDIO *mdio;
@@ -67,7 +68,7 @@ public:
     long count_periodic[3];
 
     double origo[3];
-    double r_cut, dt, dt_half, potential_energy, t, t0, volume;
+    double r_cut, dt, dt_half, potential_energy, t, t0, volume, one_over_r_cut_squared;
     unsigned int mc[3];  // Usually cell index vector
     unsigned int mc1[3]; // Usually cell index vector
     unsigned int num_cells_including_ghosts_yz,cell_index, cell_index_2,num_cells_including_ghosts_xyz;
@@ -84,6 +85,12 @@ public:
     vector<double> positions;
     vector<double> velocities;
     vector<double> accelerations;
+
+    int numberOfPrecomputedTwoParticleForces;
+    double deltaR2;
+    double oneOverDeltaR2;
+    vector<double> precomputed_forces;
+    vector<double> precomputed_potential;
 
     double mass_inverse, pressure_forces;
 

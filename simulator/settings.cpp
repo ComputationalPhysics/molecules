@@ -1,6 +1,6 @@
 #include <settings.h>
 Settings::Settings() {
-    FCC_b = 1.54478708;
+    FCC_b = 2.0;
     temperature = 1.0;
     dt = 0.02;
     r_cut = 2.5;
