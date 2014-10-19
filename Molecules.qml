@@ -78,7 +78,7 @@ Item {
                 var currentTime = Date.now()
                 var dt = currentTime - lastTime
                 dt /= 1000
-                dt /= 3.0
+                dt /= 2.0
                 molecularDynamics.step(dt)
                 lastTime = currentTime
             }
