@@ -42,19 +42,21 @@ private:
 
     vec3 m_systemSize;
     vec3 cellLength;
+    vector<atomDataType> mpi_send_buffer;
+    vector<atomDataType> mpi_receive_buffer;
+    vector<bool> atom_moved;
+    vector<unsigned long> atom_ids;
+    vector<int> head_all_atoms;
+    vector<int> head_free_atoms;
 
 public:
     Settings *settings;
     MDIO *mdio;
     Random *rnd;
-//    MDTimer *mdtimer;
     UnitConverter *unit_converter;
-    int  *head_all_atoms;
-    int  *head_free_atoms;
 
     bool sample_statistics;
     unsigned long steps;
-    int neighbor_nodes[6];
     int max_number_of_atoms;
     int max_number_of_cells;
     unsigned long num_atoms;
@@ -76,10 +78,7 @@ public:
     double shift_vector[6][3];
     unsigned int **move_queue;
 
-    vector<atomDataType> mpi_send_buffer;
-    vector<atomDataType> mpi_receive_buffer;
-    vector<bool> atom_moved;
-    vector<unsigned long> atom_ids;
+
     vector<atomDataType> positions;
     vector<atomDataType> velocities;
     vector<atomDataType> accelerations;

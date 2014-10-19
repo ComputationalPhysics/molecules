@@ -71,6 +71,33 @@ vec3 System::systemSize() const
 void System::setSystemSize(const vec3 &systemSize)
 {
     m_systemSize = systemSize;
+
+    for(a=0;a<3;a++) {
+        num_cells[a] = m_systemSize[a]/r_cut;
+        num_cells_including_ghosts[a] = num_cells[a]+2;
+
+        cellLength[a] = m_systemSize[a]/num_cells[a];
+        count_periodic[a] = 0;
+    }
+    volume = m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
+
+    num_cells_including_ghosts_yz = num_cells_including_ghosts[1]*num_cells_including_ghosts[2];
+    num_cells_including_ghosts_xyz = num_cells_including_ghosts_yz*num_cells_including_ghosts[0];
+    head_all_atoms.resize(num_cells_including_ghosts_xyz);
+    head_free_atoms.resize(num_cells_including_ghosts_xyz);
+
+    for(int cx=0;cx<num_cells[0]+2;cx++) {
+        for(int cy=0;cy<num_cells[1]+2;cy++) {
+            for(int cz=0;cz<num_cells[2]+2;cz++) {
+                cell_index_from_ijk(cx,cy,cz,cell_index);
+                if(cx == 0 || cx == num_cells[0]+1 || cy == 0 || cy == num_cells[1]+1 || cz == 0 || cz == num_cells[2]+1) {
+                    is_ghost_cell[cell_index] = true;
+                } else is_ghost_cell[cell_index] = false;
+            }
+        }
+    }
+
+    set_topology();
 }
 
 void System::allocate() {
@@ -192,35 +219,7 @@ void System::init_parameters() {
     dt_half = dt/2;
     t = 0;
 
-    // Size of this node
-    m_systemSize[0] = settings->unit_cells_x*settings->FCC_b;
-    m_systemSize[1] = settings->unit_cells_y*settings->FCC_b;
-    m_systemSize[2] = settings->unit_cells_z*settings->FCC_b;
-
-    for(a=0;a<3;a++) {
-        num_cells[a] = m_systemSize[a]/r_cut;
-        num_cells_including_ghosts[a] = num_cells[a]+2;
-
-        cellLength[a] = m_systemSize[a]/num_cells[a];
-        count_periodic[a] = 0;
-    }
-    volume = m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
-
-    num_cells_including_ghosts_yz = num_cells_including_ghosts[1]*num_cells_including_ghosts[2];
-    num_cells_including_ghosts_xyz = num_cells_including_ghosts_yz*num_cells_including_ghosts[0];
-    head_all_atoms = new int[num_cells_including_ghosts_xyz];
-    head_free_atoms = new int[num_cells_including_ghosts_xyz];
-
-    for(int cx=0;cx<num_cells[0]+2;cx++) {
-        for(int cy=0;cy<num_cells[1]+2;cy++) {
-            for(int cz=0;cz<num_cells[2]+2;cz++) {
-                cell_index_from_ijk(cx,cy,cz,cell_index);
-                if(cx == 0 || cx == num_cells[0]+1 || cy == 0 || cy == num_cells[1]+1 || cz == 0 || cz == num_cells[2]+1) {
-                    is_ghost_cell[cell_index] = true;
-                } else is_ghost_cell[cell_index] = false;
-            }
-        }
-    }
+    setSystemSize(vec3(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b));
 }
 
 void System::set_topology() {
@@ -235,18 +234,8 @@ void System::set_topology() {
         {-1,0,0}, {1,0,0}, {0,-1,0}, {0,1,0}, {0,0,-1}, {0,0,1}
     };
 
-    int k1[3];
-
     /* Set up neighbor tables, nn & sv */
     for (int n=0; n<6; n++) {
-        /* Vector index of neighbor ku */
-        for (a=0; a<3; a++) {
-            // k1[a] = (integer_vector[n][a]+num_processors[a])%num_processors[a];
-            k1[a] = integer_vector[n][a];
-        }
-
-        /* Scalar neighbor ID, nn */
-        neighbor_nodes[n] = 0; //k1[0]*num_processors[1]*num_processors[2]+k1[1]*num_processors[2]+k1[2];
         /* Shift vector, sv */
         for (a=0; a<3; a++) shift_vector[n][a] = m_systemSize[a]*integer_vector[n][a];
     }
@@ -291,7 +280,7 @@ inline bool System::atom_did_change_node(atomDataType* ri, int ku) {
 
 void System::mpi_move() {
     int new_atoms = 0;
-    int node_id,num_send,num_receive;
+    int num_send,num_receive;
     short node_higher, node_lower, local_node_id;
 
     /* Reset the # of to-be-moved atoms, move_queue[][0] */
@@ -323,7 +312,6 @@ void System::mpi_move() {
         /* Loop over the lower & higher directions------------------------*/
         for (j=0; j<2; j++) {
             local_node_id=2*dimension+j;
-            node_id = neighbor_nodes[local_node_id]; /* Neighbor node ID */
             /* Send atom-number information---------------------------------*/
 
             num_send = move_queue[local_node_id][0]; /* # of atoms to-be-sent */
@@ -397,7 +385,7 @@ void System::mpi_move() {
 }
 
 void System::mpi_copy() {
-    int node_id, num_send, num_receive;
+    int num_send, num_receive;
     int new_ghost_atoms = 0;
     short higher, local_node_id;
     for(short dimension=0;dimension<3;dimension++) {
@@ -412,7 +400,6 @@ void System::mpi_copy() {
         /* Loop through higher and lower node in this dimension */
         for(higher=0;higher<2;higher++) {
             local_node_id= 2*dimension+higher;
-            node_id = neighbor_nodes[local_node_id];
             num_send = move_queue[local_node_id][0];
 
             num_receive = num_send;
