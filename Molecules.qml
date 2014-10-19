@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import MolecularDynamics 1.0
 
@@ -42,6 +43,7 @@ Item {
                 property bool movedTooFarToHide: false
 
                 onPressed: {
+                    systemsView.revealed = false
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
                     pressedTime = Date.now()
@@ -94,7 +96,44 @@ Item {
         }
     }
 
-    Tools {
+    ToolsView {
         id: toolsView
+    }
+
+    SystemsView {
+        id: systemsView
+    }
+
+    Rectangle {
+        id: save
+        anchors {
+            left: parent.left
+            bottom: parent.bottom
+        }
+        width: parent.width * 0.05
+        height: width
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                molecularDynamics.save()
+            }
+        }
+    }
+
+    Rectangle {
+        anchors {
+            left: save.right
+            bottom: parent.bottom
+        }
+        width: parent.width * 0.05
+        height: width
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                molecularDynamics.load()
+            }
+        }
     }
 }
