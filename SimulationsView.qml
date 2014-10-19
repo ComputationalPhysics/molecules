@@ -123,14 +123,14 @@ Item {
                 fill: parent
                 margins: parent.width * 0.07
             }
-            spacing: systemsViewRectangle.width * 0.03
+            spacing: systemsViewRectangle.width * 0.02
 
             Text {
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
                 text: "Welcome to Molecules!"
-                font.pixelSize: parent.width * 0.05
+                font.pixelSize: parent.width * 0.04
                 color: "white"
             }
 
@@ -152,7 +152,7 @@ Item {
                 id: systemsGrid
 
                 property real elementWidth: systemsViewColumn.width / columns - spacing
-                property real elementHeight: elementWidth * 3.0 / 4.0
+                property real elementHeight: elementWidth * 9.0 / 16.0
                 property var simulations: [
                     { identifier: "default", name: "Default"},
                     { identifier: "cylinder", name: "Cylinder"},
