@@ -33,11 +33,11 @@ void System::allocate() {
     positions.resize(3*max_number_of_atoms);
     accelerations.resize(3*max_number_of_atoms);
     velocities.resize(3*max_number_of_atoms);
-    atom_type = new unsigned long[max_number_of_atoms];
-    atom_moved = new bool[max_number_of_atoms];
-    mpi_send_buffer = new double[max_number_of_atoms];
-    mpi_receive_buffer = new double[max_number_of_atoms];
-    atom_ids = new unsigned long[max_number_of_atoms];
+    atom_type.resize(max_number_of_atoms, 0);
+    atom_moved.resize(max_number_of_atoms, false);
+    mpi_send_buffer.resize(max_number_of_atoms);
+    mpi_receive_buffer.resize(max_number_of_atoms);
+    atom_ids.resize(max_number_of_atoms);
 
     linked_list_all_atoms = new int[max_number_of_atoms];
     linked_list_free_atoms = new int[max_number_of_atoms];
@@ -48,11 +48,9 @@ void System::allocate() {
         move_queue[i] = new unsigned int[max_number_of_atoms];
     }
 
-    memset(atom_type, 0, max_number_of_atoms*sizeof(unsigned long));
-    memset(atom_moved, 0, max_number_of_atoms*sizeof(bool));
-    memset(mpi_receive_buffer, 0, max_number_of_atoms*sizeof(double));
-    memset(mpi_send_buffer, 0, max_number_of_atoms*sizeof(double));
-    memset(atom_ids, 0, max_number_of_atoms*sizeof(unsigned long));
+    memset(&mpi_receive_buffer[0], 0, max_number_of_atoms*sizeof(double));
+    memset(&mpi_send_buffer[0], 0, max_number_of_atoms*sizeof(double));
+    memset(&atom_ids[0], 0, max_number_of_atoms*sizeof(unsigned long));
     memset(linked_list_free_atoms, 0, max_number_of_atoms*sizeof(int));
     memset(linked_list_all_atoms, 0, max_number_of_atoms*sizeof(int));
     memset(is_ghost_cell, 0, max_number_of_cells*sizeof(bool));
@@ -330,7 +328,7 @@ void System::mpi_move() {
                 atom_moved[atom_index] = true;
             }
 
-            memcpy(mpi_receive_buffer,mpi_send_buffer,11*num_receive*sizeof(double));
+            memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],11*num_receive*sizeof(double));
 
             /* Message storing */
             for (i=0; i<num_receive; i++) {
@@ -407,7 +405,7 @@ void System::mpi_copy() {
                 mpi_send_buffer[3*(i-1)+2] = positions[ 3*atom_index + 2]-shift_vector[local_node_id][2];
             }
 
-            memcpy(mpi_receive_buffer,mpi_send_buffer,3*num_receive*sizeof(double));
+            memcpy(&mpi_receive_buffer[0],&mpi_send_buffer[0],3*num_receive*sizeof(double));
 
             for (i=0; i<num_receive; i++) {
                 positions[ 3*(num_atoms+new_ghost_atoms+i) + 0] = mpi_receive_buffer[3*i+0];

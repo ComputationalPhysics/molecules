@@ -77,17 +77,17 @@ public:
     double shift_vector[6][3];
     unsigned int **move_queue;
 
-    double *mpi_send_buffer;
-    double *mpi_receive_buffer;
-    bool *atom_moved;
-    unsigned long *atom_ids;
+    vector<double> mpi_send_buffer;
+    vector<double> mpi_receive_buffer;
+    vector<bool> atom_moved;
+    vector<unsigned long> atom_ids;
     vector<double> positions;
     vector<double> velocities;
     vector<double> accelerations;
 
     double mass_inverse, pressure_forces;
 
-    unsigned long *atom_type;
+    vector<unsigned long> atom_type;
     int *linked_list_all_atoms;
     int *linked_list_free_atoms;
     bool *is_ghost_cell;
