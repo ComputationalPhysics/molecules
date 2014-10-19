@@ -245,16 +245,18 @@ void MolecularDynamics::step(double dt)
     if(!m_renderer) {
         return;
     }
-    double safeDt = min(0.01, dt);
+    double safeDt = min(0.02, dt);
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
         m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
     }
+
     m_renderer->m_simulator.m_system.dt = safeDt;
+    m_renderer->m_simulator.m_system.dt_half = m_renderer->m_simulator.m_system.dt/2;
     m_renderer->m_simulator.step();
     update();
     if(window()) window()->update();
-    qDebug() << "1/dt=" << 1/dt;
+    // qDebug() << "1/dt=" << 1/dt;
 }
 
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
