@@ -56,10 +56,10 @@ MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
     m_tilt(0),
     m_pan(0),
     m_roll(0),
-    m_positions(0),
     m_zoom(-4)
 {
     m_glQuads = new CPGLQuads();
+    m_glCube = new CPGLCube();
 }
 
 MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
@@ -132,10 +132,15 @@ void MolecularDynamicsRenderer::paint()
     QMatrix4x4 modelViewProjectionMatrix = m_projection * matrix;
     QMatrix4x4 lightModelViewProjectionMatrix = m_projection * lightMatrix;
 
+    QVector3D offset(-systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
+
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
-    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, -systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
+    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
     m_glQuads->render(systemSizeZ, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
+
+    m_glCube->update(&(m_simulator.m_system),offset);
+    m_glCube->render(modelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
 }
@@ -200,7 +205,6 @@ void MolecularDynamics::sync()
     if (!m_renderer) {
         m_renderer = new MolecularDynamicsRenderer();
         connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
-        m_renderer->m_positions = &m_positions;
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
@@ -212,21 +216,6 @@ MolecularDynamics::MolecularDynamics()
       m_thermostatEnabled(false)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
-
-    int Nx = 10;
-    int Ny = 10;
-    int Nz = 10;
-    m_positions.resize(3*Nx*Ny*Nz);
-    for(int i=0; i<Nx; i++) {
-        for(int j=0; j<Ny; j++) {
-            for(int k=0; k<Nz; k++) {
-                int index = i*Ny*Nz + j*Nz + k;
-                m_positions[3*index + 0] = i-Nx/2.0;
-                m_positions[3*index + 1] = j-Ny/2.0;
-                m_positions[3*index + 2] = k;
-            }
-        }
-    }
 }
 
 void MolecularDynamics::step(double dt)

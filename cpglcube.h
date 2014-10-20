@@ -9,16 +9,18 @@ class CPGLCube
 public:
     CPGLCube();
     ~CPGLCube();
-    void update(System *system, float deltaX, float deltaY, float deltaZ);
-    void render(QOpenGLShaderProgram *program);
-    void initializeOpenGLFunctions();
+    void update(System *system, const QVector3D &offset);
+    void render(const QMatrix4x4 &modelViewProjectionMatrix);
+    void ensureInitialized();
 
 private:
     GLuint m_vboIds[2];
     std::vector<QVector3D> m_vertices;
     std::vector<GLushort> m_indices;
     QOpenGLFunctions *m_funcs;
+    QOpenGLShaderProgram *m_program;
 
+    void createShaderProgram();
     void generateVBOs();
 
 };

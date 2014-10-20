@@ -45,14 +45,14 @@
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QMatrix4x4>
-#include <cpglquads.h>
-#include <simulator.h>
+#include "cpglquads.h"
+#include "cpglcube.h"
+#include "simulator.h"
 
 //! [1]
 class MolecularDynamicsRenderer : public QObject {
     Q_OBJECT
 public:
-    std::vector<float> *m_positions;
     Simulator m_simulator;
     MolecularDynamicsRenderer();
     ~MolecularDynamicsRenderer();
@@ -81,6 +81,7 @@ private:
 
     QMatrix4x4 m_projection;
     CPGLQuads *m_glQuads;
+    CPGLCube *m_glCube;
 };
 //! [1]
 
@@ -117,7 +118,6 @@ private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
-    std::vector<float> m_positions;
     MolecularDynamicsRenderer *m_renderer;
     double m_xPoint;
     double m_yPoint;

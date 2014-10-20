@@ -7,19 +7,13 @@ CPGLQuads::CPGLQuads() :
     m_funcs(0),
     m_program(0)
 {
-    initializeOpenGLFunctions();
     generateVBOs();
 }
 
 CPGLQuads::~CPGLQuads()
 {
-    delete m_funcs;
-    delete m_program;
-}
-
-void CPGLQuads::initializeOpenGLFunctions()
-{
-    m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
+    if(m_funcs) delete m_funcs;
+    if(m_program) delete m_program;
 }
 
 void CPGLQuads::setModelViewMatrix(QMatrix4x4 &matrix)
@@ -29,12 +23,19 @@ void CPGLQuads::setModelViewMatrix(QMatrix4x4 &matrix)
 
 void CPGLQuads::generateVBOs()
 {
+    ensureInitialized();
     m_funcs->glGenBuffers(2, m_vboIds);
 }
 
-// void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, float deltaX, float deltaY, float deltaZ)
+void CPGLQuads::ensureInitialized()
 {
+    if(!m_funcs) m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
+}
+
+// void CPGLQuads::update(vector<float> &positions)
+void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, const QVector3D &offset)
+{
+    ensureInitialized();
     int numPoints = n / 3; // x,y,z
 
     QVector3D right;
@@ -61,7 +62,7 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
-        QVector3D position(positions[3*i + 0] + deltaX, positions[3*i + 1] + deltaY, positions[3*i + 2] + deltaZ);
+        QVector3D position(positions[3*i + 0] + offset.x(), positions[3*i + 1] + offset.y(), positions[3*i + 2] + offset.z());
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
@@ -152,6 +153,7 @@ void CPGLQuads::createShaderProgram() {
 void CPGLQuads::render(float lightFalloffDistance, const QMatrix4x4 &modelViewProjectionMatrix, const QMatrix4x4 &lightModelViewProjectionMatrix)
 {
     if(m_vertices.size() == 0) return;
+    ensureInitialized();
     createShaderProgram();
 
     m_program->bind();
