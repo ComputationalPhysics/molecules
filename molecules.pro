@@ -16,7 +16,9 @@ SOURCES += main.cpp \
     simulator/mdio.cpp \
     vec3.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    images.qrc \
+    simulations.qrc
 
 ios {
     QMAKE_INFO_PLIST = iOS.plist
