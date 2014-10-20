@@ -17,9 +17,65 @@
 using namespace std;
 System::System() :
     move_queue(NULL),
-    m_time(0)
+    numberOfPrecomputedTwoParticleForces(0),
+    deltaR2(0),
+    oneOverDeltaR2(0),
+    cell_index(0),
+    cell_index_2(0),
+    num_cells_including_ghosts_xyz(0),
+    m_rCut(0),
+    m_dt(0),
+    m_potentialEnergy(0),
+    m_time(0),
+    m_startTime(0),
+    one_over_r_cut_squared(0),
+    settings(0),
+    mdio(0),
+    rnd(0),
+    unit_converter(0),
+    sample_statistics(0),
+    steps(0),
+    max_number_of_atoms(0),
+    num_atoms(0),
+    num_atoms_free(0),
+    num_atoms_frozen(0),
+    num_atoms_ghost(0),
+    mass_inverse(0),
+    pressure_forces(0)
 {
-
+    num_cells[0] = 0;
+    num_cells[1] = 0;
+    num_cells[2] = 0;
+    num_cells_including_ghosts[0] = 0;
+    num_cells_including_ghosts[1] = 0;
+    num_cells_including_ghosts[2] = 0;
+    shift_vector[0][0] = 0;
+    shift_vector[0][1] = 0;
+    shift_vector[0][2] = 0;
+    shift_vector[1][0] = 0;
+    shift_vector[1][1] = 0;
+    shift_vector[1][2] = 0;
+    shift_vector[2][0] = 0;
+    shift_vector[2][1] = 0;
+    shift_vector[2][2] = 0;
+    shift_vector[3][0] = 0;
+    shift_vector[3][1] = 0;
+    shift_vector[3][2] = 0;
+    shift_vector[4][0] = 0;
+    shift_vector[4][1] = 0;
+    shift_vector[4][2] = 0;
+    shift_vector[5][0] = 0;
+    shift_vector[5][1] = 0;
+    shift_vector[5][2] = 0;
+    mc[0] = 0;
+    mc[1] = 0;
+    mc[2] = 0;
+    mc1[0] = 0;
+    mc1[1] = 0;
+    mc1[2] = 0;
+    count_periodic[0] = 0;
+    count_periodic[1] = 0;
+    count_periodic[2] = 0;
 }
 
 void System::createForcesAndPotentialTable() {
