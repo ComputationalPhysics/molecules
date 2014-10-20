@@ -204,6 +204,9 @@ void MolecularDynamics::sync()
 {
     if (!m_renderer) {
         m_renderer = new MolecularDynamicsRenderer();
+        m_systemSize = m_renderer->m_simulator.m_system.systemSize();
+        emit systemSizeChanged(m_systemSize);
+
         connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
@@ -253,6 +256,8 @@ void MolecularDynamics::load(QString fileName)
         return;
     }
     m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(fileName);
+    m_systemSize = m_renderer->m_simulator.m_system.systemSize();
+    emit systemSizeChanged(m_systemSize);
 }
 
 double MolecularDynamics::thermostatValue() const

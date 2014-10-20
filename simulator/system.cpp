@@ -9,6 +9,7 @@
 #include <statisticssampler.h>
 #include <atom_types.h>
 #include <string.h>
+#include <QDebug>
 
 #include "mdio.h"
 #include "potential_lennard_jones.h"
@@ -106,13 +107,27 @@ void System::setRCut(double rCut)
     createForcesAndPotentialTable();
 }
 
-vec3 System::systemSize() const
+QVector3D System::systemSize() const
 {
     return m_systemSize;
 }
 
-void System::setSystemSize(const vec3 &systemSize)
+void System::setSystemSize(const QVector3D &systemSize)
 {
+    qDebug() << "Setting system size in system class: " << systemSize;
+    float scaleX = m_systemSize.x() == 0 ? 1 : systemSize.x()/m_systemSize.x();
+    float scaleY = m_systemSize.y() == 0 ? 1 : systemSize.y()/m_systemSize.y();
+    float scaleZ = m_systemSize.z() == 0 ? 1 : systemSize.z()/m_systemSize.z();
+
+    for(int n=0; n<num_atoms; n++) {
+        positions[3*n+0] *= scaleX;
+        positions[3*n+1] *= scaleY;
+        positions[3*n+2] *= scaleZ;
+        initial_positions[3*n+0] *= scaleX;
+        initial_positions[3*n+1] *= scaleY;
+        initial_positions[3*n+2] *= scaleZ;
+    }
+
     m_systemSize = systemSize;
 
     for(int a=0;a<3;a++) {
@@ -259,7 +274,7 @@ void System::init_parameters() {
     m_dt = settings->dt;
     m_time = 0;
 
-    setSystemSize(vec3(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b));
+    setSystemSize(QVector3D(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b));
 }
 
 void System::set_topology() {

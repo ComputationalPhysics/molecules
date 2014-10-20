@@ -21,7 +21,7 @@ void CPGLCube::update(System *system, const QVector3D &offset)
 
     m_vertices.clear();
     m_indices.clear();
-    vec3 systemSize = system->systemSize();
+    QVector3D systemSize = system->systemSize();
     m_vertices.push_back(QVector3D(offset.x(), offset.y(), offset.z())); // 0,0,0
     m_vertices.push_back(QVector3D(systemSize.x()+offset.x(), offset.y(), offset.z())); // 1,0,0
     m_vertices.push_back(QVector3D(offset.x(), offset.y(), systemSize.z() + offset.z())); // 0,0,1

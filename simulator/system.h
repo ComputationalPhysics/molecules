@@ -10,7 +10,7 @@ class UnitConverter;
 
 #include <fstream>
 #include <vector>
-#include <vec3.h>
+#include <QVector3D>
 
 #define EMPTY -1
 
@@ -43,8 +43,8 @@ private:
     int numberOfPrecomputedTwoParticleForces;
     double deltaR2;
     double oneOverDeltaR2;
-    vec3 m_systemSize;
-    vec3 cellLength;
+    QVector3D m_systemSize;
+    QVector3D cellLength;
     vector<atomDataType> m_dataBuffer;
     vector<bool> atom_moved;
     vector<unsigned long> atom_ids;
@@ -88,9 +88,6 @@ public:
     long count_periodic[3];
 
 
-
-
-
     vector<atomDataType> positions;
     vector<atomDataType> velocities;
     vector<atomDataType> accelerations;
@@ -104,8 +101,8 @@ public:
     void setup(Settings *settings_);
     void step();
 
-    vec3 systemSize() const;
-    void setSystemSize(const vec3 &systemSize);
+    QVector3D systemSize() const;
+    void setSystemSize(const QVector3D &systemSize);
     double volume();
     double rCut() const;
     void setRCut(double rCut);

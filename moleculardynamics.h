@@ -93,6 +93,7 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
     Q_PROPERTY(bool forceEnabled READ forceEnabled WRITE setForceEnabled NOTIFY forceEnabledChanged)
     Q_PROPERTY(double forceValue READ forceValue WRITE setForceValue NOTIFY forceValueChanged)
+    Q_PROPERTY(QVector3D systemSize READ systemSize WRITE setSystemSize NOTIFY systemSizeChanged)
 
 public:
     MolecularDynamics();
@@ -113,6 +114,11 @@ public:
         return m_forceValue;
     }
 
+    QVector3D systemSize() const
+    {
+        return m_systemSize;
+    }
+
 public slots:
     void sync();
     void cleanup();
@@ -124,6 +130,7 @@ public slots:
 
     void setForceEnabled(bool arg)
     {
+        if(!m_renderer) return;
         if (m_forceEnabled == arg)
             return;
 
@@ -134,12 +141,25 @@ public slots:
 
     void setForceValue(double arg)
     {
+        if(!m_renderer) return;
         if (m_forceValue == arg)
             return;
 
         m_forceValue = arg;
         m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
         emit forceValueChanged(arg);
+    }
+
+    void setSystemSize(QVector3D arg)
+    {
+        if(!m_renderer) return;
+        if (m_systemSize == arg)
+            return;
+
+        qDebug() << "Setting system size: " << arg;
+        m_systemSize = arg;
+        m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
+        emit systemSizeChanged(arg);
     }
 
 signals:
@@ -149,6 +169,8 @@ signals:
     void forceEnabledChanged(bool arg);
 
     void forceValueChanged(double arg);
+
+    void systemSizeChanged(QVector3D arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -162,6 +184,7 @@ private:
     bool m_thermostatEnabled;
     bool m_forceEnabled;
     double m_forceValue;
+    QVector3D m_systemSize;
 };
 //! [2]
 

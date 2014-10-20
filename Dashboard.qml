@@ -13,6 +13,10 @@ Item {
     property alias forceValue: forceSlider.value
     property alias forceEnabled: forceCheckbox.checked
 
+    property alias systemSizeX: systemSizeXSlider.value
+    property alias systemSizeY: systemSizeYSlider.value
+    property alias systemSizeZ: systemSizeZSlider.value
+
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
 

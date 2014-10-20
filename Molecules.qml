@@ -14,12 +14,25 @@ Item {
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
+        property bool isSettingSystemSize: false
 
         thermostatEnabled: dashboard.thermostatEnabled
         thermostatValue: dashboard.thermostatValue
 
         forceEnabled: dashboard.forceEnabled
         forceValue: dashboard.forceValue
+
+        onSystemSizeChanged: {
+            if(dashboard.isSettingSystemSize) {
+                return
+            }
+
+            isSettingSystemSize = true
+            dashboard.systemSizeX = systemSize.x
+            dashboard.systemSizeY = systemSize.y
+            dashboard.systemSizeZ = systemSize.z
+            isSettingSystemSize = false
+        }
 
         PinchArea {
             id: pinchArea
@@ -95,6 +108,28 @@ Item {
 
     Dashboard {
         id: dashboard
+        property bool isSettingSystemSize: false
+        function updateSystemSize() {
+            if(molecularDynamics.isSettingSystemSize) {
+                return
+            }
+            isSettingSystemSize = true
+            console.log("Setting system size from dashboard")
+            molecularDynamics.systemSize = Qt.vector3d(systemSizeX, systemSizeY, systemSizeZ)
+            isSettingSystemSize = false
+        }
+
+        onSystemSizeXChanged: {
+            updateSystemSize()
+        }
+
+        onSystemSizeYChanged: {
+            updateSystemSize()
+        }
+
+        onSystemSizeZChanged: {
+            updateSystemSize()
+        }
     }
 
     SimulationsView {
