@@ -161,15 +161,17 @@ void MolecularDynamicsRenderer::paint()
 
     matrix.translate(0,0,zoom-systemSizeZ);
 
+    matrix.rotate(-90, 1, 0, 0);
     matrix.rotate(m_tilt, 1, 0, 0);
-    matrix.rotate(m_pan, 0, 1, 0);
-    matrix.rotate(m_roll, 0, 0, 1);
+    matrix.rotate(m_pan, 0, 0, 1);
+    matrix.rotate(m_roll, 0, 1, 0);
 
     lightMatrix.translate(0,0,-systemSizeZ / 2.0);
 
+    lightMatrix.rotate(-90, 1, 0, 0);
     lightMatrix.rotate(m_tilt, 1, 0, 0);
-    lightMatrix.rotate(m_pan, 0, 1, 0);
-    lightMatrix.rotate(m_roll, 0, 0, 1);
+    lightMatrix.rotate(m_pan, 0, 0, 1);
+    lightMatrix.rotate(m_roll, 0, 1, 0);
 
     // Set modelview-projection matrix
     m_program->setUniformValue("systemSizeZ", systemSizeZ);

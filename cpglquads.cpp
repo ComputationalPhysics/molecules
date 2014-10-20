@@ -52,7 +52,7 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
-        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 2] - deltaZ, positions[3*i + 1] - deltaY);
+        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 1] - deltaY, positions[3*i + 2] - deltaZ);
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
