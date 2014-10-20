@@ -14,7 +14,7 @@ class UnitConverter;
 
 #define EMPTY -1
 
-typedef double atomDataType;
+typedef float atomDataType;
 
 using namespace std;
 
@@ -54,8 +54,8 @@ private:
     vector<int> linked_list_all_atoms;
     vector<int> linked_list_free_atoms;
     vector<bool> is_ghost_cell;
-    vector<double> precomputed_forces;
-    vector<double> precomputed_potential;
+    vector<atomDataType> precomputed_forces;
+    vector<atomDataType> precomputed_potential;
     unsigned int num_cells_including_ghosts_yz,cell_index, cell_index_2,num_cells_including_ghosts_xyz;
     unsigned int num_cells[3];
     unsigned int num_cells_including_ghosts[3];
@@ -63,9 +63,9 @@ private:
     unsigned int **move_queue;
     unsigned int mc[3];  // Usually cell index vector
     unsigned int mc1[3]; // Usually cell index vector
-    double m_rCut;
+    atomDataType m_rCut;
     double m_dt;
-    double m_potentialEnergy;
+    atomDataType m_potentialEnergy;
     double m_time;
     double m_startTime;
     double one_over_r_cut_squared;
