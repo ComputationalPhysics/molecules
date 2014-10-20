@@ -3,6 +3,13 @@
 
 using std::vector;
 
+CPGLQuads::CPGLQuads() :
+    m_funcs(0)
+{
+    initializeOpenGLFunctions();
+    generateVBOs();
+}
+
 CPGLQuads::~CPGLQuads()
 {
     delete m_funcs;
@@ -52,7 +59,7 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
-        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 1] - deltaY, positions[3*i + 2] - deltaZ);
+        QVector3D position(positions[3*i + 0] + deltaX, positions[3*i + 1] + deltaY, positions[3*i + 2] + deltaZ);
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
@@ -131,11 +138,4 @@ void CPGLQuads::render(QOpenGLShaderProgram *program)
     // Draw cube geometry using indices from VBO 1
     // glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
     m_funcs->glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
-}
-
-CPGLQuads::CPGLQuads() :
-    m_funcs(0)
-{
-    initializeOpenGLFunctions();
-    generateVBOs();
 }

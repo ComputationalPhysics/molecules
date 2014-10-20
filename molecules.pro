@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     simulator/unitconverter.cpp \
     simulator/simulator.cpp \
     simulator/mdio.cpp \
-    vec3.cpp
+    vec3.cpp \
+    cpglcube.cpp
 
 RESOURCES += qml.qrc \
     images.qrc \
@@ -43,7 +44,8 @@ HEADERS += \
     simulator/unitconverter.h \
     simulator/simulator.h \
     simulator/mdio.h \
-    vec3.h
+    vec3.h \
+    cpglcube.h
 
 OTHER_FILES += \
     iOS.plist
