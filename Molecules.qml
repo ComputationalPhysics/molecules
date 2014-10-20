@@ -15,8 +15,11 @@ Item {
         id: molecularDynamics
         anchors.fill: parent
 
-        thermostatEnabled: toolsView.thermostatEnabled
-        thermostatValue: toolsView.thermostatValue
+        thermostatEnabled: dashboard.thermostatEnabled
+        thermostatValue: dashboard.thermostatValue
+
+        forceEnabled: dashboard.forceEnabled
+        forceValue: dashboard.forceValue
 
         PinchArea {
             id: pinchArea
@@ -46,6 +49,7 @@ Item {
 
                 onPressed: {
                     systemsView.revealed = false
+                    dashboard.revealed = false
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
                     pressedTime = Date.now()
@@ -67,14 +71,6 @@ Item {
                     lastPosition = Qt.point(mouse.x, mouse.y)
                 }
 
-                onReleased: {
-                    var currentTime = Date.now()
-                    var timeDiff = (currentTime - pressedTime) / 1000
-                    if(timeDiff < 0.6 && !movedTooFarToHide) {
-                        toolsView.revealed = false
-                    }
-                }
-
                 onWheel: {
                     molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
                 }
@@ -84,7 +80,7 @@ Item {
         Timer {
             id: timer
             property real lastTime: Date.now()
-            running: toolsView.running
+            running: dashboard.running
             repeat: true
             interval: 1
             onTriggered: {
@@ -97,8 +93,8 @@ Item {
         }
     }
 
-    ToolsView {
-        id: toolsView
+    Dashboard {
+        id: dashboard
     }
 
     SimulationsView {

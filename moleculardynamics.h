@@ -91,6 +91,8 @@ class MolecularDynamics : public QQuickItem
     Q_OBJECT
     Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
     Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
+    Q_PROPERTY(bool forceEnabled READ forceEnabled WRITE setForceEnabled NOTIFY forceEnabledChanged)
+    Q_PROPERTY(double forceValue READ forceValue WRITE setForceValue NOTIFY forceValueChanged)
 
 public:
     MolecularDynamics();
@@ -101,6 +103,16 @@ public:
     double thermostatValue() const;
     bool thermostatEnabled() const;
 
+    bool forceEnabled() const
+    {
+        return m_forceEnabled;
+    }
+
+    double forceValue() const
+    {
+        return m_forceValue;
+    }
+
 public slots:
     void sync();
     void cleanup();
@@ -110,9 +122,33 @@ public slots:
     void setThermostatValue(double arg);
     void setThermostatEnabled(bool arg);
 
+    void setForceEnabled(bool arg)
+    {
+        if (m_forceEnabled == arg)
+            return;
+
+        m_forceEnabled = arg;
+        m_renderer->m_simulator.m_settings.gravity_direction = m_forceEnabled ? 2 : -1; // -1 means disabled
+        emit forceEnabledChanged(arg);
+    }
+
+    void setForceValue(double arg)
+    {
+        if (m_forceValue == arg)
+            return;
+
+        m_forceValue = arg;
+        m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
+        emit forceValueChanged(arg);
+    }
+
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
+
+    void forceEnabledChanged(bool arg);
+
+    void forceValueChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -124,6 +160,8 @@ private:
 
     double m_thermostatValue;
     bool m_thermostatEnabled;
+    bool m_forceEnabled;
+    double m_forceValue;
 };
 //! [2]
 

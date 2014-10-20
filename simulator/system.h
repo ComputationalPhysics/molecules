@@ -45,8 +45,7 @@ private:
     double oneOverDeltaR2;
     vec3 m_systemSize;
     vec3 cellLength;
-    vector<atomDataType> mpi_send_buffer;
-    vector<atomDataType> mpi_receive_buffer;
+    vector<atomDataType> m_dataBuffer;
     vector<bool> atom_moved;
     vector<unsigned long> atom_ids;
     vector<int> head_all_atoms;

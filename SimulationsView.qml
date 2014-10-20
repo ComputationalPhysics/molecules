@@ -45,12 +45,12 @@ Item {
                 NumberAnimation {
                     properties: "opacity"
                     duration: 250
-                    easing.type: Easing.OutQuad
+                    easing.type: Easing.InOutQuad
                 }
                 NumberAnimation {
                     properties: "scale"
                     duration: 250
-                    easing.type: Easing.InQuad
+                    easing.type: Easing.InOutQuad
                 }
             }
         },
@@ -61,12 +61,12 @@ Item {
                 NumberAnimation {
                     properties: "opacity"
                     duration: 250
-                    easing.type: Easing.OutQuad
+                    easing.type: Easing.InOutQuad
                 }
                 NumberAnimation {
                     properties: "scale"
                     duration: 100
-                    easing.type: Easing.InQuad
+                    easing.type: Easing.InOutQuad
                 }
             }
         }

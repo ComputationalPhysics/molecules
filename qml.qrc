@@ -6,5 +6,6 @@
         <file>images/systems.png</file>
         <file>SimulationsView.qml</file>
         <file>SimulationButton.qml</file>
+        <file>Dashboard.qml</file>
     </qresource>
 </RCC>

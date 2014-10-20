@@ -213,7 +213,9 @@ void MolecularDynamics::sync()
 MolecularDynamics::MolecularDynamics()
     : m_renderer(0),
       m_thermostatValue(1.0),
-      m_thermostatEnabled(false)
+      m_thermostatEnabled(false),
+      m_forceEnabled(false),
+      m_forceValue(0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
 }
