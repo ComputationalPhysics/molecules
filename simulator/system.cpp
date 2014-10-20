@@ -504,7 +504,7 @@ void System::apply_gravity() {
 }
 
 void System::apply_harmonic_oscillator() {
-    double spring_constant = 1000.0;
+    double spring_constant = 2000.0;
     double spring_constant_times_mass_inverse = spring_constant * mass_inverse;
     for(int n=0; n<num_atoms; n++) {
         if(atom_type[n] == FROZEN) {
