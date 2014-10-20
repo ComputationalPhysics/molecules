@@ -250,6 +250,16 @@ void MolecularDynamics::sync()
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
+//    double safeDt = min(0.02, dt);
+    double safeDt = 0.02;
+    if(m_thermostatEnabled) {
+        double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
+        m_renderer->m_simulator.m_thermostat->relaxation_time = 0.1;
+        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
+    }
+
+    m_renderer->m_simulator.m_system.setDt(safeDt);
+    m_renderer->m_simulator.step();
 }
 
 MolecularDynamics::MolecularDynamics()
@@ -277,23 +287,11 @@ MolecularDynamics::MolecularDynamics()
 
 void MolecularDynamics::step(double dt)
 {
-    if(!m_renderer) {
-        return;
-    }
-    double safeDt = min(0.02, dt);
-    if(m_thermostatEnabled) {
-        double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
-        m_renderer->m_simulator.m_thermostat->relaxation_time = 0.1;
-        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
-    }
-
-    m_renderer->m_simulator.m_system.setDt(safeDt);
-    m_renderer->m_simulator.step();
     if(window()) {
         window()->update();
     }
 
-    qDebug() << "fps: " << 1.0/dt;
+//    qDebug() << "fps: " << 1.0/dt;
 }
 
 void MolecularDynamics::save(QString fileName)
