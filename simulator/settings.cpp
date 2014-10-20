@@ -11,9 +11,6 @@ Settings::Settings() {
     unit_cells_x = 10;
     unit_cells_y = 10;
     unit_cells_z = 10;
-    nodes_x = 1;
-    nodes_y = 1;
-    nodes_z = 1;
     statistics_interval = 100;
     max_number_of_atoms = 10000;
     max_number_of_cells = 1000;

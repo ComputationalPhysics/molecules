@@ -22,12 +22,12 @@ void System::calculate_accelerations() {
         head_all_atoms[cell_index] = i;
     }
 
-    double mass_inverse_24 = mass_inverse*24;
+    atomDataType mass_inverse_24 = mass_inverse*24;
 
-    double r_cut_squared_inverse = 1.0/rr_cut;
-    double r_cut_6_inverse = r_cut_squared_inverse*r_cut_squared_inverse*r_cut_squared_inverse;
-    double potential_energy_correction = 4*r_cut_6_inverse*(r_cut_6_inverse - 1);
-    vec3 dr;
+    atomDataType r_cut_squared_inverse = 1.0/rr_cut;
+    atomDataType r_cut_6_inverse = r_cut_squared_inverse*r_cut_squared_inverse*r_cut_squared_inverse;
+    atomDataType potential_energy_correction = 4*r_cut_6_inverse*(r_cut_6_inverse - 1);
+    float dr[3];
     // Loop through all local cells (not including ghosts)
     for (mc[0]=1; mc[0]<=num_cells[0]; mc[0]++) {
         for (mc[1]=1; mc[1]<=num_cells[1]; mc[1]++) {
@@ -51,7 +51,7 @@ void System::calculate_accelerations() {
                                         dr[0] = positions[3*i+0]-positions[3*j+0];
                                         dr[1] = positions[3*i+1]-positions[3*j+1];
                                         dr[2] = positions[3*i+2]-positions[3*j+2];
-                                        double dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
+                                        atomDataType dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
 
                                         if (dr2<rr_cut) {
 #ifdef PRECOMPUTED_TABLE
@@ -62,10 +62,10 @@ void System::calculate_accelerations() {
                                             double force = force0 + (force1 - force0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
 #else
 
-                                            double dr2_inverse = 1.0/dr2;
-                                            double dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
+                                            atomDataType dr2_inverse = 1.0/dr2;
+                                            atomDataType dr6_inverse = dr2_inverse*dr2_inverse*dr2_inverse;
 
-                                            double force = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
+                                            atomDataType force = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
 #endif
 
                                             bool is_local_atom = j < num_atoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
@@ -75,7 +75,7 @@ void System::calculate_accelerations() {
                                                 double energy1 = precomputed_potential[precomputedTableIndex+1];
                                                 double potential_energy_tmp = energy0 + (energy1 - energy0)*(dr2 - precomputedTableIndex*deltaR2)*oneOverDeltaR2;
 #else
-                                                double potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
+                                                atomDataType potential_energy_tmp = 4*dr6_inverse*(dr6_inverse - 1) - potential_energy_correction;
 #endif
                                                 if(is_local_atom) {
                                                     m_potentialEnergy += potential_energy_tmp;

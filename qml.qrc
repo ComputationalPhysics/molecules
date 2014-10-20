@@ -2,22 +2,10 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Molecules.qml</file>
-        <file>images/tools.png</file>
-        <file>images/pause.png</file>
-        <file>images/play.png</file>
         <file>ToolsView.qml</file>
         <file>images/systems.png</file>
         <file>SimulationsView.qml</file>
         <file>SimulationButton.qml</file>
-        <file>simulations/cylinder.lmp</file>
-        <file>simulations/cylinder.png</file>
-        <file>simulations/pores8.lmp</file>
-        <file>simulations/pores8.png</file>
-        <file>simulations/pores16.lmp</file>
-        <file>simulations/pores16.png</file>
-        <file>simulations/pores20.lmp</file>
-        <file>simulations/pores20.png</file>
-        <file>simulations/default.png</file>
-        <file>simulations/default.lmp</file>
+        <file>Dashboard.qml</file>
     </qresource>
 </RCC>

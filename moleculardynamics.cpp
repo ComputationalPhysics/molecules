@@ -56,16 +56,15 @@ MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
     m_tilt(0),
     m_pan(0),
     m_roll(0),
-    m_positions(0),
-    m_zoom(-4),
-    m_program(0)
+    m_zoom(-4)
 {
     m_glQuads = new CPGLQuads();
+    m_glCube = new CPGLCube();
 }
 
 MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
 {
-    delete m_program;
+
 }
 
 void MolecularDynamicsRenderer::resetProjection()
@@ -99,49 +98,6 @@ void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
 
 void MolecularDynamicsRenderer::paint()
 {
-    if (!m_program) {
-        m_program = new QOpenGLShaderProgram();
-
-        m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                                           "attribute highp vec4 a_position;\n"
-                                           "attribute highp vec3 a_color;\n"
-                                           "attribute highp vec2 a_texcoord;\n"
-                                           "uniform highp mat4 modelViewProjectionMatrix;\n"
-                                           "uniform highp mat4 lightModelViewProjectionMatrix;\n"
-                                           "uniform highp float systemSizeZ;\n"
-                                           "varying highp vec2 coords;\n"
-                                           "varying highp float light;\n"
-                                           "varying highp vec3 color;\n"
-                                           "void main() {\n"
-                                           "    gl_Position = modelViewProjectionMatrix*a_position;\n"
-                                           "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
-                                           "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
-                                           "    coords = a_texcoord;\n"
-                                           "    color = a_color;\n"
-                                           "}");
-
-        m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                           "varying highp vec2 coords;\n"
-                                           "varying highp float light;\n"
-                                           "varying highp vec3 color;\n"
-                                           "highp vec2 center = vec2(0.5, 0.5);\n"
-                                           "void main() {\n"
-                                           "    highp vec2 delta = coords - center;\n"
-                                           "    highp float r2 = delta.x*delta.x + delta.y*delta.y;\n"
-                                           "    highp float gradient = 1.0 - (r2*r2)/0.07;\n"
-                                           "    highp vec3 color1 = color;\n"
-                                           "    highp vec3 color2 = 0.5 * vec3(color.r*0.1, color.g*0.4, color.b*0.2);\n"
-                                           "    highp vec3 finalColor = (color1 * gradient + color2 * (1.0 - gradient));\n"
-                                           "    highp float alpha = float(r2<0.25);\n"
-                                           "    if(alpha < 0.999) { discard; }\n"
-                                           "    gl_FragColor = vec4(finalColor * light, 1.0);\n"
-                                           "}");
-
-
-        m_program->link();
-    }
-    m_program->bind();
-
     glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
 
     glEnable(GL_DEPTH_TEST);
@@ -161,29 +117,32 @@ void MolecularDynamicsRenderer::paint()
 
     matrix.translate(0,0,zoom-systemSizeZ);
 
+    matrix.rotate(-90, 1, 0, 0);
     matrix.rotate(m_tilt, 1, 0, 0);
-    matrix.rotate(m_pan, 0, 1, 0);
-    matrix.rotate(m_roll, 0, 0, 1);
+    matrix.rotate(m_pan, 0, 0, 1);
+    matrix.rotate(m_roll, 0, 1, 0);
 
     lightMatrix.translate(0,0,-systemSizeZ / 2.0);
 
+    lightMatrix.rotate(-90, 1, 0, 0);
     lightMatrix.rotate(m_tilt, 1, 0, 0);
-    lightMatrix.rotate(m_pan, 0, 1, 0);
-    lightMatrix.rotate(m_roll, 0, 0, 1);
+    lightMatrix.rotate(m_pan, 0, 0, 1);
+    lightMatrix.rotate(m_roll, 0, 1, 0);
 
-    // Set modelview-projection matrix
-    m_program->setUniformValue("systemSizeZ", systemSizeZ);
-    m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
-    m_program->setUniformValue("lightModelViewProjectionMatrix", m_projection * lightMatrix);
+    QMatrix4x4 modelViewProjectionMatrix = m_projection * matrix;
+    QMatrix4x4 lightModelViewProjectionMatrix = m_projection * lightMatrix;
+
+    QVector3D offset(-systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
 
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
-    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, systemSizeX/2.0, systemSizeY/2.0, systemSizeZ/2.0);
-    m_glQuads->render(m_program);
+    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
+    m_glQuads->render(systemSizeZ, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
+
+    m_glCube->update(&(m_simulator.m_system),offset);
+    m_glCube->render(modelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
-
-    m_program->release();
 }
 
 double MolecularDynamicsRenderer::zoom() const
@@ -245,8 +204,10 @@ void MolecularDynamics::sync()
 {
     if (!m_renderer) {
         m_renderer = new MolecularDynamicsRenderer();
+        m_systemSize = m_renderer->m_simulator.m_system.systemSize();
+        emit systemSizeChanged(m_systemSize);
+
         connect(window(), SIGNAL(beforeRendering()), m_renderer, SLOT(paint()), Qt::DirectConnection);
-        m_renderer->m_positions = &m_positions;
     }
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
@@ -265,24 +226,11 @@ void MolecularDynamics::sync()
 MolecularDynamics::MolecularDynamics()
     : m_renderer(0),
       m_thermostatValue(1.0),
-      m_thermostatEnabled(false)
+      m_thermostatEnabled(false),
+      m_forceEnabled(false),
+      m_forceValue(0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
-
-    int Nx = 10;
-    int Ny = 10;
-    int Nz = 10;
-    m_positions.resize(3*Nx*Ny*Nz);
-    for(int i=0; i<Nx; i++) {
-        for(int j=0; j<Ny; j++) {
-            for(int k=0; k<Nz; k++) {
-                int index = i*Ny*Nz + j*Nz + k;
-                m_positions[3*index + 0] = i-Nx/2.0;
-                m_positions[3*index + 1] = j-Ny/2.0;
-                m_positions[3*index + 2] = k;
-            }
-        }
-    }
 }
 
 void MolecularDynamics::step(double dt)
@@ -290,8 +238,6 @@ void MolecularDynamics::step(double dt)
     if(window()) {
         window()->update();
     }
-
-//    qDebug() << "fps: " << 1.0/dt;
 }
 
 void MolecularDynamics::save(QString fileName)
@@ -308,6 +254,8 @@ void MolecularDynamics::load(QString fileName)
         return;
     }
     m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(fileName);
+    m_systemSize = m_renderer->m_simulator.m_system.systemSize();
+    emit systemSizeChanged(m_systemSize);
 }
 
 double MolecularDynamics::thermostatValue() const

@@ -156,7 +156,7 @@ void MDIO::load_state_from_file_binary(QString fileName) {
     cout << "bounds: " << maximumX << " " << maximumY << " " << maximumZ << endl;
 
     system->num_atoms = atomCount;
-    system->setSystemSize(vec3(maximumX - minimumX, maximumY - minimumY, maximumZ - minimumZ));
+    system->setSystemSize(QVector3D(maximumX - minimumX, maximumY - minimumY, maximumZ - minimumZ));
 
     double *tmp_data = new double[chunkLength];
     file.read(reinterpret_cast<char*>(tmp_data),chunkLength*sizeof(double));

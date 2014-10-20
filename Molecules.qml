@@ -14,9 +14,25 @@ Item {
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
+        property bool isSettingSystemSize: false
 
-        thermostatEnabled: toolsView.thermostatEnabled
-        thermostatValue: toolsView.thermostatValue
+        thermostatEnabled: dashboard.thermostatEnabled
+        thermostatValue: dashboard.thermostatValue
+
+        forceEnabled: dashboard.forceEnabled
+        forceValue: dashboard.forceValue
+
+        onSystemSizeChanged: {
+            if(dashboard.isSettingSystemSize) {
+                return
+            }
+
+            isSettingSystemSize = true
+            dashboard.systemSizeX = systemSize.x
+            dashboard.systemSizeY = systemSize.y
+            dashboard.systemSizeZ = systemSize.z
+            isSettingSystemSize = false
+        }
 
         PinchArea {
             id: pinchArea
@@ -46,6 +62,7 @@ Item {
 
                 onPressed: {
                     systemsView.revealed = false
+                    dashboard.revealed = false
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
                     pressedTime = Date.now()
@@ -67,14 +84,6 @@ Item {
                     lastPosition = Qt.point(mouse.x, mouse.y)
                 }
 
-                onReleased: {
-                    var currentTime = Date.now()
-                    var timeDiff = (currentTime - pressedTime) / 1000
-                    if(timeDiff < 0.6 && !movedTooFarToHide) {
-                        toolsView.revealed = false
-                    }
-                }
-
                 onWheel: {
                     molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
                 }
@@ -84,7 +93,7 @@ Item {
         Timer {
             id: timer
             property real lastTime: Date.now()
-            running: toolsView.running
+            running: dashboard.running
             repeat: true
             interval: 1
             onTriggered: {
@@ -97,8 +106,30 @@ Item {
         }
     }
 
-    ToolsView {
-        id: toolsView
+    Dashboard {
+        id: dashboard
+        property bool isSettingSystemSize: false
+        function updateSystemSize() {
+            if(molecularDynamics.isSettingSystemSize) {
+                return
+            }
+            isSettingSystemSize = true
+            console.log("Setting system size from dashboard")
+            molecularDynamics.systemSize = Qt.vector3d(systemSizeX, systemSizeY, systemSizeZ)
+            isSettingSystemSize = false
+        }
+
+        onSystemSizeXChanged: {
+            updateSystemSize()
+        }
+
+        onSystemSizeYChanged: {
+            updateSystemSize()
+        }
+
+        onSystemSizeZChanged: {
+            updateSystemSize()
+        }
     }
 
     SimulationsView {
@@ -111,7 +142,7 @@ Item {
 
     Keys.onPressed: {
         if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
-            molecularDynamics.save()
+            molecularDynamics.save("state-"+Date.now()+".lmp")
         }
     }
 }

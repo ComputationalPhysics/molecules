@@ -3,14 +3,17 @@
 
 using std::vector;
 
-CPGLQuads::~CPGLQuads()
+CPGLQuads::CPGLQuads() :
+    m_funcs(0),
+    m_program(0)
 {
-    delete m_funcs;
+    generateVBOs();
 }
 
-void CPGLQuads::initializeOpenGLFunctions()
+CPGLQuads::~CPGLQuads()
 {
-    m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
+    if(m_funcs) delete m_funcs;
+    if(m_program) delete m_program;
 }
 
 void CPGLQuads::setModelViewMatrix(QMatrix4x4 &matrix)
@@ -20,12 +23,19 @@ void CPGLQuads::setModelViewMatrix(QMatrix4x4 &matrix)
 
 void CPGLQuads::generateVBOs()
 {
+    ensureInitialized();
     m_funcs->glGenBuffers(2, m_vboIds);
 }
 
-// void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, float deltaX, float deltaY, float deltaZ)
+void CPGLQuads::ensureInitialized()
 {
+    if(!m_funcs) m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
+}
+
+// void CPGLQuads::update(vector<float> &positions)
+void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, const QVector3D &offset)
+{
+    ensureInitialized();
     int numPoints = n / 3; // x,y,z
 
     QVector3D right;
@@ -52,7 +62,7 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
-        QVector3D position(positions[3*i + 0] - deltaX, positions[3*i + 2] - deltaZ, positions[3*i + 1] - deltaY);
+        QVector3D position(positions[3*i + 0] + offset.x(), positions[3*i + 1] + offset.y(), positions[3*i + 2] + offset.z());
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
@@ -96,9 +106,62 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     m_funcs->glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLushort), &m_indices[0], GL_STATIC_DRAW);
 }
 
-void CPGLQuads::render(QOpenGLShaderProgram *program)
+void CPGLQuads::createShaderProgram() {
+    if (!m_program) {
+        m_program = new QOpenGLShaderProgram();
+
+        m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
+                                           "attribute highp vec4 a_position;\n"
+                                           "attribute highp vec3 a_color;\n"
+                                           "attribute highp vec2 a_texcoord;\n"
+                                           "uniform highp mat4 modelViewProjectionMatrix;\n"
+                                           "uniform highp mat4 lightModelViewProjectionMatrix;\n"
+                                           "uniform highp float systemSizeZ;\n"
+                                           "varying highp vec2 coords;\n"
+                                           "varying highp float light;\n"
+                                           "varying highp vec3 color;\n"
+                                           "void main() {\n"
+                                           "    gl_Position = modelViewProjectionMatrix*a_position;\n"
+                                           "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
+                                           "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
+                                           "    coords = a_texcoord;\n"
+                                           "    color = a_color;\n"
+                                           "}");
+
+        m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                           "varying highp vec2 coords;\n"
+                                           "varying highp float light;\n"
+                                           "varying highp vec3 color;\n"
+                                           "highp vec2 center = vec2(0.5, 0.5);\n"
+                                           "void main() {\n"
+                                           "    highp vec2 delta = coords - center;\n"
+                                           "    highp float r2 = delta.x*delta.x + delta.y*delta.y;\n"
+                                           "    highp float gradient = 1.0 - (r2*r2)/0.07;\n"
+                                           "    highp vec3 color1 = color;\n"
+                                           "    highp vec3 color2 = 0.5 * vec3(color.r*0.1, color.g*0.4, color.b*0.2);\n"
+                                           "    highp vec3 finalColor = (color1 * gradient + color2 * (1.0 - gradient));\n"
+                                           "    highp float alpha = float(r2<0.25);\n"
+                                           "    if(alpha < 0.999) { discard; }\n"
+                                           "    gl_FragColor = vec4(finalColor * light, 1.0);\n"
+                                           "}");
+
+
+        m_program->link();
+    }
+}
+
+void CPGLQuads::render(float lightFalloffDistance, const QMatrix4x4 &modelViewProjectionMatrix, const QMatrix4x4 &lightModelViewProjectionMatrix)
 {
     if(m_vertices.size() == 0) return;
+    ensureInitialized();
+    createShaderProgram();
+
+    m_program->bind();
+
+    // Set modelview-projection matrix
+    m_program->setUniformValue("systemSizeZ", lightFalloffDistance);
+    m_program->setUniformValue("modelViewProjectionMatrix", modelViewProjectionMatrix);
+    m_program->setUniformValue("lightModelViewProjectionMatrix", lightModelViewProjectionMatrix);
 
     // Tell OpenGL which VBOs to use
     m_funcs->glBindBuffer(GL_ARRAY_BUFFER, m_vboIds[0]);
@@ -108,34 +171,29 @@ void CPGLQuads::render(QOpenGLShaderProgram *program)
     quintptr offset = 0;
 
     // Tell OpenGL programmable pipeline how to locate vertex position data
-    int vertexLocation = program->attributeLocation("a_position");
-    program->enableAttributeArray(vertexLocation);
+    int vertexLocation = m_program->attributeLocation("a_position");
+    m_program->enableAttributeArray(vertexLocation);
     m_funcs->glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
 
     // Offset for texture coordinate
     offset += sizeof(QVector3D);
 
     // Tell OpenGL programmable pipeline how to locate vertex color data
-    int colorLocation = program->attributeLocation("a_color");
-    program->enableAttributeArray(colorLocation);
+    int colorLocation = m_program->attributeLocation("a_color");
+    m_program->enableAttributeArray(colorLocation);
     m_funcs->glVertexAttribPointer(colorLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
 
     // Offset for texture coordinate
     offset += sizeof(QVector3D);
 
     // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
-    int texcoordLocation = program->attributeLocation("a_texcoord");
-    program->enableAttributeArray(texcoordLocation);
+    int texcoordLocation = m_program->attributeLocation("a_texcoord");
+    m_program->enableAttributeArray(texcoordLocation);
     m_funcs->glVertexAttribPointer(texcoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const void *)offset);
 
     // Draw cube geometry using indices from VBO 1
     // glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
     m_funcs->glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
-}
 
-CPGLQuads::CPGLQuads() :
-    m_funcs(0)
-{
-    initializeOpenGLFunctions();
-    generateVBOs();
+    m_program->release();
 }
