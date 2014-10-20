@@ -114,7 +114,6 @@ Item {
                 return
             }
             isSettingSystemSize = true
-            console.log("Setting system size from dashboard")
             molecularDynamics.systemSize = Qt.vector3d(systemSizeX, systemSizeY, systemSizeZ)
             isSettingSystemSize = false
         }

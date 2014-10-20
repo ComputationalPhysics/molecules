@@ -78,7 +78,6 @@ public:
     bool sample_statistics;
     unsigned long steps;
     int max_number_of_atoms;
-    int max_number_of_cells;
     unsigned long num_atoms;
     unsigned long num_atoms_free;
     unsigned long num_atoms_frozen;
