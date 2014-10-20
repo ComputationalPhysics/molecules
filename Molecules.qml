@@ -111,7 +111,7 @@ Item {
 
     Keys.onPressed: {
         if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
-            molecularDynamics.save()
+            molecularDynamics.save("state-"+Date.now()+".lmp")
         }
     }
 }

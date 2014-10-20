@@ -294,8 +294,6 @@ void MolecularDynamics::step(double dt)
     if(window()) {
         window()->update();
     }
-
-    qDebug() << "fps: " << 1.0/dt;
 }
 
 void MolecularDynamics::save(QString fileName)
