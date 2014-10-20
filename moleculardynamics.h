@@ -156,7 +156,6 @@ public slots:
         if (m_systemSize == arg)
             return;
 
-        qDebug() << "Setting system size: " << arg;
         m_systemSize = arg;
         m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
         emit systemSizeChanged(arg);

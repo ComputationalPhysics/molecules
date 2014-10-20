@@ -23,7 +23,6 @@ System::System() :
 }
 
 void System::createForcesAndPotentialTable() {
-    cout << "Will create forces and potential table" << endl;
     numberOfPrecomputedTwoParticleForces = 8192;
 
     precomputed_forces.resize(numberOfPrecomputedTwoParticleForces+1);
@@ -58,8 +57,6 @@ void System::createForcesAndPotentialTable() {
         precomputed_forces[i] = forceShifted;
         precomputed_potential[i] = potentialShifted;
     }
-
-    cout << "Did create forces and potential table" << endl;
 }
 double System::startTime() const
 {
@@ -114,7 +111,6 @@ QVector3D System::systemSize() const
 
 void System::setSystemSize(const QVector3D &systemSize)
 {
-    qDebug() << "Setting system size in system class: " << systemSize;
     float scaleX = m_systemSize.x() == 0 ? 1 : systemSize.x()/m_systemSize.x();
     float scaleY = m_systemSize.y() == 0 ? 1 : systemSize.y()/m_systemSize.y();
     float scaleZ = m_systemSize.z() == 0 ? 1 : systemSize.z()/m_systemSize.z();
@@ -142,6 +138,10 @@ void System::setSystemSize(const QVector3D &systemSize)
     num_cells_including_ghosts_xyz = num_cells_including_ghosts_yz*num_cells_including_ghosts[0];
     head_all_atoms.resize(num_cells_including_ghosts_xyz);
     head_free_atoms.resize(num_cells_including_ghosts_xyz);
+    int numberOfCells = (num_cells[0]+2)*(num_cells[1]+2)*(num_cells[2]+2);
+    if(numberOfCells > is_ghost_cell.size()) {
+        is_ghost_cell.resize(numberOfCells);
+    }
 
     for(unsigned long cx=0;cx<num_cells[0]+2;cx++) {
         for(unsigned long cy=0;cy<num_cells[1]+2;cy++) {
@@ -173,7 +173,6 @@ void System::allocate() {
 
     linked_list_all_atoms.resize(max_number_of_atoms);
     linked_list_free_atoms.resize(max_number_of_atoms);
-    is_ghost_cell.resize(max_number_of_cells, false);
     initial_positions.resize(3*max_number_of_atoms);
     move_queue = new unsigned int*[6];
     for(int i=0; i<6; i++) {
@@ -188,7 +187,6 @@ void System::setup(Settings *settings_) {
     num_atoms = 0;
     num_atoms_ghost = 0;
     max_number_of_atoms = settings->max_number_of_atoms;
-    max_number_of_cells = settings->max_number_of_cells;
 
     allocate();
 
@@ -209,7 +207,6 @@ void System::setup(Settings *settings_) {
 
     mpi_copy();
     calculate_accelerations();
-//    half_kick();
 
     cout << "System size: " << unit_converter->length_to_SI(m_systemSize[0])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[1])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[2])*1e10 << " Å" << endl;
     cout << "Atoms: " << num_atoms << endl;
