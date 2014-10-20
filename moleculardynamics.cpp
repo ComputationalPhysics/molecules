@@ -57,15 +57,14 @@ MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
     m_pan(0),
     m_roll(0),
     m_positions(0),
-    m_zoom(-4),
-    m_program(0)
+    m_zoom(-4)
 {
     m_glQuads = new CPGLQuads();
 }
 
 MolecularDynamicsRenderer::~MolecularDynamicsRenderer()
 {
-    delete m_program;
+
 }
 
 void MolecularDynamicsRenderer::resetProjection()
@@ -99,49 +98,6 @@ void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
 
 void MolecularDynamicsRenderer::paint()
 {
-    if (!m_program) {
-        m_program = new QOpenGLShaderProgram();
-
-        m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                                           "attribute highp vec4 a_position;\n"
-                                           "attribute highp vec3 a_color;\n"
-                                           "attribute highp vec2 a_texcoord;\n"
-                                           "uniform highp mat4 modelViewProjectionMatrix;\n"
-                                           "uniform highp mat4 lightModelViewProjectionMatrix;\n"
-                                           "uniform highp float systemSizeZ;\n"
-                                           "varying highp vec2 coords;\n"
-                                           "varying highp float light;\n"
-                                           "varying highp vec3 color;\n"
-                                           "void main() {\n"
-                                           "    gl_Position = modelViewProjectionMatrix*a_position;\n"
-                                           "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
-                                           "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
-                                           "    coords = a_texcoord;\n"
-                                           "    color = a_color;\n"
-                                           "}");
-
-        m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                           "varying highp vec2 coords;\n"
-                                           "varying highp float light;\n"
-                                           "varying highp vec3 color;\n"
-                                           "highp vec2 center = vec2(0.5, 0.5);\n"
-                                           "void main() {\n"
-                                           "    highp vec2 delta = coords - center;\n"
-                                           "    highp float r2 = delta.x*delta.x + delta.y*delta.y;\n"
-                                           "    highp float gradient = 1.0 - (r2*r2)/0.07;\n"
-                                           "    highp vec3 color1 = color;\n"
-                                           "    highp vec3 color2 = 0.5 * vec3(color.r*0.1, color.g*0.4, color.b*0.2);\n"
-                                           "    highp vec3 finalColor = (color1 * gradient + color2 * (1.0 - gradient));\n"
-                                           "    highp float alpha = float(r2<0.25);\n"
-                                           "    if(alpha < 0.999) { discard; }\n"
-                                           "    gl_FragColor = vec4(finalColor * light, 1.0);\n"
-                                           "}");
-
-
-        m_program->link();
-    }
-    m_program->bind();
-
     glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
 
     glEnable(GL_DEPTH_TEST);
@@ -173,19 +129,15 @@ void MolecularDynamicsRenderer::paint()
     lightMatrix.rotate(m_pan, 0, 0, 1);
     lightMatrix.rotate(m_roll, 0, 1, 0);
 
-    // Set modelview-projection matrix
-    m_program->setUniformValue("systemSizeZ", systemSizeZ);
-    m_program->setUniformValue("modelViewProjectionMatrix", m_projection * matrix);
-    m_program->setUniformValue("lightModelViewProjectionMatrix", m_projection * lightMatrix);
+    QMatrix4x4 modelViewProjectionMatrix = m_projection * matrix;
+    QMatrix4x4 lightModelViewProjectionMatrix = m_projection * lightMatrix;
 
     int n = 3*m_simulator.m_system.num_atoms;
     m_glQuads->setModelViewMatrix(matrix);
     m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, -systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
-    m_glQuads->render(m_program);
+    m_glQuads->render(systemSizeZ, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
-
-    m_program->release();
 }
 
 double MolecularDynamicsRenderer::zoom() const

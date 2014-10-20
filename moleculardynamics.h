@@ -78,7 +78,6 @@ private:
     double m_roll;
     double m_zoom;
     double m_pinchScale;
-    QOpenGLShaderProgram *m_program;
 
     QMatrix4x4 m_projection;
     CPGLQuads *m_glQuads;
