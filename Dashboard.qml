@@ -18,6 +18,7 @@ Item {
     property alias systemSizeX: systemSizeXSlider.value
     property alias systemSizeY: systemSizeYSlider.value
     property alias systemSizeZ: systemSizeZSlider.value
+    property real  minimumSystemSizeSliderValue: 1
 
     property bool othersPressed: false
 
@@ -341,7 +342,7 @@ Item {
                 id: systemSizeXSlider
                 orientation: Qt.Vertical
                 Layout.fillHeight: true
-                minimumValue: 5
+                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                 maximumValue: 100
                 value: 10
                 opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
@@ -367,7 +368,7 @@ Item {
                 id: systemSizeYSlider
                 orientation: Qt.Vertical
                 Layout.fillHeight: true
-                minimumValue: 5
+                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                 maximumValue: 100
                 value: 10
                 opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
@@ -393,7 +394,7 @@ Item {
                 id: systemSizeZSlider
                 orientation: Qt.Vertical
                 Layout.fillHeight: true
-                minimumValue: 5
+                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                 maximumValue: 100
                 value: 10
                 opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity

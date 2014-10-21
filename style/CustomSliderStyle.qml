@@ -9,7 +9,9 @@ SliderStyle {
 
 
     handle: Rectangle {
-        implicitWidth: Screen.pixelDensity * 8
+        property double minimumWidth: Screen.width / 30
+        property double maximumWidth: Screen.width / 20
+        implicitWidth: Math.max(Math.min(Screen.pixelDensity * 4, maximumWidth), minimumWidth)
         implicitHeight: implicitWidth
         radius: width
         border.width: width * 0.1

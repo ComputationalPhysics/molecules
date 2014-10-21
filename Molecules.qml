@@ -15,6 +15,8 @@ Item {
         id: molecularDynamics
         anchors.fill: parent
         property bool isSettingSystemSize: false
+        property real volume: systemSize.x*systemSize.y*systemSize.z
+        property real density: atomCount / volume
 
         thermostatEnabled: dashboard.thermostatEnabled
         thermostatValue: dashboard.thermostatValue
@@ -27,6 +29,10 @@ Item {
         zoom: -40
 
         running: dashboard.running
+
+        onAtomCountChanged: {
+            dashboard.minimumSystemSizeSliderValue = Math.pow(atomCount, 1.0/3)
+        }
 
         onSystemSizeChanged: {
             if(dashboard.isSettingSystemSize) {

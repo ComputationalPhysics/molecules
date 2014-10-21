@@ -181,6 +181,10 @@ void System::setSystemSize(const QVector3D &systemSize)
     }
 
     m_systemSize = systemSize;
+    double density = num_atoms / volume();
+    double volumePerAtom = 1.0/density;
+    double lengthPerAtom = pow(volumePerAtom, 1.0/3.0);
+    qDebug() << "New density: " << density << ". Length per atom: " << lengthPerAtom;
 
     for(int a=0;a<3;a++) {
         num_cells[a] = m_systemSize[a]/m_rCut;

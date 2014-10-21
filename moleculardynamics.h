@@ -101,6 +101,7 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(double roll READ roll WRITE setRoll NOTIFY rollChanged)
     Q_PROPERTY(double zoom READ zoom WRITE setZoom NOTIFY zoomChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
+    Q_PROPERTY(int atomCount READ atomCount NOTIFY atomCountChanged)
 
 public:
     MolecularDynamics();
@@ -120,6 +121,11 @@ public:
     double zoom() const;
 
     bool running() const;
+
+    int atomCount() const
+    {
+        return m_atomCount;
+    }
 
 public slots:
     void sync();
@@ -154,6 +160,8 @@ signals:
 
     void runningChanged(bool arg);
 
+    void atomCountChanged(int arg);
+
 private slots:
     void handleWindowChanged(QQuickWindow *win);
 
@@ -173,6 +181,16 @@ private:
     double m_zoom;
     QElapsedTimer m_timer;
     bool m_running;
+    int m_atomCount;
+
+    void setAtomCount(int arg)
+    {
+        if (m_atomCount == arg)
+            return;
+
+        m_atomCount = arg;
+        emit atomCountChanged(arg);
+    }
 };
 //! [2]
 

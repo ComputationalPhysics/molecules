@@ -145,7 +145,8 @@ MolecularDynamics::MolecularDynamics()
       m_pan(0),
       m_roll(0),
       m_zoom(-4),
-      m_running(true)
+      m_running(true),
+      m_atomCount(0)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
     m_timer.start();
@@ -299,6 +300,8 @@ void MolecularDynamics::sync()
     if(m_running) {
         m_renderer->m_simulator.step();
     }
+
+    setAtomCount(m_renderer->m_simulator.m_system.num_atoms);
 }
 
 void MolecularDynamics::step(double dt)
