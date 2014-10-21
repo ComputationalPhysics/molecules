@@ -104,6 +104,8 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(int atomCount READ atomCount NOTIFY atomCountChanged)
     Q_PROPERTY(bool didScaleVelocitiesDueToHighValues READ didScaleVelocitiesDueToHighValues NOTIFY didScaleVelocitiesDueToHighValuesChanged)
     Q_PROPERTY(double temperature READ temperature NOTIFY temperatureChanged)
+    Q_PROPERTY(double kineticEnergy READ kineticEnergy NOTIFY kineticEnergyChanged)
+    Q_PROPERTY(double potentialEnergy READ potentialEnergy NOTIFY potentialEnergyChanged)
 
 public:
     MolecularDynamics();
@@ -137,6 +139,16 @@ public:
     double temperature() const
     {
         return m_temperature;
+    }
+
+    double kineticEnergy() const
+    {
+        return m_kineticEnergy;
+    }
+
+    double potentialEnergy() const
+    {
+        return m_potentialEnergy;
     }
 
 public slots:
@@ -176,6 +188,24 @@ public slots:
         emit temperatureChanged(arg);
     }
 
+    void setKineticEnergy(double arg)
+    {
+        if (m_kineticEnergy == arg)
+            return;
+
+        m_kineticEnergy = arg;
+        emit kineticEnergyChanged(arg);
+    }
+
+    void setPotentialEnergy(double arg)
+    {
+        if (m_potentialEnergy == arg)
+            return;
+
+        m_potentialEnergy = arg;
+        emit potentialEnergyChanged(arg);
+    }
+
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
@@ -195,6 +225,10 @@ signals:
     void didScaleVelocitiesDueToHighValuesChanged(bool arg);
 
     void temperatureChanged(double arg);
+
+    void kineticEnergyChanged(double arg);
+
+    void potentialEnergyChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -227,6 +261,8 @@ private:
     }
     bool m_didScaleVelocitiesDueToHighValues;
     double m_temperature;
+    double m_kineticEnergy;
+    double m_potentialEnergy;
 };
 //! [2]
 

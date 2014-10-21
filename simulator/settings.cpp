@@ -11,7 +11,7 @@ Settings::Settings() {
     unit_cells_x = 10;
     unit_cells_y = 10;
     unit_cells_z = 10;
-    statistics_interval = 100;
+    statistics_interval = 10;
     thermostat_enabled = false;
     thermostat_frozen_enabled = false;
 }

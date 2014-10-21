@@ -27,6 +27,18 @@ Item {
         plotTemperature.addPoint(temperature)
     }
 
+    function addKineticEnergy(kineticEnergy) {
+        plotKineticEnergy.addPoint(kineticEnergy)
+    }
+
+    function addPotentialEnergy(potentialEnergy) {
+        plotPotentialEnergy.addPoint(potentialEnergy)
+    }
+
+    function addTotalEnergy(totalEnergy) {
+        plotTotalEnergy.addPoint(totalEnergy)
+    }
+
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
 
@@ -208,13 +220,37 @@ Item {
                     anchors.fill: parent
                     minimumValue: 0
                     maximumValue: 1000
-                    strokeStyle: "#4292c6"
+                    strokeStyle: "#a6cee3"
                 }
 
                 PlotLabels {
                     anchors.fill: parent
                     minimumValue: plotTemperature.minimumValue
                     maximumValue: plotTemperature.maximumValue
+                    title: "T [K]"
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: "black"
+                border.color: "white"
+                border.width: 1.0
+
+                Plot {
+                    id: pressurePlot
+                    anchors.fill: parent
+                    minimumValue: 0
+                    maximumValue: 1000
+                    strokeStyle: "#a6cee3"
+                }
+
+                PlotLabels {
+                    anchors.fill: parent
+                    minimumValue: pressurePlot.minimumValue
+                    maximumValue: pressurePlot.maximumValue
+                    title: "T [K]"
                 }
             }
 
@@ -228,40 +264,33 @@ Item {
                 Plot {
                     id: plotKineticEnergy
                     anchors.fill: parent
-                    minimumValue: 0
-                    maximumValue: 1000
-                    strokeStyle: "#4292c6"
+                    minimumValue: -1
+                    maximumValue: 1
+                    strokeStyle: "#a6cee3"
                 }
 
                 Plot {
                     id: plotPotentialEnergy
                     anchors.fill: parent
-                    minimumValue: 0
-                    maximumValue: 1000
-                    strokeStyle: "#4292c6"
+                    minimumValue: plotKineticEnergy.minimumValue
+                    maximumValue: plotKineticEnergy.maximumValue
+                    strokeStyle: "#b2df8a"
                 }
 
                 Plot {
                     id: plotTotalEnergy
                     anchors.fill: parent
-                    minimumValue: 0
-                    maximumValue: 1000
-                    strokeStyle: "#4292c6"
+                    minimumValue: plotKineticEnergy.minimumValue
+                    maximumValue: plotKineticEnergy.maximumValue
+                    strokeStyle: "#fdbf6f"
                 }
 
                 PlotLabels {
                     anchors.fill: parent
-                    minimumValue: plotTemperature.minimumValue
-                    maximumValue: plotTemperature.maximumValue
+                    minimumValue: plotKineticEnergy.minimumValue
+                    maximumValue: plotKineticEnergy.maximumValue
+                    title: "E/N [eV]"
                 }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: "black"
-                border.color: "white"
-                border.width: 1.0
             }
         }
 

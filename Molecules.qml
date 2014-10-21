@@ -127,6 +127,10 @@ Item {
                 if(sampleTimeDifference > 0.1) {
                     lastSampleTime = currentTime
                     dashboard.addTemperature(molecularDynamics.temperature)
+                    dashboard.addKineticEnergy(molecularDynamics.kineticEnergy / molecularDynamics.atomCount)
+                    dashboard.addPotentialEnergy(molecularDynamics.potentialEnergy / molecularDynamics.atomCount)
+                    dashboard.addTotalEnergy(molecularDynamics.kineticEnergy / molecularDynamics.atomCount
+                                             + molecularDynamics.potentialEnergy / molecularDynamics.atomCount)
                 }
                 lastTime = currentTime
             }
