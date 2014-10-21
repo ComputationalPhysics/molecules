@@ -54,7 +54,7 @@ Item {
             onPinchUpdated: {
                 var correctScale = pinch.scale >= 1.0 ? (pinch.scale - 1.0) : (-1.0 / pinch.scale + 1.0)
                 var deltaScale = correctScale - previousScale
-                molecularDynamics.incrementZoom(5 * deltaScale)
+                molecularDynamics.zoom += 10 * deltaScale
                 previousScale = correctScale
             }
 
