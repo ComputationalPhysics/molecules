@@ -3,5 +3,6 @@
         <file>images/tools.png</file>
         <file>images/pause.png</file>
         <file>images/play.png</file>
+        <file>images/systems.png</file>
     </qresource>
 </RCC>

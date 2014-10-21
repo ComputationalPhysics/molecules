@@ -3,9 +3,9 @@
         <file>main.qml</file>
         <file>Molecules.qml</file>
         <file>ToolsView.qml</file>
-        <file>images/systems.png</file>
         <file>SimulationsView.qml</file>
         <file>SimulationButton.qml</file>
         <file>Dashboard.qml</file>
+        <file>style/CustomSliderStyle.qml</file>
     </qresource>
 </RCC>
