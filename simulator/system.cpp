@@ -592,18 +592,20 @@ void System::full_kick() {
 
 void System::move() {
     for(int n=0;n<m_numAtoms;n++) {
-        positions[3*n+0] += velocities[3*n+0]*m_dt;
-        positions[3*n+1] += velocities[3*n+1]*m_dt;
-        positions[3*n+2] += velocities[3*n+2]*m_dt;
+        if(atom_type[n] != FIXED) {
+            positions[3*n+0] += velocities[3*n+0]*m_dt;
+            positions[3*n+1] += velocities[3*n+1]*m_dt;
+            positions[3*n+2] += velocities[3*n+2]*m_dt;
 
-        atom_moved[n] = false;
+            atom_moved[n] = false;
+        }
     }
 }
 
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*m_dt;
     for(int n=0;n<m_numAtoms;n++) {
-        if(atom_type[n] != FROZEN) {
+        if(atom_type[n] == ARGON) {
             velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
         }
     }
