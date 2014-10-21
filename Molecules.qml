@@ -24,7 +24,7 @@ Item {
 
         pan: 30
         tilt: 30
-        zoom: -10.0
+        zoom: -40
 
         onSystemSizeChanged: {
             if(dashboard.isSettingSystemSize) {

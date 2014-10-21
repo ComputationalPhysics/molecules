@@ -86,7 +86,7 @@ void MolecularDynamicsRenderer::setModelViewMatrices(double zoom, double tilt, d
     float systemSizeMax = sqrt(systemSizeX*systemSizeX + systemSizeY*systemSizeY + systemSizeZ*systemSizeZ);
 
     m_modelViewMatrix.setToIdentity();
-    m_modelViewMatrix.translate(0,0,zoom-systemSizeMax);
+    m_modelViewMatrix.translate(0,0,zoom);
     m_modelViewMatrix.rotate(-90, 1, 0, 0);
     m_modelViewMatrix.rotate(tilt, 1, 0, 0);
     m_modelViewMatrix.rotate(pan, 0, 0, 1);
