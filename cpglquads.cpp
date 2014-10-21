@@ -116,14 +116,14 @@ void CPGLQuads::createShaderProgram() {
                                            "attribute highp vec2 a_texcoord;\n"
                                            "uniform highp mat4 modelViewProjectionMatrix;\n"
                                            "uniform highp mat4 lightModelViewProjectionMatrix;\n"
-                                           "uniform highp float systemSizeZ;\n"
+                                           "uniform highp float lightFalloffDistance;\n"
                                            "varying highp vec2 coords;\n"
                                            "varying highp float light;\n"
                                            "varying highp vec3 color;\n"
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
                                            "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
-                                           "    light = clamp((systemSizeZ * 0.7 - lightPosition.z) / (systemSizeZ * 0.7), 0.0, 1.0);\n"
+                                           "    light = clamp((lightFalloffDistance * 0.7 - lightPosition.z) / (lightFalloffDistance * 0.7), 0.0, 1.0);\n"
                                            "    coords = a_texcoord;\n"
                                            "    color = a_color;\n"
                                            "}");
@@ -159,7 +159,7 @@ void CPGLQuads::render(float lightFalloffDistance, const QMatrix4x4 &modelViewPr
     m_program->bind();
 
     // Set modelview-projection matrix
-    m_program->setUniformValue("systemSizeZ", lightFalloffDistance);
+    m_program->setUniformValue("lightFalloffDistance", lightFalloffDistance);
     m_program->setUniformValue("modelViewProjectionMatrix", modelViewProjectionMatrix);
     m_program->setUniformValue("lightModelViewProjectionMatrix", lightModelViewProjectionMatrix);
 
