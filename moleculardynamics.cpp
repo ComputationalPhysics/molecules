@@ -69,7 +69,7 @@ void MolecularDynamicsRenderer::resetProjection()
     qreal aspect = qreal(m_viewportSize.width()) / qreal(m_viewportSize.height() ? m_viewportSize.height() : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 65 degrees
-    const qreal zNear = 2.0, zFar = 200.0, fov = 65.0;
+    const qreal zNear = 2.0, zFar = 2000.0, fov = 65.0;
 
     // Reset projection
     m_projectionMatrix.setToIdentity();
@@ -312,6 +312,11 @@ void MolecularDynamics::sync()
     setKineticEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->kinetic_energy));
     setPotentialEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->potential_energy));
     setPressure(m_renderer->m_simulator.m_system.unit_converter->pressure_to_SI(m_renderer->m_simulator.m_sampler->pressure));
+
+//    double pressure = m_renderer->m_simulator.m_sampler->pressure;
+//    double volume = m_renderer->m_simulator.m_system.volume();
+//    double temperature = m_renderer->m_simulator.m_sampler->temperature;
+//    qDebug() << "PV/NkT=" << pressure*volume/(atomCount()*temperature);
 }
 
 void MolecularDynamics::step(double dt)

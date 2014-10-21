@@ -100,6 +100,7 @@ Item {
 //                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
                     molecularDynamics.pan += deltaPan
                     molecularDynamics.tilt += deltaTilt
+                    molecularDynamics.tilt = Math.max(-90, Math.min(90, molecularDynamics.tilt))
                     lastPosition = Qt.point(mouse.x, mouse.y)
                 }
 
