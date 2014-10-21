@@ -306,6 +306,7 @@ void MolecularDynamics::sync()
     setTemperature(m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature));
     setKineticEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->kinetic_energy));
     setPotentialEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->potential_energy));
+    setPressure(m_renderer->m_simulator.m_system.unit_converter->pressure_to_SI(m_renderer->m_simulator.m_sampler->pressure));
 }
 
 void MolecularDynamics::step(double dt)

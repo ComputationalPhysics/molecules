@@ -39,6 +39,10 @@ Item {
         plotTotalEnergy.addPoint(totalEnergy)
     }
 
+    function addPressure(pressure) {
+        pressurePlot.addPoint(pressure)
+    }
+
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
 
@@ -219,7 +223,7 @@ Item {
                     id: plotTemperature
                     anchors.fill: parent
                     minimumValue: 0
-                    maximumValue: 1000
+                    maximumValue: 1100
                     strokeStyle: "#a6cee3"
                 }
 
@@ -241,8 +245,8 @@ Item {
                 Plot {
                     id: pressurePlot
                     anchors.fill: parent
-                    minimumValue: 0
-                    maximumValue: 1000
+                    minimumValue: -10
+                    maximumValue: 1200
                     strokeStyle: "#a6cee3"
                 }
 
@@ -250,7 +254,7 @@ Item {
                     anchors.fill: parent
                     minimumValue: pressurePlot.minimumValue
                     maximumValue: pressurePlot.maximumValue
-                    title: "T [K]"
+                    title: "P [MPa]"
                 }
             }
 

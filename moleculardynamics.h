@@ -106,6 +106,8 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(double temperature READ temperature NOTIFY temperatureChanged)
     Q_PROPERTY(double kineticEnergy READ kineticEnergy NOTIFY kineticEnergyChanged)
     Q_PROPERTY(double potentialEnergy READ potentialEnergy NOTIFY potentialEnergyChanged)
+    Q_PROPERTY(double pressure READ pressure NOTIFY pressureChanged)
+
 
 public:
     MolecularDynamics();
@@ -151,6 +153,11 @@ public:
         return m_potentialEnergy;
     }
 
+    double pressure() const
+    {
+        return m_pressure;
+    }
+
 public slots:
     void sync();
     void cleanup();
@@ -169,6 +176,8 @@ public slots:
     void setZoom(double arg);
 
     void setRunning(bool arg);
+
+private slots:
 
     void setDidScaleVelocitiesDueToHighValues(bool arg)
     {
@@ -206,6 +215,15 @@ public slots:
         emit potentialEnergyChanged(arg);
     }
 
+    void setPressure(double arg)
+    {
+        if (m_pressure == arg)
+            return;
+
+        m_pressure = arg;
+        emit pressureChanged(arg);
+    }
+
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
@@ -229,6 +247,8 @@ signals:
     void kineticEnergyChanged(double arg);
 
     void potentialEnergyChanged(double arg);
+
+    void pressureChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -263,6 +283,7 @@ private:
     double m_temperature;
     double m_kineticEnergy;
     double m_potentialEnergy;
+    double m_pressure;
 };
 //! [2]
 

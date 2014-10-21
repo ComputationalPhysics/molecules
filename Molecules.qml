@@ -131,6 +131,7 @@ Item {
                     dashboard.addPotentialEnergy(molecularDynamics.potentialEnergy / molecularDynamics.atomCount)
                     dashboard.addTotalEnergy(molecularDynamics.kineticEnergy / molecularDynamics.atomCount
                                              + molecularDynamics.potentialEnergy / molecularDynamics.atomCount)
+                    dashboard.addPressure(molecularDynamics.pressure * 1e-6)
                 }
                 lastTime = currentTime
             }
