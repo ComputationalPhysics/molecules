@@ -17,8 +17,6 @@ public:
     int unit_cells_z;
     int timesteps;
     int statistics_interval;
-    int max_number_of_atoms;
-    int max_number_of_cells;
     bool thermostat_enabled;
     bool thermostat_frozen_enabled;
 };

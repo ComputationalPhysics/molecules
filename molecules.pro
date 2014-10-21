@@ -21,6 +21,8 @@ RESOURCES += qml.qrc \
     images.qrc \
     simulations.qrc
 
+DEFINES += MD_DEBUG
+
 ios {
     QMAKE_INFO_PLIST = iOS.plist
 }

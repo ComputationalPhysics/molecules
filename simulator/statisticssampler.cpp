@@ -27,7 +27,7 @@ void StatisticsSampler::sample_momentum_cm() {
     v_cm[0] = 0; v_cm[1] = 0; v_cm[2] = 0;
     v_cm_local[0] = 0; v_cm_local[1] = 0; v_cm_local[2] = 0;
 
-    for(unsigned int i=system->num_atoms_frozen;i<system->num_atoms;i++) {
+    for(unsigned int i=system->num_atoms_frozen;i<system->numAtoms();i++) {
         v_cm_local[0] += system->velocities[3*i+0];
         v_cm_local[1] += system->velocities[3*i+1];
         v_cm_local[2] += system->velocities[3*i+2];
@@ -44,7 +44,7 @@ void StatisticsSampler::sample_kinetic_energy() {
 
     kinetic_energy = 0;
 
-    for(unsigned int i=0;i<system->num_atoms;i++) {
+    for(unsigned int i=0;i<system->numAtoms();i++) {
         double vx = system->velocities[3*i+0];
         double vy = system->velocities[3*i+1];
         double vz = system->velocities[3*i+2];
@@ -64,12 +64,12 @@ void StatisticsSampler::sample_temperature() {
     temperature_sampled_at = system->steps;
 
     sample_kinetic_energy();
-    double kinetic_energy_per_atom = kinetic_energy / system->num_atoms;
+    double kinetic_energy_per_atom = kinetic_energy / system->numAtoms();
     temperature = 2.0/3*kinetic_energy_per_atom;
 
     double kinetic_energy_free_atoms = 0;
     double kinetic_energy_frozen_atoms = 0;
-    for(int n=0; n<system->num_atoms; n++) {
+    for(int n=0; n<system->numAtoms(); n++) {
         double v_squared = system->velocities[3*n+0]*system->velocities[3*n+0] + system->velocities[3*n+1]*system->velocities[3*n+1] + system->velocities[3*n+2]*system->velocities[3*n+2];
         if(system->atom_type[n] == ARGON) {
             kinetic_energy_free_atoms += 0.5*system->settings->mass*v_squared;

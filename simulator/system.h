@@ -14,13 +14,13 @@ class UnitConverter;
 
 #define EMPTY -1
 
-typedef float atomDataType;
+typedef double atomDataType;
 
 using namespace std;
 
 class System {
 private:
-    void allocate();
+    void allocate(int numberOfAtoms);
     void move();
     void mpi_move();
     void mpi_copy();
@@ -59,7 +59,7 @@ private:
     unsigned int num_cells[3];
     unsigned int num_cells_including_ghosts[3];
     double shift_vector[6][3];
-    unsigned int **move_queue;
+    vector<vector<unsigned int> > move_queue;
     unsigned int mc[3];  // Usually cell index vector
     unsigned int mc1[3]; // Usually cell index vector
     atomDataType m_rCut;
@@ -68,7 +68,10 @@ private:
     double m_time;
     double m_startTime;
     double one_over_r_cut_squared;
+    unsigned long m_numAtoms;
+    bool m_didScaleVelocitiesDueToHighValues;
 
+    void ensureAllAtomsAreInsideSystem();
 public:
     Settings *settings;
     MDIO *mdio;
@@ -77,8 +80,6 @@ public:
 
     bool sample_statistics;
     unsigned long steps;
-    int max_number_of_atoms;
-    unsigned long num_atoms;
     unsigned long num_atoms_free;
     unsigned long num_atoms_frozen;
     unsigned long num_atoms_ghost;
@@ -112,4 +113,9 @@ public:
     void setTime(double time);
     double startTime() const;
     void setStartTime(double startTime);
+    void printMaxPositionComponent();
+    unsigned long numAtoms() const;
+    void setNumAtoms(unsigned long numAtoms);
+    bool didScaleVelocitiesDueToHighValues() const;
+    void setDidScaleVelocitiesDueToHighValues(bool didScaleVelocitiesDueToHighValues);
 };

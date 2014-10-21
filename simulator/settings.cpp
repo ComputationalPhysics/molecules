@@ -12,7 +12,6 @@ Settings::Settings() {
     unit_cells_y = 10;
     unit_cells_z = 10;
     statistics_interval = 100;
-    max_number_of_atoms = 10000;
     thermostat_enabled = false;
     thermostat_frozen_enabled = false;
 }

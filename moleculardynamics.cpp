@@ -124,7 +124,7 @@ void MolecularDynamicsRenderer::paint()
 
     QVector3D offset(-systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
 
-    int n = 3*m_simulator.m_system.num_atoms;
+    int n = 3*m_simulator.m_system.numAtoms();
     m_glQuads->setModelViewMatrix(m_modelViewMatrix);
     m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
@@ -301,7 +301,8 @@ void MolecularDynamics::sync()
         m_renderer->m_simulator.step();
     }
 
-    setAtomCount(m_renderer->m_simulator.m_system.num_atoms);
+    setDidScaleVelocitiesDueToHighValues(m_renderer->m_simulator.m_system.didScaleVelocitiesDueToHighValues());
+    setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
 }
 
 void MolecularDynamics::step(double dt)

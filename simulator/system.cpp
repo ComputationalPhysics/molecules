@@ -1,5 +1,5 @@
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <time.h>
 #include <fstream>
 #include <system.h>
@@ -35,13 +35,13 @@ System::System() :
     unit_converter(0),
     sample_statistics(0),
     steps(0),
-    max_number_of_atoms(0),
-    num_atoms(0),
+    m_numAtoms(0),
     num_atoms_free(0),
     num_atoms_frozen(0),
     num_atoms_ghost(0),
     mass_inverse(0),
-    pressure_forces(0)
+    pressure_forces(0),
+    m_didScaleVelocitiesDueToHighValues(false)
 {
     num_cells[0] = 0;
     num_cells[1] = 0;
@@ -114,6 +114,27 @@ void System::createForcesAndPotentialTable() {
         precomputed_potential[i] = potentialShifted;
     }
 }
+bool System::didScaleVelocitiesDueToHighValues() const
+{
+    return m_didScaleVelocitiesDueToHighValues;
+}
+
+void System::setDidScaleVelocitiesDueToHighValues(bool didScaleVelocitiesDueToHighValues)
+{
+    m_didScaleVelocitiesDueToHighValues = didScaleVelocitiesDueToHighValues;
+}
+
+unsigned long System::numAtoms() const
+{
+    return m_numAtoms;
+}
+
+void System::setNumAtoms(unsigned long numAtoms)
+{
+    m_numAtoms = numAtoms;
+    allocate(27*m_numAtoms);
+}
+
 double System::startTime() const
 {
     return m_startTime;
@@ -171,7 +192,7 @@ void System::setSystemSize(const QVector3D &systemSize)
     float scaleY = m_systemSize.y() == 0 ? 1 : systemSize.y()/m_systemSize.y();
     float scaleZ = m_systemSize.z() == 0 ? 1 : systemSize.z()/m_systemSize.z();
 
-    for(int n=0; n<num_atoms; n++) {
+    for(int n=0; n<m_numAtoms; n++) {
         positions[3*n+0] *= scaleX;
         positions[3*n+1] *= scaleY;
         positions[3*n+2] *= scaleZ;
@@ -181,10 +202,6 @@ void System::setSystemSize(const QVector3D &systemSize)
     }
 
     m_systemSize = systemSize;
-    double density = num_atoms / volume();
-    double volumePerAtom = 1.0/density;
-    double lengthPerAtom = pow(volumePerAtom, 1.0/3.0);
-    qDebug() << "New density: " << density << ". Length per atom: " << lengthPerAtom;
 
     for(int a=0;a<3;a++) {
         num_cells[a] = m_systemSize[a]/m_rCut;
@@ -222,21 +239,21 @@ double System::volume()
     return m_systemSize[0]*m_systemSize[1]*m_systemSize[2];
 }
 
-void System::allocate() {
-    positions.resize(3*max_number_of_atoms);
-    accelerations.resize(3*max_number_of_atoms);
-    velocities.resize(3*max_number_of_atoms);
-    atom_type.resize(max_number_of_atoms, 0);
-    atom_moved.resize(max_number_of_atoms, false);
-    m_dataBuffer.resize(max_number_of_atoms);
-    atom_ids.resize(max_number_of_atoms);
+void System::allocate(int numberOfAtoms) {
+    positions.resize(3*numberOfAtoms);
+    accelerations.resize(3*numberOfAtoms);
+    velocities.resize(3*numberOfAtoms);
+    atom_type.resize(numberOfAtoms, 0);
+    atom_moved.resize(numberOfAtoms, false);
+    m_dataBuffer.resize(numberOfAtoms);
+    atom_ids.resize(numberOfAtoms);
 
-    linked_list_all_atoms.resize(max_number_of_atoms);
-    linked_list_free_atoms.resize(max_number_of_atoms);
-    initial_positions.resize(3*max_number_of_atoms);
-    move_queue = new unsigned int*[6];
+    linked_list_all_atoms.resize(numberOfAtoms);
+    linked_list_free_atoms.resize(numberOfAtoms);
+    initial_positions.resize(3*numberOfAtoms);
+    move_queue.resize(6);
     for(int i=0; i<6; i++) {
-        move_queue[i] = new unsigned int[max_number_of_atoms];
+        move_queue[i].resize(numberOfAtoms);
     }
 }
 
@@ -244,11 +261,8 @@ void System::setup(Settings *settings_) {
     unit_converter = new UnitConverter();
 
     settings = settings_;
-    num_atoms = 0;
+    m_numAtoms = 0;
     num_atoms_ghost = 0;
-    max_number_of_atoms = settings->max_number_of_atoms;
-
-    allocate();
 
     steps = 0;
     int seed = -1;
@@ -269,14 +283,14 @@ void System::setup(Settings *settings_) {
     calculate_accelerations();
 
     cout << "System size: " << unit_converter->length_to_SI(m_systemSize[0])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[1])*1e10 << " Å " << unit_converter->length_to_SI(m_systemSize[2])*1e10 << " Å" << endl;
-    cout << "Atoms: " << num_atoms << endl;
+    cout << "Atoms: " << m_numAtoms << endl;
     cout << "Free atoms: " << num_atoms_free << endl;
 }
 
 void System::count_frozen_atoms() {
     num_atoms_free = 0;
     num_atoms_frozen = 0;
-    for(int i=0; i<num_atoms; i++) {
+    for(int i=0; i<m_numAtoms; i++) {
         if(atom_type[i] == FROZEN)  {
             num_atoms_frozen++;
         } else {
@@ -293,7 +307,10 @@ void System::create_FCC() {
     double r[3];
     double T = settings->temperature;
 
-    bool warning_shown = false;
+    int numberOfAtoms = settings->unit_cells_x*settings->unit_cells_y*settings->unit_cells_z*4;
+    setNumAtoms(numberOfAtoms);
+
+    int currentAtomIndex = 0;
     for(int x = 0; x < settings->unit_cells_x; x++) {
         for(int y = 0; y < settings->unit_cells_y; y++) {
             for(int z = 0; z < settings->unit_cells_z; z++) {
@@ -304,20 +321,15 @@ void System::create_FCC() {
                     r[1] = (y+yCell[k]) * settings->FCC_b;
                     r[2] = (z+zCell[k]) * settings->FCC_b;
                     for(int i=0;i<3;i++) {
-                        positions[3*num_atoms+i] = r[i];
-                        initial_positions[3*num_atoms+i] = r[i];
-                        velocities[3*num_atoms+i] = rnd->nextGauss()*sqrt(T*mass_inverse);
+                        positions[3*currentAtomIndex+i] = r[i];
+                        initial_positions[3*currentAtomIndex+i] = r[i];
+                        velocities[3*currentAtomIndex+i] = rnd->nextGauss()*sqrt(T*mass_inverse);
                     }
 
-                    atom_type[num_atoms] = ARGON;
-                    atom_ids[num_atoms] = num_atoms;
+                    atom_type[currentAtomIndex] = ARGON;
+                    atom_ids[currentAtomIndex] = currentAtomIndex;
 
-                    num_atoms++;
-                    if(!warning_shown && num_atoms >= 0.8*max_number_of_atoms) {
-                        cout << "                 ### WARNING ###" << endl;
-                        cout << "NUMBER OF PARTICLES IS MORE THAN 0.8*MAX_ATOM_NUM" << endl << endl;
-                        warning_shown = true;
-                    }
+                    currentAtomIndex++;
                 }
             }
         }
@@ -356,9 +368,11 @@ void System::set_topology() {
 inline void System::cell_index_from_ijk(const int &i, const int &j, const int &k, unsigned int &cell_index) {
     cell_index = i*num_cells_including_ghosts_yz+j*num_cells_including_ghosts[2]+k;
 #ifdef MD_DEBUG
-    if(cell_index > max_number_of_cells-1) {
-        cout << "Too few cells, aborting. Increase program.max_number_of_cells in python script" << endl;
-        MPI_Abort(MPI_COMM_WORLD, 1000);
+    if(cell_index > is_ghost_cell.size()-1 || cell_index < 0) {
+        cout << systemSize().x() << endl;
+        cout << "1: cell index: " << cell_index << endl;
+        cout << "i: " << i << ", " << j << ", " << k << endl;
+        exit(1);
     }
 #endif
 }
@@ -366,9 +380,11 @@ inline void System::cell_index_from_ijk(const int &i, const int &j, const int &k
 inline void System::cell_index_from_vector(unsigned int *mc, unsigned int &cell_index) {
     cell_index = mc[0]*num_cells_including_ghosts_yz+mc[1]*num_cells_including_ghosts[2]+mc[2];
 #ifdef MD_DEBUG
-    if(cell_index > max_number_of_cells-1) {
-        cout << "Too few cells, aborting. Increase program.max_number_of_cells in python script" << endl;
-        MPI_Abort(MPI_COMM_WORLD, 1000);
+    if(cell_index > is_ghost_cell.size()-1 || cell_index < 0) {
+        cout << systemSize().x() << endl;
+        cout << "2: cell index: " << cell_index << endl;
+        cout << "i: " << mc[0] << ", " << mc[1] << ", " << mc[2] << endl;
+        exit(1);
     }
 #endif
 }
@@ -402,7 +418,7 @@ void System::mpi_move() {
 
     for(short dimension=0;dimension<3;dimension++) {
         /* Scan all the residents & immigrants to list moved-out atoms */
-        for (unsigned long i=0; i<num_atoms+new_atoms; i++) {
+        for (unsigned long i=0; i<m_numAtoms+new_atoms; i++) {
             node_lower = 2*dimension;
             node_higher = 2*dimension+1;
             /* Register a to-be-copied atom in move_queue[kul|kuh][] */
@@ -450,7 +466,7 @@ void System::mpi_move() {
 
             /* Message storing */
             for (int i=0; i<num_receive; i++) {
-                int atom_index = num_atoms+new_atoms+i;
+                int atom_index = m_numAtoms+new_atoms+i;
 
                 positions [3*atom_index+0] = m_dataBuffer[11*i   + 0];
                 positions [3*atom_index+1] = m_dataBuffer[11*i   + 1];
@@ -475,7 +491,7 @@ void System::mpi_move() {
     }
 
     int ipt = 0;
-    for (int i=0; i<num_atoms+new_atoms; i++) {
+    for (int i=0; i<m_numAtoms+new_atoms; i++) {
         if (!atom_moved[i]) {
             for (int a=0; a<3; a++) {
                 positions [3*ipt+a] = positions [3*i+a];
@@ -490,8 +506,8 @@ void System::mpi_move() {
     }
 
     /* Update the compressed # of resident atoms */
-    num_atoms = ipt;
-    num_atoms_free = num_atoms - num_atoms_free;
+    m_numAtoms = ipt;
+    num_atoms_free = m_numAtoms - num_atoms_free;
 }
 
 void System::mpi_copy() {
@@ -500,7 +516,7 @@ void System::mpi_copy() {
     short local_node_id;
     for(short dimension=0;dimension<3;dimension++) {
         for (int higher=0; higher<2; higher++) move_queue[2*dimension+higher][0] = 0;
-        for(int i=0;i<num_atoms+new_ghost_atoms;i++) {
+        for(int i=0;i<m_numAtoms+new_ghost_atoms;i++) {
             for(int higher=0;higher<2;higher++) {
                 local_node_id = 2*dimension + higher;
                 if (atom_should_be_copied(&positions[3*i],local_node_id)) move_queue[local_node_id][++(move_queue[local_node_id][0])] = i;
@@ -523,9 +539,9 @@ void System::mpi_copy() {
             }
 
             for (int i=0; i<num_receive; i++) {
-                positions[ 3*(num_atoms+new_ghost_atoms+i) + 0] = m_dataBuffer[3*i+0];
-                positions[ 3*(num_atoms+new_ghost_atoms+i) + 1] = m_dataBuffer[3*i+1];
-                positions[ 3*(num_atoms+new_ghost_atoms+i) + 2] = m_dataBuffer[3*i+2];
+                positions[ 3*(m_numAtoms+new_ghost_atoms+i) + 0] = m_dataBuffer[3*i+0];
+                positions[ 3*(m_numAtoms+new_ghost_atoms+i) + 1] = m_dataBuffer[3*i+1];
+                positions[ 3*(m_numAtoms+new_ghost_atoms+i) + 2] = m_dataBuffer[3*i+2];
             }
 
             new_ghost_atoms += num_receive;
@@ -536,15 +552,38 @@ void System::mpi_copy() {
 }
 
 void System::half_kick() {
-    for(int n=0;n<num_atoms;n++) {
-        velocities[3*n+0] += accelerations[3*n+0]*m_dt*0.5;
-        velocities[3*n+1] += accelerations[3*n+1]*m_dt*0.5;
-        velocities[3*n+2] += accelerations[3*n+2]*m_dt*0.5;
+    double maxMagnitude = 1.0;
+    double density = m_numAtoms / volume();
+    double volumePerAtom = 1.0/density;
+    double lengthPerAtom = pow(volumePerAtom, 1.0/3);
+
+    double minimumSystemSizeComponentSquared = 0.1*lengthPerAtom; // will square next line
+    minimumSystemSizeComponentSquared *= minimumSystemSizeComponentSquared;
+    double maxVelocitySquared = minimumSystemSizeComponentSquared/(m_dt*m_dt);
+
+    for(int n=0;n<m_numAtoms;n++) {
+        double magnitude = sqrt(accelerations[3*n+0]*m_dt*0.5*accelerations[3*n+0]*m_dt*0.5 + accelerations[3*n+1]*m_dt*0.5*accelerations[3*n+1]*m_dt*0.5 + accelerations[3*n+2]*m_dt*0.5*accelerations[3*n+2]*m_dt*0.5);
+        double scaling = (magnitude>maxMagnitude) ? maxMagnitude/magnitude : 1.0;
+
+        velocities[3*n+0] += accelerations[3*n+0]*m_dt*0.5*scaling;
+        velocities[3*n+1] += accelerations[3*n+1]*m_dt*0.5*scaling;
+        velocities[3*n+2] += accelerations[3*n+2]*m_dt*0.5*scaling;
+
+        double velocitySquared = velocities[3*n+0]*velocities[3*n+0] + velocities[3*n+1]*velocities[3*n+1] + velocities[3*n+2]*velocities[3*n+2];
+        if(velocitySquared>maxVelocitySquared) {
+            m_didScaleVelocitiesDueToHighValues = true;
+            double scaling2 = sqrt(maxVelocitySquared/velocitySquared);
+            velocities[3*n+0] *= scaling2;
+            velocities[3*n+1] *= scaling2;
+            velocities[3*n+2] *= scaling2;
+        }
+
+        magnitude = sqrt(accelerations[3*n+0]*m_dt*0.5*accelerations[3*n+0]*m_dt*0.5 + accelerations[3*n+1]*m_dt*0.5*accelerations[3*n+1]*m_dt*0.5 + accelerations[3*n+2]*m_dt*0.5*accelerations[3*n+2]*m_dt*0.5)*scaling;
     }
 }
 
 void System::full_kick() {
-    for(int n=0;n<num_atoms;n++) {
+    for(int n=0;n<m_numAtoms;n++) {
         velocities[3*n+0] += accelerations[3*n+0]*m_dt;
         velocities[3*n+1] += accelerations[3*n+1]*m_dt;
         velocities[3*n+2] += accelerations[3*n+2]*m_dt;
@@ -552,7 +591,7 @@ void System::full_kick() {
 }
 
 void System::move() {
-    for(int n=0;n<num_atoms;n++) {
+    for(int n=0;n<m_numAtoms;n++) {
         positions[3*n+0] += velocities[3*n+0]*m_dt;
         positions[3*n+1] += velocities[3*n+1]*m_dt;
         positions[3*n+2] += velocities[3*n+2]*m_dt;
@@ -563,7 +602,7 @@ void System::move() {
 
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*m_dt;
-    for(int n=0;n<num_atoms;n++) {
+    for(int n=0;n<m_numAtoms;n++) {
         if(atom_type[n] != FROZEN) {
             velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
         }
@@ -573,7 +612,7 @@ void System::apply_gravity() {
 void System::apply_harmonic_oscillator() {
     double spring_constant = 2000.0;
     double spring_constant_times_mass_inverse = spring_constant * mass_inverse;
-    for(int n=0; n<num_atoms; n++) {
+    for(int n=0; n<m_numAtoms; n++) {
         if(atom_type[n] == FROZEN) {
             double dx = positions[3*n+0] - initial_positions[3*n+0];
             double dy = positions[3*n+1] - initial_positions[3*n+1];
@@ -590,12 +629,21 @@ void System::apply_harmonic_oscillator() {
 
 void System::reset() {
     /* Reset the potential, pressure & forces */
-    memset(&accelerations[0],0,3*num_atoms*sizeof(double));
+    memset(&accelerations[0],0,3*m_numAtoms*sizeof(double));
     m_potentialEnergy = 0;
     pressure_forces = 0;
 }
 
+void System::ensureAllAtomsAreInsideSystem() {
+    for(int n=0;n<m_numAtoms;n++) {
+        positions[3*n+0] = fmod(positions[3*n+0] + 100*m_systemSize.x(), m_systemSize.x());
+        positions[3*n+1] = fmod(positions[3*n+1] + 100*m_systemSize.y(), m_systemSize.y());
+        positions[3*n+2] = fmod(positions[3*n+2] + 100*m_systemSize.z(), m_systemSize.z());
+    }
+}
+
 void System::step() {
+    m_didScaleVelocitiesDueToHighValues = false;
     half_kick();
     move();
     mpi_move();
@@ -607,6 +655,7 @@ void System::step() {
     calculate_accelerations();
     apply_harmonic_oscillator();
     half_kick();
+    ensureAllAtomsAreInsideSystem();
 
     steps++;
     m_time += m_dt;

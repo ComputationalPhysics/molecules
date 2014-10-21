@@ -13,8 +13,31 @@ void System::calculate_accelerations() {
 
     for (unsigned int c=0; c<num_cells_including_ghosts_xyz; c++) { head_all_atoms[c] = EMPTY; head_free_atoms[c] = EMPTY; }
 
-    for (unsigned int i=0; i<num_atoms+num_atoms_ghost; i++) {
+    for (unsigned int i=0; i<m_numAtoms+num_atoms_ghost; i++) {
         for (int a=0; a<3; a++) mc[a] = (positions[3*i+a]+cellLength[a])/cellLength[a];
+        if(mc[0] > 100000) {
+            if(i>= m_numAtoms) {
+                cout << "Atom " << i << " has x position " << positions[3*i+0] << " and is outside the system with cell length: " << cellLength[0] << endl;
+            } else {
+                cout << "Ghost atom " << i << " has x position " << positions[3*i+0] << " and is outside the system with cell length: " << cellLength[0] << endl;
+            }
+        }
+
+        if(mc[1] > 100000) {
+            if(i>= m_numAtoms) {
+                cout << "Atom " << i << " has y position " << positions[3*i+1] << " and is outside the system with cell length: " << cellLength[1] << endl;
+            } else {
+                cout << "Ghost atom " << i << " has y position " << positions[3*i+1] << " and is outside the system with cell length: " << cellLength[1] << endl;
+            }
+        }
+
+        if(mc[2] > 100000) {
+            if(i>= m_numAtoms) {
+                cout << "Atom " << i << " has z position " << positions[3*i+2] << " and is outside the system with cell length: " << cellLength[2] << endl;
+            } else {
+                cout << "Ghost atom " << i << " has z position " << positions[3*i+2] << " and is outside the system with cell length: " << cellLength[2] << endl;
+            }
+        }
         cell_index_from_vector(mc,cell_index);
 
         // Set this atom at the head of the linked list, and update its next
@@ -68,7 +91,7 @@ void System::calculate_accelerations() {
                                             atomDataType force = (2*dr6_inverse-1)*dr6_inverse*dr2_inverse*mass_inverse_24;
 #endif
 
-                                            bool is_local_atom = j < num_atoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
+                                            bool is_local_atom = j < m_numAtoms; // Ghost atoms contributes with 0.5 of pressure and potential energy statistics
                                             if(sample_statistics) {
 #ifdef PRECOMPUTED_TABLE
                                                 double energy0 = precomputed_potential[precomputedTableIndex];

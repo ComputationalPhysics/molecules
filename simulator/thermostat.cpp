@@ -17,7 +17,7 @@ Thermostat::Thermostat(double relaxation_time_)
 void Thermostat::apply(StatisticsSampler *sampler, System *system, const double &temperature, bool frozen_atoms_only) {
     if(frozen_atoms_only) {
         double kinetic_energy = 0;
-        for(int n=0; n<system->num_atoms;n++) {
+        for(int n=0; n<system->numAtoms();n++) {
             if(system->atom_type[n]==FROZEN) {
                 double vx = system->velocities[3*n+0];
                 double vy = system->velocities[3*n+1];
@@ -30,7 +30,7 @@ void Thermostat::apply(StatisticsSampler *sampler, System *system, const double 
         double current_temperature = 2.0/3*kinetic_energy_per_atom;
         double berendsen_factor = sqrt(1 + system->dt()/relaxation_time*(temperature/current_temperature - 1));
 
-        for(int n=0; n<system->num_atoms;n++) {
+        for(int n=0; n<system->numAtoms();n++) {
             if(system->atom_type[n]==FROZEN) {
                 for(short a=0;a<3;a++) system->velocities[3*n+a] *= berendsen_factor;
             }
@@ -39,7 +39,7 @@ void Thermostat::apply(StatisticsSampler *sampler, System *system, const double 
         sampler->sample_temperature();
         double berendsen_factor = sqrt(1 + system->dt()/relaxation_time*(temperature/sampler->temperature - 1));
 
-        for(unsigned long n=0;n<system->num_atoms;n++) {
+        for(unsigned long n=0;n<system->numAtoms();n++) {
             for(short a=0;a<3;a++) system->velocities[3*n+a] *= berendsen_factor;
         }
     }

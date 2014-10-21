@@ -46,6 +46,11 @@ Item {
             isSettingSystemSize = false
         }
 
+        onDidScaleVelocitiesDueToHighValuesChanged: {
+            dashboard.thermostatValue = 1000
+            dashboard.thermostatEnabled = true
+        }
+
         PinchArea {
             id: pinchArea
             anchors.fill: parent

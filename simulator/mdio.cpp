@@ -54,7 +54,7 @@ void MDIO::save_state_to_file_binary(QString fileName) {
     file.open(QIODevice::WriteOnly);
 
     int step = 1;
-    int atomCount = system->num_atoms;
+    int atomCount = system->numAtoms();
     double minimumX = 0.0;
     double minimumY = 0.0;
     double minimumZ = 0.0;
@@ -82,7 +82,7 @@ void MDIO::save_state_to_file_binary(QString fileName) {
     file.write(reinterpret_cast<char*>(&chunkCount), sizeof(int));
     file.write(reinterpret_cast<char*>(&chunkLength), sizeof(int));
 
-    for(unsigned int i=0;i<system->num_atoms;i++) {
+    for(unsigned int i=0;i<system->numAtoms();i++) {
         int offset = 0;
         double index = i + 1;
         double type = system->atom_type[i];
@@ -155,14 +155,14 @@ void MDIO::load_state_from_file_binary(QString fileName) {
     cout << "chunk: " << columnCount << " " << chunkCount << " " << chunkLength << endl;
     cout << "bounds: " << maximumX << " " << maximumY << " " << maximumZ << endl;
 
-    system->num_atoms = atomCount;
+    system->setNumAtoms(atomCount);
     system->setSystemSize(QVector3D(maximumX - minimumX, maximumY - minimumY, maximumZ - minimumZ));
 
     double *tmp_data = new double[chunkLength];
     file.read(reinterpret_cast<char*>(tmp_data),chunkLength*sizeof(double));
     file.close();
 
-    for(unsigned int i=0;i<system->num_atoms;i++) {
+    for(unsigned int i=0;i<system->numAtoms();i++) {
         int offset = 0;
         system->atom_type[i] = tmp_data[columnCount*i + offset + 1];
         offset += 2;
