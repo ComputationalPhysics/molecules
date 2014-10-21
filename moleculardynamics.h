@@ -59,27 +59,28 @@ public:
 
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void resetProjection();
-    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
-    void incrementZoom(double deltaZoom);
+//    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
+//    void incrementZoom(double deltaZoom);
 
-    double zoom() const;
-    void setZoom(double zoom);
+//    double zoom() const;
+    void setModelViewMatrices(double zoom, double tilt, double pan, double roll);
 
-    double pinchScale() const;
-    void setPinchScale(double pinchScale);
+//    double pinchScale() const;
+//    void setPinchScale(double pinchScale);
 
 public slots:
     void paint();
 
 private:
     QSize m_viewportSize;
-    double m_tilt;
-    double m_pan;
-    double m_roll;
-    double m_zoom;
-    double m_pinchScale;
+//    double m_tilt;
+//    double m_pan;
+//    double m_roll;
+//    double m_zoom;
 
-    QMatrix4x4 m_projection;
+    QMatrix4x4 m_projectionMatrix;
+    QMatrix4x4 m_modelViewMatrix;
+    QMatrix4x4 m_lightModelViewMatrix;
     CPGLQuads *m_glQuads;
     CPGLCube *m_glCube;
 };
@@ -94,6 +95,10 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(bool forceEnabled READ forceEnabled WRITE setForceEnabled NOTIFY forceEnabledChanged)
     Q_PROPERTY(double forceValue READ forceValue WRITE setForceValue NOTIFY forceValueChanged)
     Q_PROPERTY(QVector3D systemSize READ systemSize WRITE setSystemSize NOTIFY systemSizeChanged)
+    Q_PROPERTY(double tilt READ tilt WRITE setTilt NOTIFY tiltChanged)
+    Q_PROPERTY(double pan READ pan WRITE setPan NOTIFY panChanged)
+    Q_PROPERTY(double roll READ roll WRITE setRoll NOTIFY rollChanged)
+    Q_PROPERTY(double zoom READ zoom WRITE setZoom NOTIFY zoomChanged)
 
 public:
     MolecularDynamics();
@@ -103,21 +108,14 @@ public:
 
     double thermostatValue() const;
     bool thermostatEnabled() const;
+    bool forceEnabled() const;
+    double forceValue() const;
+    QVector3D systemSize() const;
 
-    bool forceEnabled() const
-    {
-        return m_forceEnabled;
-    }
-
-    double forceValue() const
-    {
-        return m_forceValue;
-    }
-
-    QVector3D systemSize() const
-    {
-        return m_systemSize;
-    }
+    double tilt() const;
+    double pan() const;
+    double roll() const;
+    double zoom() const;
 
 public slots:
     void sync();
@@ -127,49 +125,26 @@ public slots:
 
     void setThermostatValue(double arg);
     void setThermostatEnabled(bool arg);
+    void setForceEnabled(bool arg);
+    void setForceValue(double arg);
+    void setSystemSize(QVector3D arg);
 
-    void setForceEnabled(bool arg)
-    {
-        if(!m_renderer) return;
-        if (m_forceEnabled == arg)
-            return;
-
-        m_forceEnabled = arg;
-        m_renderer->m_simulator.m_settings.gravity_direction = m_forceEnabled ? 2 : -1; // -1 means disabled
-        emit forceEnabledChanged(arg);
-    }
-
-    void setForceValue(double arg)
-    {
-        if(!m_renderer) return;
-        if (m_forceValue == arg)
-            return;
-
-        m_forceValue = arg;
-        m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
-        emit forceValueChanged(arg);
-    }
-
-    void setSystemSize(QVector3D arg)
-    {
-        if(!m_renderer) return;
-        if (m_systemSize == arg)
-            return;
-
-        m_systemSize = arg;
-        m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
-        emit systemSizeChanged(arg);
-    }
+    void setTilt(double arg);
+    void setPan(double arg);
+    void setRoll(double arg);
+    void setZoom(double arg);
 
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
-
     void forceEnabledChanged(bool arg);
-
     void forceValueChanged(double arg);
-
     void systemSizeChanged(QVector3D arg);
+
+    void tiltChanged(double arg);
+    void panChanged(double arg);
+    void rollChanged(double arg);
+    void zoomChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -184,6 +159,10 @@ private:
     bool m_forceEnabled;
     double m_forceValue;
     QVector3D m_systemSize;
+    double m_tilt;
+    double m_pan;
+    double m_roll;
+    double m_zoom;
 };
 //! [2]
 

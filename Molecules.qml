@@ -22,6 +22,10 @@ Item {
         forceEnabled: dashboard.forceEnabled
         forceValue: dashboard.forceValue
 
+        pan: 30
+        tilt: 30
+        zoom: -10.0
+
         onSystemSizeChanged: {
             if(dashboard.isSettingSystemSize) {
                 return
@@ -80,12 +84,15 @@ Item {
                     var deltaY = mouse.y - lastPosition.y
                     var deltaPan = deltaX / width * 360 // max 3 rounds
                     var deltaTilt = deltaY / height * 180 // max 0.5 round
-                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
+//                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
+                    molecularDynamics.pan += deltaPan
+                    molecularDynamics.tilt += deltaTilt
                     lastPosition = Qt.point(mouse.x, mouse.y)
                 }
 
                 onWheel: {
-                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
+//                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
+                    molecularDynamics.zoom += wheel.angleDelta.y / 180
                 }
             }
         }
