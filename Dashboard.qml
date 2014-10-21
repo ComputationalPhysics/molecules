@@ -19,6 +19,10 @@ Item {
     property alias systemSizeY: systemSizeYSlider.value
     property alias systemSizeZ: systemSizeZSlider.value
 
+    property bool othersPressed: false
+
+    property real hiddenOpacity: 0.2
+
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
 
@@ -127,7 +131,13 @@ Item {
         width: parent.width * 0.7
         border.width: 1.0
         border.color: Qt.rgba(0.5, 0.5, 0.5, 0.9)
-        color: Qt.rgba(0.05, 0.05, 0.05, 0.8)
+        color: Qt.rgba(0.05, 0.05, 0.05, othersPressed ? hiddenOpacity : 0.8)
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 200
+            }
+        }
 
         MouseArea {
             // Dummy area to keep input on background from being passed through to MD object
@@ -145,6 +155,14 @@ Item {
             width: parent.width * 0.05
             height: width
             source: dashboardRoot.running ? "images/pause.png" : "images/play.png"
+
+            opacity: othersPressed ? hiddenOpacity : 1.0
+
+            Behavior on opacity {
+                OpacityAnimation {
+
+                }
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -164,21 +182,37 @@ Item {
             }
 
             height: dashboardRectangle.height*0.3
+            opacity: othersPressed ? hiddenOpacity : 1.0
 
             spacing: anchors.margins
+
+            Behavior on opacity {
+                OpacityAnimation {
+
+                }
+            }
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                color: "black"
+                border.color: "white"
+                border.width: 1.0
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                color: "black"
+                border.color: "white"
+                border.width: 1.0
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                color: "black"
+                border.color: "white"
+                border.width: 1.0
             }
         }
 
@@ -203,10 +237,24 @@ Item {
                 id: thermostatCheckbox
                 checked: false
                 text: "T"
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CheckBoxStyle {
                     label: Text {
                         text: control.text
                         color: "white"
+                    }
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
                     }
                 }
             }
@@ -218,8 +266,22 @@ Item {
                 minimumValue: 1
                 maximumValue: 1000
                 value: 100
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CustomSliderStyle {
 
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
                 }
             }
 
@@ -227,10 +289,24 @@ Item {
                 id: forceCheckbox
                 checked: false
                 text: "F"
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CheckBoxStyle {
                     label: Text {
                         text: control.text
                         color: "white"
+                    }
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
                     }
                 }
             }
@@ -242,8 +318,22 @@ Item {
                 minimumValue: -100
                 maximumValue: 100
                 value: 0
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CustomSliderStyle {
 
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
                 }
             }
 
@@ -254,8 +344,22 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CustomSliderStyle {
 
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
                 }
             }
 
@@ -266,8 +370,22 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
                 style: CustomSliderStyle {
 
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
                 }
             }
 
@@ -278,8 +396,23 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
+
                 style: CustomSliderStyle {
 
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
                 }
             }
 

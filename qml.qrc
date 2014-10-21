@@ -6,5 +6,6 @@
         <file>SimulationButton.qml</file>
         <file>Dashboard.qml</file>
         <file>style/CustomSliderStyle.qml</file>
+        <file>style/OpacityAnimation.qml</file>
     </qresource>
 </RCC>
