@@ -117,7 +117,7 @@ void CPGLCube::createShaderProgram()
 
         m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
                                            "void main() {\n"
-                                           "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+                                           "    gl_FragColor = vec4(0.5, 0.6, 0.53, 1.0);\n"
                                            "}");
 
 

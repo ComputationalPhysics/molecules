@@ -162,6 +162,12 @@ Item {
         MouseArea {
             // Dummy area to keep input on background from being passed through to MD object
             anchors.fill: parent
+            onPressed: {
+                othersPressed = true
+            }
+            onReleased: {
+                othersPressed = false
+            }
         }
 
         Image {
