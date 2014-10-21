@@ -20,7 +20,7 @@ Item {
             }
             PropertyChanges {
                 target: revealToogleButton
-                opacity: 1.0
+                opacity: 0.0
             }
         },
         State {
@@ -95,6 +95,14 @@ Item {
             onPressed: {
                 systemsViewRoot.revealed = true
             }
+        }
+    }
+
+    MouseArea {
+        enabled: systemsViewRoot.revealed
+        anchors.fill: parent
+        onPressed: {
+            systemsViewRoot.revealed = false
         }
     }
 

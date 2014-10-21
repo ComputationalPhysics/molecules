@@ -3,6 +3,8 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 
+import "style"
+
 Item {
     id: dashboardRoot
     property bool revealed: false
@@ -28,6 +30,10 @@ Item {
                 opacity: 1.0
                 scale: 1.0
             }
+            PropertyChanges {
+                target: revealToggleButton
+                opacity: 0.0
+            }
         },
         State {
             name: "hidden"
@@ -35,6 +41,10 @@ Item {
                 target: dashboardRectangle
                 opacity: 0.0
                 scale: 0.85
+            }
+            PropertyChanges {
+                target: revealToggleButton
+                opacity: 1.0
             }
         }
     ]
@@ -76,6 +86,14 @@ Item {
         }
     ]
 
+    MouseArea {
+        enabled: dashboardRoot.revealed
+        anchors.fill: parent
+        onPressed: {
+            dashboardRoot.revealed = false
+        }
+    }
+
     Item {
         id: revealToggleButton
         anchors {
@@ -112,6 +130,7 @@ Item {
         color: Qt.rgba(0.05, 0.05, 0.05, 0.8)
 
         MouseArea {
+            // Dummy area to keep input on background from being passed through to MD object
             anchors.fill: parent
         }
 
@@ -199,6 +218,9 @@ Item {
                 minimumValue: 1
                 maximumValue: 1000
                 value: 100
+                style: CustomSliderStyle {
+
+                }
             }
 
             CheckBox {
@@ -220,6 +242,9 @@ Item {
                 minimumValue: -100
                 maximumValue: 100
                 value: 0
+                style: CustomSliderStyle {
+
+                }
             }
 
             Slider {
@@ -229,6 +254,9 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                style: CustomSliderStyle {
+
+                }
             }
 
             Slider {
@@ -238,6 +266,9 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                style: CustomSliderStyle {
+
+                }
             }
 
             Slider {
@@ -247,6 +278,9 @@ Item {
                 minimumValue: 5
                 maximumValue: 100
                 value: 10
+                style: CustomSliderStyle {
+
+                }
             }
 
             Item {
