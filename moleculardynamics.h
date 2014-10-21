@@ -44,6 +44,7 @@
 
 #include <QtQuick/QQuickItem>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QElapsedTimer>
 #include <QMatrix4x4>
 #include "cpglquads.h"
 #include "cpglcube.h"
@@ -99,6 +100,7 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(double pan READ pan WRITE setPan NOTIFY panChanged)
     Q_PROPERTY(double roll READ roll WRITE setRoll NOTIFY rollChanged)
     Q_PROPERTY(double zoom READ zoom WRITE setZoom NOTIFY zoomChanged)
+    Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
 
 public:
     MolecularDynamics();
@@ -117,6 +119,8 @@ public:
     double roll() const;
     double zoom() const;
 
+    bool running() const;
+
 public slots:
     void sync();
     void cleanup();
@@ -134,6 +138,8 @@ public slots:
     void setRoll(double arg);
     void setZoom(double arg);
 
+    void setRunning(bool arg);
+
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
@@ -145,6 +151,8 @@ signals:
     void panChanged(double arg);
     void rollChanged(double arg);
     void zoomChanged(double arg);
+
+    void runningChanged(bool arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -163,6 +171,8 @@ private:
     double m_pan;
     double m_roll;
     double m_zoom;
+    QElapsedTimer m_timer;
+    bool m_running;
 };
 //! [2]
 

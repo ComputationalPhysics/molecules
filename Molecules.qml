@@ -26,6 +26,8 @@ Item {
         tilt: 30
         zoom: -40
 
+        running: dashboard.running
+
         onSystemSizeChanged: {
             if(dashboard.isSettingSystemSize) {
                 return
@@ -100,7 +102,7 @@ Item {
         Timer {
             id: timer
             property real lastTime: Date.now()
-            running: dashboard.running
+            running: true
             repeat: true
             interval: 1
             onTriggered: {

@@ -100,20 +100,6 @@ void MolecularDynamicsRenderer::setModelViewMatrices(double zoom, double tilt, d
     m_lightModelViewMatrix.rotate(roll, 0, 1, 0);
 }
 
-//void MolecularDynamicsRenderer::incrementRotation(double deltaPan, double deltaTilt, double deltaRoll)
-//{
-//    m_pan += deltaPan;
-//    m_tilt += deltaTilt;
-//    m_tilt = max(-90.0, min(90.0, m_tilt)); // Clamp so that upside-down is not possible
-//    m_roll += deltaRoll;
-//}
-
-//void MolecularDynamicsRenderer::incrementZoom(double deltaZoom)
-//{
-//    m_zoom += deltaZoom;
-
-//}
-
 void MolecularDynamicsRenderer::paint()
 {
     glViewport(0, 0, m_viewportSize.width(), m_viewportSize.height());
@@ -149,15 +135,21 @@ void MolecularDynamicsRenderer::paint()
     glDepthMask(GL_TRUE);
 }
 
-//double MolecularDynamicsRenderer::zoom() const
-//{
-//    return m_zoom;
-//}
-
-//void MolecularDynamicsRenderer::setZoom(double zoom)
-//{
-//    m_zoom = zoom;
-//}
+MolecularDynamics::MolecularDynamics()
+    : m_renderer(0),
+      m_thermostatValue(1.0),
+      m_thermostatEnabled(false),
+      m_forceEnabled(false),
+      m_forceValue(0),
+      m_tilt(0),
+      m_pan(0),
+      m_roll(0),
+      m_zoom(-4),
+      m_running(true)
+{
+    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
+    m_timer.start();
+}
 
 void MolecularDynamics::cleanup()
 {
@@ -273,6 +265,15 @@ void MolecularDynamics::setZoom(double arg)
     emit zoomChanged(arg);
 }
 
+void MolecularDynamics::setRunning(bool arg)
+{
+    if (m_running == arg)
+        return;
+
+    m_running = arg;
+    emit runningChanged(arg);
+}
+
 void MolecularDynamics::sync()
 {
     if (!m_renderer) {
@@ -285,9 +286,8 @@ void MolecularDynamics::sync()
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
     m_renderer->setModelViewMatrices(m_zoom, m_tilt, m_pan, m_roll);
-//    m_renderer->setModelViewMatrices(0, 0, 0, 0);
-//    double safeDt = min(0.02, dt);
-    double safeDt = 0.02;
+    double dt = m_timer.restart() / 1000.0;
+    double safeDt = min(0.02, dt);
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
         m_renderer->m_simulator.m_thermostat->relaxation_time = 0.1;
@@ -295,21 +295,10 @@ void MolecularDynamics::sync()
     }
 
     m_renderer->m_simulator.m_system.setDt(safeDt);
-    m_renderer->m_simulator.step();
-}
 
-MolecularDynamics::MolecularDynamics()
-    : m_renderer(0),
-      m_thermostatValue(1.0),
-      m_thermostatEnabled(false),
-      m_forceEnabled(false),
-      m_forceValue(0),
-      m_tilt(0),
-      m_pan(0),
-      m_roll(0),
-      m_zoom(-4)
-{
-    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
+    if(m_running) {
+        m_renderer->m_simulator.step();
+    }
 }
 
 void MolecularDynamics::step(double dt)
@@ -380,6 +369,11 @@ double MolecularDynamics::roll() const
 double MolecularDynamics::zoom() const
 {
     return m_zoom;
+}
+
+bool MolecularDynamics::running() const
+{
+    return m_running;
 }
 
 void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
