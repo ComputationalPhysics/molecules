@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Molecules.qml</file>
-        <file>ToolsView.qml</file>
         <file>SimulationsView.qml</file>
         <file>SimulationButton.qml</file>
         <file>Dashboard.qml</file>
