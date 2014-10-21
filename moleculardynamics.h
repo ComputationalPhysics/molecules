@@ -103,6 +103,7 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
     Q_PROPERTY(int atomCount READ atomCount NOTIFY atomCountChanged)
     Q_PROPERTY(bool didScaleVelocitiesDueToHighValues READ didScaleVelocitiesDueToHighValues NOTIFY didScaleVelocitiesDueToHighValuesChanged)
+    Q_PROPERTY(double temperature READ temperature NOTIFY temperatureChanged)
 
 public:
     MolecularDynamics();
@@ -133,6 +134,11 @@ public:
         return m_didScaleVelocitiesDueToHighValues;
     }
 
+    double temperature() const
+    {
+        return m_temperature;
+    }
+
 public slots:
     void sync();
     void cleanup();
@@ -161,6 +167,15 @@ public slots:
         emit didScaleVelocitiesDueToHighValuesChanged(arg);
     }
 
+    void setTemperature(double arg)
+    {
+        if (m_temperature == arg)
+            return;
+
+        m_temperature = arg;
+        emit temperatureChanged(arg);
+    }
+
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
@@ -178,6 +193,8 @@ signals:
     void atomCountChanged(int arg);
 
     void didScaleVelocitiesDueToHighValuesChanged(bool arg);
+
+    void temperatureChanged(double arg);
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
@@ -209,6 +226,7 @@ private:
         emit atomCountChanged(arg);
     }
     bool m_didScaleVelocitiesDueToHighValues;
+    double m_temperature;
 };
 //! [2]
 

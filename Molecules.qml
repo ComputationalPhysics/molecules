@@ -113,6 +113,7 @@ Item {
         Timer {
             id: timer
             property real lastTime: Date.now()
+            property real lastSampleTime: Date.now()
             running: true
             repeat: true
             interval: 1
@@ -121,6 +122,12 @@ Item {
                 var dt = currentTime - lastTime
                 dt /= 1000
                 molecularDynamics.step(dt)
+
+                var sampleTimeDifference = (currentTime - lastSampleTime)/1000
+                if(sampleTimeDifference > 0.1) {
+                    lastSampleTime = currentTime
+                    dashboard.addTemperature(molecularDynamics.temperature)
+                }
                 lastTime = currentTime
             }
         }

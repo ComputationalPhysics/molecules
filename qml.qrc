@@ -7,5 +7,7 @@
         <file>Dashboard.qml</file>
         <file>style/CustomSliderStyle.qml</file>
         <file>style/OpacityAnimation.qml</file>
+        <file>Plot.qml</file>
+        <file>PlotLabels.qml</file>
     </qresource>
 </RCC>

@@ -21,8 +21,11 @@ Item {
     property real  minimumSystemSizeSliderValue: 1
 
     property bool othersPressed: false
-
     property real hiddenOpacity: 0.2
+
+    function addTemperature(temperature) {
+        plotTemperature.addPoint(temperature)
+    }
 
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
@@ -192,12 +195,27 @@ Item {
 
                 }
             }
+
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: "black"
                 border.color: "white"
                 border.width: 1.0
+
+                Plot {
+                    id: plotTemperature
+                    anchors.fill: parent
+                    minimumValue: 0
+                    maximumValue: 1000
+                    strokeStyle: "#4292c6"
+                }
+
+                PlotLabels {
+                    anchors.fill: parent
+                    minimumValue: plotTemperature.minimumValue
+                    maximumValue: plotTemperature.maximumValue
+                }
             }
 
             Rectangle {
@@ -206,6 +224,36 @@ Item {
                 color: "black"
                 border.color: "white"
                 border.width: 1.0
+
+                Plot {
+                    id: plotKineticEnergy
+                    anchors.fill: parent
+                    minimumValue: 0
+                    maximumValue: 1000
+                    strokeStyle: "#4292c6"
+                }
+
+                Plot {
+                    id: plotPotentialEnergy
+                    anchors.fill: parent
+                    minimumValue: 0
+                    maximumValue: 1000
+                    strokeStyle: "#4292c6"
+                }
+
+                Plot {
+                    id: plotTotalEnergy
+                    anchors.fill: parent
+                    minimumValue: 0
+                    maximumValue: 1000
+                    strokeStyle: "#4292c6"
+                }
+
+                PlotLabels {
+                    anchors.fill: parent
+                    minimumValue: plotTemperature.minimumValue
+                    maximumValue: plotTemperature.maximumValue
+                }
             }
 
             Rectangle {
