@@ -32,7 +32,7 @@ Item {
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
-        property bool zoomSetByLoad: false
+        property real targetZoom: 0.0
         property bool isSettingSystemSize: false
         property real volume: systemSize.x*systemSize.y*systemSize.z
         property real density: atomCount / volume
@@ -50,17 +50,14 @@ Item {
 
         running: dashboard.running
 
-        Behavior on zoom {
-            enabled: molecularDynamics.zoomSetByLoad
-            NumberAnimation {
-                duration: 400
-                easing.type: Easing.InOutQuad
-                onRunningChanged: {
-                    if(!running) {
-                        molecularDynamics.zoomSetByLoad = false
-                    }
-                }
-            }
+        PropertyAnimation {
+            id: zoomAnimation
+            target: molecularDynamics
+            property: "zoom"
+            from: molecularDynamics.zoom
+            to: molecularDynamics.targetZoom
+            duration: 400
+            easing.type: Easing.InOutQuad
         }
 
         onAtomCountChanged: {
@@ -98,7 +95,6 @@ Item {
             onPinchUpdated: {
                 var correctScale = pinch.scale >= 1.0 ? (pinch.scale - 1.0) : (-1.0 / pinch.scale + 1.0)
                 var deltaScale = correctScale - previousScale
-                molecularDynamics.zoomSetByLoad = false
                 molecularDynamics.zoom += 10 * deltaScale
                 previousScale = correctScale
             }
@@ -140,7 +136,6 @@ Item {
 
                 onWheel: {
                     //                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
-                    molecularDynamics.zoomSetByLoad = false
                     molecularDynamics.zoom += wheel.angleDelta.y / 180
                 }
             }
@@ -330,8 +325,8 @@ Item {
             revealed = false
             molecularDynamics.load(fileName)
             var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
-            molecularDynamics.zoomSetByLoad = true
-            molecularDynamics.zoom = -10 - systemSizeMax
+            molecularDynamics.targetZoom = -10 - systemSizeMax
+            zoomAnimation.restart()
             dashboard.resetControls()
             molecularDynamics.running = true
         }
