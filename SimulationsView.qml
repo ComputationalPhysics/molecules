@@ -163,6 +163,7 @@ Item {
                 property real elementHeight: elementWidth * 9.0 / 16.0
                 property var simulations: [
                     { identifier: "default", name: "Default"},
+                    { identifier: "chamber", name: "Chamber"},
                     { identifier: "cylinder", name: "Cylinder"},
                     { identifier: "pores8", name: "Small pores"},
                     { identifier: "pores16", name: "Medium pores"},
