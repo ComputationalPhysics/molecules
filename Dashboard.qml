@@ -71,35 +71,50 @@ Item {
         var logMinValue = Math.log(Math.abs(minValue)) / Math.LN10
         var logMaxValue = Math.log(Math.abs(maxValue)) / Math.LN10
 
-        var minExponent = 0
-        if(minValue > 0) {
-            minExponent = Math.floor(logMinValue)
-        } else {
-            minExponent = Math.ceil(logMinValue)
-        }
+        var minExponent = Math.floor(logMinValue)
+        var maxExponent = Math.floor(logMaxValue)
 
-        var maxExponent = 0
-        if(maxValue > 0) {
-            maxExponent = Math.ceil(logMaxValue)
-        } else {
-            maxExponent = Math.floor(logMaxValue)
-        }
+        var sharedExponent = Math.max(minExponent, maxExponent)
 
-        var minSign = (minValue > 0) ? 1.0 : -1.0
-        var maxSign = (maxValue > 0) ? 1.0 : -1.0
+        var powMinExponent = Math.pow(10, sharedExponent)
+        var minValueOverExponentMinusOne = minValue / powMinExponent
+        var minValueRoundedDown = Math.floor(minValueOverExponentMinusOne)
+        var minValueOut = minValueRoundedDown * powMinExponent
 
-        var outMinValue = minSign * Math.pow(10, minExponent)
-        var outMaxValue = maxSign *Math.pow(10, maxExponent)
+        var powMaxExponent = Math.pow(10, sharedExponent)
+        var maxValueOverExponentMinusOne = maxValue / powMaxExponent
+        var maxValueRoundedUp = Math.ceil(maxValueOverExponentMinusOne)
+        var maxValueOut = maxValueRoundedUp * powMaxExponent
 
-        if(outMinValue > 0.99 && outMinValue < 1.01) {
-            outMinValue = 0
-        }
+//        var minExponent = 0
+//        if(minValue > 0) {
+//            minExponent = Math.ceil(logMinValue)
+//        } else {
+//            minExponent = Math.floor(logMinValue)
+//        }
 
-        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
-            outMaxValue = 0
-        }
+//        var maxExponent = 0
+//        if(maxValue > 0) {
+//            maxExponent = Math.floor(logMaxValue)
+//        } else {
+//            maxExponent = Math.ceil(logMaxValue)
+//        }
 
-        return [outMinValue, outMaxValue]
+//        var minSign = (minValue > 0) ? 1.0 : -1.0
+//        var maxSign = (maxValue > 0) ? 1.0 : -1.0
+
+//        var outMinValue = minSign / Math.pow(10, minExponent)
+//        var outMaxValue = maxSign * Math.pow(10, maxExponent)
+
+//        if(outMinValue > 0.99 && outMinValue < 1.01) {
+//            outMinValue = 0
+//        }
+
+//        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
+//            outMaxValue = 0
+//        }
+
+        return [minValueOut, maxValueOut]
     }
 
     function resetRange() {
@@ -324,7 +339,7 @@ Item {
                     id: temperaturePlot
                     anchors {
                         fill: parent
-                        margins: width * 0.01
+                        margins: width * 0.05
                     }
                     minimumValue: 0
                     maximumValue: 1100
@@ -350,7 +365,7 @@ Item {
                     id: pressurePlot
                     anchors {
                         fill: parent
-                        margins: width * 0.01
+                        margins: width * 0.05
                     }
                     minimumValue: -10
                     maximumValue: 1200
@@ -376,7 +391,7 @@ Item {
                     id: kineticEnergyPlot
                     anchors {
                         fill: parent
-                        margins: width * 0.01
+                        margins: width * 0.05
                     }
                     minimumValue: -1
                     maximumValue: 1
@@ -387,7 +402,7 @@ Item {
                     id: potentialEnergyPlot
                     anchors {
                         fill: parent
-                        margins: width * 0.01
+                        margins: width * 0.05
                     }
                     minimumValue: kineticEnergyPlot.minimumValue
                     maximumValue: kineticEnergyPlot.maximumValue
@@ -398,7 +413,7 @@ Item {
                     id: totalEnergyPlot
                     anchors {
                         fill: parent
-                        margins: width * 0.01
+                        margins: width * 0.05
                     }
                     minimumValue: kineticEnergyPlot.minimumValue
                     maximumValue: kineticEnergyPlot.maximumValue

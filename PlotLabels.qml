@@ -4,7 +4,7 @@ Item {
     property real maximumValue: 100
     property real minimumValue: -100
     property string title: ""
-    property real scientificLimit: 1000
+    property real scientificLimit: 9999
     width: 100
     height: 62
 
