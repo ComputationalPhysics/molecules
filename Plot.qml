@@ -10,6 +10,7 @@ Canvas {
     property real maximumValue: 100.0
     property int paintsSinceLastReset: 100
     property int length: 0
+    property real lineWidth: 2.0
 
     antialiasing: true
 

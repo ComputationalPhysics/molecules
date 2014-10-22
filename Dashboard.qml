@@ -22,6 +22,9 @@ Item {
 
     property real temperature: 0.0
     property real pressure: 0.0
+    property real kineticEnergy: 0.0
+    property real potentialEnergy: 0.0
+    property real totalEnergy: 0.0
 
     property bool othersPressed: false
     property real hiddenOpacity: 0.2
@@ -86,33 +89,33 @@ Item {
         var maxValueRoundedUp = Math.ceil(maxValueOverExponentMinusOne)
         var maxValueOut = maxValueRoundedUp * powMaxExponent
 
-//        var minExponent = 0
-//        if(minValue > 0) {
-//            minExponent = Math.ceil(logMinValue)
-//        } else {
-//            minExponent = Math.floor(logMinValue)
-//        }
+        //        var minExponent = 0
+        //        if(minValue > 0) {
+        //            minExponent = Math.ceil(logMinValue)
+        //        } else {
+        //            minExponent = Math.floor(logMinValue)
+        //        }
 
-//        var maxExponent = 0
-//        if(maxValue > 0) {
-//            maxExponent = Math.floor(logMaxValue)
-//        } else {
-//            maxExponent = Math.ceil(logMaxValue)
-//        }
+        //        var maxExponent = 0
+        //        if(maxValue > 0) {
+        //            maxExponent = Math.floor(logMaxValue)
+        //        } else {
+        //            maxExponent = Math.ceil(logMaxValue)
+        //        }
 
-//        var minSign = (minValue > 0) ? 1.0 : -1.0
-//        var maxSign = (maxValue > 0) ? 1.0 : -1.0
+        //        var minSign = (minValue > 0) ? 1.0 : -1.0
+        //        var maxSign = (maxValue > 0) ? 1.0 : -1.0
 
-//        var outMinValue = minSign / Math.pow(10, minExponent)
-//        var outMaxValue = maxSign * Math.pow(10, maxExponent)
+        //        var outMinValue = minSign / Math.pow(10, minExponent)
+        //        var outMaxValue = maxSign * Math.pow(10, maxExponent)
 
-//        if(outMinValue > 0.99 && outMinValue < 1.01) {
-//            outMinValue = 0
-//        }
+        //        if(outMinValue > 0.99 && outMinValue < 1.01) {
+        //            outMinValue = 0
+        //        }
 
-//        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
-//            outMaxValue = 0
-//        }
+        //        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
+        //            outMaxValue = 0
+        //        }
 
         return [minValueOut, maxValueOut]
     }
@@ -328,103 +331,154 @@ Item {
                 }
             }
 
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "black"
-                border.color: "white"
-                border.width: 1.0
-
-                Plot {
-                    id: temperaturePlot
-                    anchors {
-                        fill: parent
-                        margins: width * 0.05
-                    }
-                    minimumValue: 0
-                    maximumValue: 1100
-                    strokeStyle: "#a6cee3"
-                }
-
-                PlotLabels {
+                ColumnLayout {
                     anchors.fill: parent
-                    minimumValue: temperaturePlot.minimumValue
-                    maximumValue: temperaturePlot.maximumValue
-                    title: "T [K]"
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "black"
+                        border.color: "white"
+                        border.width: 1.0
+
+                        Plot {
+                            id: temperaturePlot
+                            anchors {
+                                fill: parent
+                                margins: dashboardRoot.width * 0.01
+                            }
+                            minimumValue: 0
+                            maximumValue: 1100
+                            strokeStyle: "#a6cee3"
+                        }
+
+                        PlotLabels {
+                            anchors.fill: parent
+                            minimumValue: temperaturePlot.minimumValue
+                            maximumValue: temperaturePlot.maximumValue
+                            title: "T [K]"
+                        }
+                    }
+
+                    Text {
+                        text: "T = " + dashboardRoot.temperature.toFixed(1) + " K"
+                        color: temperaturePlot.strokeStyle
+                        font.pixelSize: 12
+                    }
                 }
             }
 
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "black"
-                border.color: "white"
-                border.width: 1.0
-
-                Plot {
-                    id: pressurePlot
-                    anchors {
-                        fill: parent
-                        margins: width * 0.05
-                    }
-                    minimumValue: -10
-                    maximumValue: 1200
-                    strokeStyle: "#a6cee3"
-                }
-
-                PlotLabels {
+                ColumnLayout {
                     anchors.fill: parent
-                    minimumValue: pressurePlot.minimumValue
-                    maximumValue: pressurePlot.maximumValue
-                    title: "P [MPa]"
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "black"
+                        border.color: "white"
+                        border.width: 1.0
+
+                        Plot {
+                            id: pressurePlot
+                            anchors {
+                                fill: parent
+                                margins: dashboardRoot.width * 0.01
+                            }
+                            minimumValue: -10
+                            maximumValue: 1200
+                            strokeStyle: "#a6cee3"
+                        }
+
+                        PlotLabels {
+                            anchors.fill: parent
+                            minimumValue: pressurePlot.minimumValue
+                            maximumValue: pressurePlot.maximumValue
+                            title: "P [MPa]"
+                        }
+                    }
+
+                    Text {
+                        text: "P = " + (dashboardRoot.pressure * 1e-6).toFixed(1) + " MPa"
+                        color: pressurePlot.strokeStyle
+                        font.pixelSize: 12
+                    }
                 }
             }
 
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "black"
-                border.color: "white"
-                border.width: 1.0
-
-                Plot {
-                    id: kineticEnergyPlot
-                    anchors {
-                        fill: parent
-                        margins: width * 0.05
-                    }
-                    minimumValue: -1
-                    maximumValue: 1
-                    strokeStyle: "#a6cee3"
-                }
-
-                Plot {
-                    id: potentialEnergyPlot
-                    anchors {
-                        fill: parent
-                        margins: width * 0.05
-                    }
-                    minimumValue: kineticEnergyPlot.minimumValue
-                    maximumValue: kineticEnergyPlot.maximumValue
-                    strokeStyle: "#b2df8a"
-                }
-
-                Plot {
-                    id: totalEnergyPlot
-                    anchors {
-                        fill: parent
-                        margins: width * 0.05
-                    }
-                    minimumValue: kineticEnergyPlot.minimumValue
-                    maximumValue: kineticEnergyPlot.maximumValue
-                    strokeStyle: "#fdbf6f"
-                }
-
-                PlotLabels {
+                ColumnLayout {
                     anchors.fill: parent
-                    minimumValue: kineticEnergyPlot.minimumValue
-                    maximumValue: kineticEnergyPlot.maximumValue
-                    title: "E/N [eV]"
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        color: "black"
+                        border.color: "white"
+                        border.width: 1.0
+
+                        Plot {
+                            id: kineticEnergyPlot
+                            anchors {
+                                fill: parent
+                                margins: dashboardRoot.width * 0.01
+                            }
+                            minimumValue: -1
+                            maximumValue: 1
+                            strokeStyle: "#b2df8a"
+                        }
+
+                        Plot {
+                            id: potentialEnergyPlot
+                            anchors {
+                                fill: parent
+                                margins: dashboardRoot.width * 0.01
+                            }
+                            minimumValue: kineticEnergyPlot.minimumValue
+                            maximumValue: kineticEnergyPlot.maximumValue
+                            strokeStyle: "#a6cee3"
+                        }
+
+                        Plot {
+                            id: totalEnergyPlot
+                            anchors {
+                                fill: parent
+                                margins: dashboardRoot.width * 0.01
+                            }
+                            minimumValue: kineticEnergyPlot.minimumValue
+                            maximumValue: kineticEnergyPlot.maximumValue
+                            strokeStyle: "#ff7f00"
+                        }
+
+                        PlotLabels {
+                            anchors.fill: parent
+                            minimumValue: kineticEnergyPlot.minimumValue
+                            maximumValue: kineticEnergyPlot.maximumValue
+                            title: "E/N [eV]"
+                        }
+                    }
+                    Row {
+                        spacing: 12
+                        Text {
+                            text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(1) + " eV"
+                            color: kineticEnergyPlot.strokeStyle
+                            font.pixelSize: 12
+                        }
+                        Text {
+                            text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(1) + " eV"
+                            color: potentialEnergyPlot.strokeStyle
+                            font.pixelSize: 12
+                        }
+                        Text {
+                            text: "Et = " + dashboardRoot.totalEnergy.toFixed(1) + " eV"
+                            color: totalEnergyPlot.strokeStyle
+                            font.pixelSize: 12
+                        }
+                    }
                 }
             }
         }

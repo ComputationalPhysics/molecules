@@ -36,6 +36,7 @@ Item {
         property bool isSettingSystemSize: false
         property real volume: systemSize.x*systemSize.y*systemSize.z
         property real density: atomCount / volume
+        property real totalEnergy: kineticEnergy + potentialEnergy
 
         thermostatEnabled: dashboard.thermostatEnabled
         thermostatValue: dashboard.thermostatValue
@@ -176,6 +177,13 @@ Item {
     Dashboard {
         id: dashboard
         property bool isSettingSystemSize: false
+
+        temperature: molecularDynamics.temperature
+        pressure: molecularDynamics.pressure
+        kineticEnergy: molecularDynamics.kineticEnergy
+        potentialEnergy: molecularDynamics.potentialEnergy
+        totalEnergy: molecularDynamics.totalEnergy
+
         function updateSystemSize() {
             if(molecularDynamics.isSettingSystemSize) {
                 return
@@ -184,9 +192,6 @@ Item {
             molecularDynamics.systemSize = Qt.vector3d(systemSizeX, systemSizeY, systemSizeZ)
             isSettingSystemSize = false
         }
-
-        temperature: molecularDynamics.temperature
-        pressure: molecularDynamics.pressure
 
         onSystemSizeXChanged: {
             updateSystemSize()
