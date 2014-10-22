@@ -55,7 +55,7 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     up.setY(m_modelViewMatrix(1,1));
     up.setZ(m_modelViewMatrix(1,2));
 
-    float scale = 0.3;
+    float scale = 0.4;
     QVector3D ul = (0.5*up - 0.5*right)*scale;
     QVector3D ur = (0.5*up + 0.5*right)*scale;
     QVector3D dl = (-0.5*up - 0.5*right)*scale;
@@ -144,7 +144,7 @@ void CPGLQuads::createShaderProgram() {
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
                                            "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
-                                           "    light = clamp((lightFalloffDistance * 0.7 - lightPosition.z) / (lightFalloffDistance * 0.7), 0.0, 1.0);\n"
+                                           "    light = clamp((lightFalloffDistance * 0.85 - lightPosition.z) / (lightFalloffDistance * 0.7), 0.4, 1.0);\n"
                                            "    coords = a_texcoord;\n"
                                            "    color = a_color;\n"
                                            "}");
