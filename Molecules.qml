@@ -185,6 +185,9 @@ Item {
             isSettingSystemSize = false
         }
 
+        temperature: molecularDynamics.temperature
+        pressure: molecularDynamics.pressure
+
         onSystemSizeXChanged: {
             updateSystemSize()
         }

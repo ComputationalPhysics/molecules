@@ -4,8 +4,26 @@ Item {
     property real maximumValue: 100
     property real minimumValue: -100
     property string title: ""
+    property real scientificLimit: 1000
     width: 100
     height: 62
+
+    function inScientificLimit(value) {
+        return ((value >= -scientificLimit && value <= -1 / scientificLimit) ||
+                (value >= 1 / scientificLimit && value <= scientificLimit)) || value === 0
+    }
+
+    function formatValue(value) {
+        if(inScientificLimit(value)) {
+            if(value > 1 || value < -1) {
+                return value.toFixed(0)
+            } else {
+                return value.toPrecision(1)
+            }
+        } else {
+            return value.toExponential(0)
+        }
+    }
 
     Text {
         anchors {
@@ -14,7 +32,7 @@ Item {
             margins: parent.height * 0.04
         }
         font.pixelSize: 12
-        text: maximumValue.toFixed(0)
+        text: formatValue(maximumValue)
         color: "white"
     }
 
@@ -25,7 +43,7 @@ Item {
             margins: parent.height * 0.04
         }
         font.pixelSize: 12
-        text: minimumValue.toFixed(0)
+        text: formatValue(minimumValue)
         color: "white"
     }
 

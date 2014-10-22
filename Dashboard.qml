@@ -20,27 +20,122 @@ Item {
     property alias systemSizeZ: systemSizeZSlider.value
     property real  minimumSystemSizeSliderValue: 1
 
+    property real temperature: 0.0
+    property real pressure: 0.0
+
     property bool othersPressed: false
     property real hiddenOpacity: 0.2
 
     function addTemperature(temperature) {
-        plotTemperature.addPoint(temperature)
+        temperaturePlot.addValue(temperature)
     }
 
     function addKineticEnergy(kineticEnergy) {
-        plotKineticEnergy.addPoint(kineticEnergy)
+        kineticEnergyPlot.addValue(kineticEnergy)
     }
 
     function addPotentialEnergy(potentialEnergy) {
-        plotPotentialEnergy.addPoint(potentialEnergy)
+        potentialEnergyPlot.addValue(potentialEnergy)
     }
 
     function addTotalEnergy(totalEnergy) {
-        plotTotalEnergy.addPoint(totalEnergy)
+        totalEnergyPlot.addValue(totalEnergy)
+        resetRange()
     }
 
     function addPressure(pressure) {
-        pressurePlot.addPoint(pressure)
+        pressurePlot.addValue(pressure)
+    }
+
+    function min(data) {
+        var minValue = Infinity
+        for(var i in data) {
+            if(!isNaN(data[i])) {
+                minValue = Math.min(minValue, data[i])
+            }
+        }
+        return minValue
+    }
+
+    function max(data) {
+        var maxValue = -Infinity
+        for(var i in data) {
+            if(!isNaN(data[i])) {
+                maxValue = Math.max(maxValue, data[i])
+            }
+        }
+        return maxValue
+    }
+
+    function minMaxExponent(minValue, maxValue) {
+        var logMinValue = Math.log(Math.abs(minValue)) / Math.LN10
+        var logMaxValue = Math.log(Math.abs(maxValue)) / Math.LN10
+
+        var minExponent = 0
+        if(minValue > 0) {
+            minExponent = Math.floor(logMinValue)
+        } else {
+            minExponent = Math.ceil(logMinValue)
+        }
+
+        var maxExponent = 0
+        if(maxValue > 0) {
+            maxExponent = Math.ceil(logMaxValue)
+        } else {
+            maxExponent = Math.floor(logMaxValue)
+        }
+
+        var minSign = (minValue > 0) ? 1.0 : -1.0
+        var maxSign = (maxValue > 0) ? 1.0 : -1.0
+
+        var outMinValue = minSign * Math.pow(10, minExponent)
+        var outMaxValue = maxSign *Math.pow(10, maxExponent)
+
+        if(outMinValue > 0.99 && outMinValue < 1.01) {
+            outMinValue = 0
+        }
+
+        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
+            outMaxValue = 0
+        }
+
+        return [outMinValue, outMaxValue]
+    }
+
+    function resetRange() {
+        var minValue = Math.min(min(kineticEnergyPlot.values), Math.min(min(potentialEnergyPlot.values), min(totalEnergyPlot.values)))
+        var maxValue = Math.max(max(kineticEnergyPlot.values), Math.max(max(potentialEnergyPlot.values), max(totalEnergyPlot.values)))
+
+        var minMaxExponents = minMaxExponent(minValue, maxValue)
+        minValue = minMaxExponents[0]
+        maxValue = minMaxExponents[1]
+
+        kineticEnergyPlot.minimumValue = minValue
+        kineticEnergyPlot.maximumValue = maxValue
+        potentialEnergyPlot.minimumValue = minValue
+        potentialEnergyPlot.maximumValue = maxValue
+        totalEnergyPlot.minimumValue = minValue
+        totalEnergyPlot.maximumValue = maxValue
+
+        var minTemperature = min(temperaturePlot.values)
+        var maxTemperature = max(temperaturePlot.values)
+
+        var minMaxTemperatureExponents = minMaxExponent(minTemperature, maxTemperature)
+        minTemperature = minMaxTemperatureExponents[0]
+        maxTemperature = minMaxTemperatureExponents[1]
+
+        temperaturePlot.minimumValue = minTemperature
+        temperaturePlot.maximumValue = maxTemperature
+
+        var minPressure = min(pressurePlot.values)
+        var maxPressure = max(pressurePlot.values)
+
+        var minMaxPressureExponents = minMaxExponent(minPressure, maxPressure)
+        minPressure = minMaxPressureExponents[0]
+        maxPressure = minMaxPressureExponents[1]
+
+        pressurePlot.minimumValue = minPressure
+        pressurePlot.maximumValue = maxPressure
     }
 
     anchors.fill: parent
@@ -226,8 +321,11 @@ Item {
                 border.width: 1.0
 
                 Plot {
-                    id: plotTemperature
-                    anchors.fill: parent
+                    id: temperaturePlot
+                    anchors {
+                        fill: parent
+                        margins: width * 0.01
+                    }
                     minimumValue: 0
                     maximumValue: 1100
                     strokeStyle: "#a6cee3"
@@ -235,8 +333,8 @@ Item {
 
                 PlotLabels {
                     anchors.fill: parent
-                    minimumValue: plotTemperature.minimumValue
-                    maximumValue: plotTemperature.maximumValue
+                    minimumValue: temperaturePlot.minimumValue
+                    maximumValue: temperaturePlot.maximumValue
                     title: "T [K]"
                 }
             }
@@ -250,7 +348,10 @@ Item {
 
                 Plot {
                     id: pressurePlot
-                    anchors.fill: parent
+                    anchors {
+                        fill: parent
+                        margins: width * 0.01
+                    }
                     minimumValue: -10
                     maximumValue: 1200
                     strokeStyle: "#a6cee3"
@@ -272,33 +373,42 @@ Item {
                 border.width: 1.0
 
                 Plot {
-                    id: plotKineticEnergy
-                    anchors.fill: parent
+                    id: kineticEnergyPlot
+                    anchors {
+                        fill: parent
+                        margins: width * 0.01
+                    }
                     minimumValue: -1
                     maximumValue: 1
                     strokeStyle: "#a6cee3"
                 }
 
                 Plot {
-                    id: plotPotentialEnergy
-                    anchors.fill: parent
-                    minimumValue: plotKineticEnergy.minimumValue
-                    maximumValue: plotKineticEnergy.maximumValue
+                    id: potentialEnergyPlot
+                    anchors {
+                        fill: parent
+                        margins: width * 0.01
+                    }
+                    minimumValue: kineticEnergyPlot.minimumValue
+                    maximumValue: kineticEnergyPlot.maximumValue
                     strokeStyle: "#b2df8a"
                 }
 
                 Plot {
-                    id: plotTotalEnergy
-                    anchors.fill: parent
-                    minimumValue: plotKineticEnergy.minimumValue
-                    maximumValue: plotKineticEnergy.maximumValue
+                    id: totalEnergyPlot
+                    anchors {
+                        fill: parent
+                        margins: width * 0.01
+                    }
+                    minimumValue: kineticEnergyPlot.minimumValue
+                    maximumValue: kineticEnergyPlot.maximumValue
                     strokeStyle: "#fdbf6f"
                 }
 
                 PlotLabels {
                     anchors.fill: parent
-                    minimumValue: plotKineticEnergy.minimumValue
-                    maximumValue: plotKineticEnergy.maximumValue
+                    minimumValue: kineticEnergyPlot.minimumValue
+                    maximumValue: kineticEnergyPlot.maximumValue
                     title: "E/N [eV]"
                 }
             }

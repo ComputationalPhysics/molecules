@@ -340,6 +340,7 @@ void System::create_FCC() {
             }
         }
     }
+    countAtomTypes();
 }
 
 void System::init_parameters() {
@@ -513,7 +514,7 @@ void System::mpi_move() {
 
     /* Update the compressed # of resident atoms */
     m_numAtoms = ipt;
-    num_atoms_free = m_numAtoms - num_atoms_free;
+//    num_atoms_free = m_numAtoms - num_atoms_free;
 }
 
 void System::mpi_copy() {

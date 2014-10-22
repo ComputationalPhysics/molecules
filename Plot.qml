@@ -5,15 +5,16 @@ Canvas {
     property color strokeStyle:  Qt.darker(fillStyle, 1.4)
     property color fillStyle: "#b40000" // red
     property real alpha: 1.0
-    property var data: new Array(100)
+    property var values: new Array(100)
     property real minimumValue: -100.0
     property real maximumValue: 100.0
     property int paintsSinceLastReset: 100
+    property int length: 0
 
     antialiasing: true
 
     onScaleChanged: requestPaint()
-    onDataChanged: requestPaint()
+    onValuesChanged: requestPaint()
 
     anchors.fill: parent
 
@@ -22,16 +23,18 @@ Canvas {
     }
 
     function clearData() {
-        for(var i = 0; i < data.length; i++) {
-            data[i] = -Infinity
+        for(var i = 0; i < values.length; i++) {
+            values[i] = NaN
         }
     }
 
-    function addPoint(point) {
-        var newData = data
+    function addValue(point) {
+        var newData = values
         newData.shift()
         newData.push(point)
-        data = newData
+        values = newData
+        length += 1
+        length = Math.min(length, values.length)
     }
 
     onPaint: {
@@ -43,13 +46,13 @@ Canvas {
         ctx.fillStyle = canvasRoot.fillStyle
         ctx.lineWidth = canvasRoot.lineWidth
         ctx.beginPath()
-        var normalizedValue = (data[0] - minimumValue) / (maximumValue - minimumValue)
+        var normalizedValue = (values[0] - minimumValue) / (maximumValue - minimumValue)
         var y = canvasRoot.height - normalizedValue * canvasRoot.height
         ctx.moveTo(0, y);
         var x = 0
         var started = false
-        for(var i in data) {
-            normalizedValue = (data[i] - minimumValue) / (maximumValue - minimumValue)
+        for(var i in values) {
+            normalizedValue = (values[i] - minimumValue) / (maximumValue - minimumValue)
             y = canvasRoot.height - normalizedValue * canvasRoot.height
 
             if(!started) {
@@ -58,11 +61,11 @@ Canvas {
                 ctx.lineTo(x,y);
             }
 
-            if(data[i] > -9999) {
+            if(values[i] > -9999) {
                 started = true
             }
 
-            x += 1 * canvasRoot.width / data.length;
+            x += 1 * canvasRoot.width / values.length;
         }
         ctx.stroke();
         ctx.restore();
