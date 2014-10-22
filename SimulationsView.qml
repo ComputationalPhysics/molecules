@@ -18,10 +18,6 @@ Item {
                 opacity: 1.0
                 scale: 1.0
             }
-            PropertyChanges {
-                target: revealToogleButton
-                opacity: 0.0
-            }
         },
         State {
             name: "hidden"
@@ -29,10 +25,6 @@ Item {
                 target: systemsViewRectangle
                 opacity: 0.0
                 scale: 0.85
-            }
-            PropertyChanges {
-                target: revealToogleButton
-                opacity: 1.0
             }
         }
     ]
@@ -72,31 +64,6 @@ Item {
         }
 
     ]
-
-    Item {
-        id: revealToogleButton
-        anchors {
-            top: parent.top
-            left: parent.left
-        }
-        height: parent.height * 0.1
-        width: height
-
-        Image {
-            anchors {
-                fill: parent
-                margins: parent.width * 0.2
-            }
-            source: "images/systems.png"
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onPressed: {
-                systemsViewRoot.revealed = true
-            }
-        }
-    }
 
     MouseArea {
         enabled: systemsViewRoot.revealed

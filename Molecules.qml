@@ -80,7 +80,7 @@ Item {
         }
 
         onDidScaleVelocitiesDueToHighValuesChanged: {
-//            dashboard.thermostatValue = 1000
+            //            dashboard.thermostatValue = 1000
             dashboard.thermostatEnabled = true
         }
 
@@ -112,7 +112,7 @@ Item {
                 property bool movedTooFarToHide: false
 
                 onPressed: {
-                    systemsView.revealed = false
+                    simulationsView.revealed = false
                     dashboard.revealed = false
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
@@ -131,7 +131,7 @@ Item {
                     var deltaY = mouse.y - lastPosition.y
                     var deltaPan = deltaX / width * 360 // max 3 rounds
                     var deltaTilt = deltaY / height * 180 // max 0.5 round
-//                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
+                    //                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
                     molecularDynamics.pan += deltaPan
                     molecularDynamics.tilt += deltaTilt
                     molecularDynamics.tilt = Math.max(-90, Math.min(90, molecularDynamics.tilt))
@@ -139,7 +139,7 @@ Item {
                 }
 
                 onWheel: {
-//                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
+                    //                    molecularDynamics.incrementZoom(wheel.angleDelta.y / 360)
                     molecularDynamics.zoomSetByLoad = false
                     molecularDynamics.zoom += wheel.angleDelta.y / 180
                 }
@@ -160,7 +160,7 @@ Item {
                 molecularDynamics.step(dt)
 
                 var sampleTimeDifference = (currentTime - lastSampleTime)/1000
-                if(sampleTimeDifference > 0.1) {
+                if(molecularDynamics.running && sampleTimeDifference > 0.1) {
                     lastSampleTime = currentTime
                     dashboard.addTemperature(molecularDynamics.temperature)
                     dashboard.addKineticEnergy(molecularDynamics.kineticEnergy / molecularDynamics.atomCount)
@@ -170,6 +170,122 @@ Item {
                     dashboard.addPressure(molecularDynamics.pressure * 1e-6)
                 }
                 lastTime = currentTime
+            }
+        }
+    }
+
+    Item {
+        id: revealDashboardButton
+        property bool revealed: !dashboard.revealed && !simulationsView.revealed
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
+        enabled: revealed
+        state: revealed ? "revealed" : "hidden"
+
+        states: [
+            State {
+                name: "hidden"
+                PropertyChanges {
+                    target: revealDashboardButton
+                    opacity: 0.0
+                }
+            },
+            State {
+                name: "revealed"
+                PropertyChanges {
+                    target: revealDashboardButton
+                    opacity: 1.0
+                }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                NumberAnimation {
+                    properties: "opacity"
+                    duration: 200
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        ]
+        width: Style.touchableSize * 2
+        height: width
+
+        Image {
+            anchors {
+                fill: parent
+                margins: moleculesRoot.width * 0.01
+            }
+
+            source: "images/dashboard.png"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                simulationsView.revealed = false
+                dashboard.revealed = true
+            }
+        }
+    }
+
+
+
+    Item {
+        id: revealSimulationsViewButton
+        property bool revealed: !dashboard.revealed && !simulationsView.revealed
+
+        anchors {
+            top: moleculesRoot.top
+            left: moleculesRoot.left
+        }
+        width: Style.touchableSize * 2
+        height: width
+
+        enabled: revealed
+        state: revealed ? "revealed" : "hidden"
+
+        states: [
+            State {
+                name: "hidden"
+                PropertyChanges {
+                    target: revealSimulationsViewButton
+                    opacity: 0.0
+                }
+            },
+            State {
+                name: "revealed"
+                PropertyChanges {
+                    target: revealSimulationsViewButton
+                    opacity: 1.0
+                }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                NumberAnimation {
+                    properties: "opacity"
+                    duration: 200
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        ]
+
+        Image {
+            anchors {
+                fill: parent
+                margins: parent.width * 0.2
+            }
+            source: "images/systems.png"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                simulationsView.revealed = true
             }
         }
     }
@@ -208,14 +324,16 @@ Item {
     }
 
     SimulationsView {
-        id: systemsView
+        id: simulationsView
         onLoadSimulation: {
+            molecularDynamics.running = false
             revealed = false
             molecularDynamics.load(fileName)
             var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
             molecularDynamics.zoomSetByLoad = true
             molecularDynamics.zoom = -10 - systemSizeMax
             dashboard.resetControls()
+            molecularDynamics.running = true
         }
     }
 

@@ -154,10 +154,6 @@ Item {
                 opacity: 1.0
                 scale: 1.0
             }
-            PropertyChanges {
-                target: revealToggleButton
-                opacity: 0.0
-            }
         },
         State {
             name: "hidden"
@@ -165,10 +161,6 @@ Item {
                 target: dashboardRectangle
                 opacity: 0.0
                 scale: 0.85
-            }
-            PropertyChanges {
-                target: revealToggleButton
-                opacity: 1.0
             }
         }
     ]
@@ -218,45 +210,6 @@ Item {
         }
     }
 
-    Row {
-        id: revealToggleButton
-        anchors {
-            right: parent.right
-            bottom: parent.bottom
-        }
-
-        Text {
-            anchors {
-                bottom: parent.bottom
-                margins: dashboardRoot.width * 0.01
-            }
-            color: "white"
-
-            text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
-        }
-
-        Item {
-            height: dashboardRoot.width * 0.07
-            width: height
-
-            Image {
-                anchors {
-                    fill: parent
-                    margins: dashboardRoot.width * 0.01
-                }
-
-                source: "images/tools.png"
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onPressed: {
-                    dashboardRoot.revealed = !dashboardRoot.revealed
-                }
-            }
-        }
-    }
-
     Rectangle {
         id: dashboardRectangle
         enabled: revealed
@@ -292,7 +245,7 @@ Item {
                 margins: parent.width*0.01
             }
 
-            width: parent.width * 0.05
+            width: Style.touchableSize
             height: width
             source: dashboardRoot.running ? "images/pause.png" : "images/play.png"
 

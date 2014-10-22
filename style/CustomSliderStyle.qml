@@ -10,9 +10,7 @@ SliderStyle {
 
 
     handle: Rectangle {
-        property double minimumWidth: Style.windowWidth / 30
-        property double maximumWidth: Style.windowHeight / 20
-        implicitWidth: Math.max(Math.min(Screen.pixelDensity * 4, maximumWidth), minimumWidth)
+        implicitWidth: Style.touchableSize
         implicitHeight: implicitWidth
         radius: width
         border.width: width * 0.1
