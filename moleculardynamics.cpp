@@ -50,6 +50,7 @@
 #include <cmath>
 #include "simulator/unitconverter.h"
 #include "simulator/mdio.h"
+#include "simulator/atom_types.h"
 using namespace std;
 
 MolecularDynamicsRenderer::MolecularDynamicsRenderer()
@@ -297,7 +298,7 @@ void MolecularDynamics::sync()
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
         m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
-        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, false);
+        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, ARGON);
     }
 
     m_renderer->m_simulator.m_system.setDt(safeDt);
@@ -308,7 +309,7 @@ void MolecularDynamics::sync()
 
     setDidScaleVelocitiesDueToHighValues(m_renderer->m_simulator.m_system.didScaleVelocitiesDueToHighValues());
     setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
-    setTemperature(m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature));
+    setTemperature(m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature_free_atoms));
     setKineticEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->kinetic_energy));
     setPotentialEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->potential_energy));
     setPressure(m_renderer->m_simulator.m_system.unit_converter->pressure_to_SI(m_renderer->m_simulator.m_sampler->pressure));

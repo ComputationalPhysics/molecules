@@ -81,6 +81,7 @@ public:
     bool sample_statistics;
     unsigned long steps;
     unsigned long num_atoms_free;
+    unsigned long num_atoms_fixed;
     unsigned long num_atoms_frozen;
     unsigned long num_atoms_ghost;
     double mass_inverse, pressure_forces;
@@ -95,7 +96,7 @@ public:
     vector<unsigned long> atom_type;
     vector<float> initial_positions;
     void apply_harmonic_oscillator();
-    void count_frozen_atoms();
+    void countAtomTypes();
 
     System();
     void setup(Settings *settings_);

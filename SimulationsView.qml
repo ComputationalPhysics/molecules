@@ -125,73 +125,72 @@ Item {
             anchors.fill: parent
         }
 
-        ColumnLayout {
-            id: systemsViewColumn
+        Flickable {
             anchors {
                 fill: parent
                 margins: parent.width * 0.07
             }
-            spacing: systemsViewRectangle.width * 0.02
-
-            Text {
+            ColumnLayout {
+                id: systemsViewColumn
                 anchors {
-                    horizontalCenter: parent.horizontalCenter
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
                 }
-                text: "Welcome to Molecules!"
-                font.pixelSize: parent.width * 0.04
-                color: "white"
-            }
 
-            Text {
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
+                spacing: systemsViewRectangle.width * 0.02
+
+                Text {
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: "Welcome to Molecules!"
+                    font.pixelSize: parent.width * 0.04
+                    color: "white"
                 }
-                text: "Please select a simulation."
-                font.pixelSize: parent.width * 0.025
-                color: "white"
-            }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
+                Text {
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: "Please select a simulation."
+                    font.pixelSize: parent.width * 0.025
+                    color: "white"
+                }
 
-            Grid {
-                id: systemsGrid
+                Grid {
+                    id: systemsGrid
 
-                property real elementWidth: systemsViewColumn.width / columns - spacing
-                property real elementHeight: elementWidth * 9.0 / 16.0
-                property var simulations: [
-                    { identifier: "default", name: "Default"},
-                    { identifier: "chamber", name: "Chamber"},
-                    { identifier: "cylinder", name: "Cylinder"},
-                    { identifier: "pores8", name: "Small pores"},
-                    { identifier: "pores16", name: "Medium pores"},
-                    { identifier: "pores20", name: "Large pores"}
-                ]
+                    property real elementWidth: systemsViewColumn.width / columns - spacing
+                    property real elementHeight: elementWidth * 9.0 / 16.0
+                    property var simulations: [
+                        { identifier: "default", name: "Default"},
+                        { identifier: "chamber", name: "Chamber"},
+                        { identifier: "diffusion", name: "Diffusion"},
+                        { identifier: "cylinder", name: "Cylinder"},
+                        { identifier: "pores8", name: "Small pores"},
+                        { identifier: "pores16", name: "Medium pores"},
+                        { identifier: "pores20", name: "Large pores"}
+                    ]
 
-                columns: 3
-                spacing: systemsViewRectangle.width * 0.01
+                    columns: 3
+                    spacing: systemsViewRectangle.width * 0.01
 
-                Component.onCompleted: {
-                    for(var i in simulations) {
-                        var simulation = simulations[i]
-                        var component = Qt.createComponent("SimulationButton.qml")
-                        var properties = {
-                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
-                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
-                            identifier: simulation.identifier,
-                            name: simulation.name
+                    Component.onCompleted: {
+                        for(var i in simulations) {
+                            var simulation = simulations[i]
+                            var component = Qt.createComponent("SimulationButton.qml")
+                            var properties = {
+                                width: Qt.binding(function() {return systemsGrid.elementWidth}),
+                                height: Qt.binding(function() {return systemsGrid.elementHeight}),
+                                identifier: simulation.identifier,
+                                name: simulation.name
+                            }
+                            var button = component.createObject(systemsGrid, properties)
+                            button.loadSimulation.connect(systemsViewRoot.loadSimulation)
                         }
-                        var button = component.createObject(systemsGrid, properties)
-                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
                     }
                 }
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
             }
         }
     }

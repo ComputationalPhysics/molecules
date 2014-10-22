@@ -1,5 +1,7 @@
 TEMPLATE = app
 
+TARGET = molecules
+
 QT += qml quick widgets opengl openglextensions
 CONFIG += c++11
 INCLUDEPATH += simulator
@@ -20,6 +22,8 @@ SOURCES += main.cpp \
 RESOURCES += qml.qrc \
     images.qrc \
     simulations.qrc
+
+OTHER_FILES +=
 
 DEFINES += MD_DEBUG
 

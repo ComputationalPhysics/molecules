@@ -37,6 +37,7 @@ System::System() :
     steps(0),
     m_numAtoms(0),
     num_atoms_free(0),
+    num_atoms_fixed(0),
     num_atoms_frozen(0),
     num_atoms_ghost(0),
     mass_inverse(0),
@@ -277,7 +278,7 @@ void System::setup(Settings *settings_) {
     set_topology();
     create_FCC();
 
-    count_frozen_atoms();
+    countAtomTypes();
 
     mpi_copy();
     calculate_accelerations();
@@ -287,14 +288,19 @@ void System::setup(Settings *settings_) {
     cout << "Free atoms: " << num_atoms_free << endl;
 }
 
-void System::count_frozen_atoms() {
+void System::countAtomTypes() {
     num_atoms_free = 0;
+    num_atoms_fixed = 0;
     num_atoms_frozen = 0;
     for(int i=0; i<m_numAtoms; i++) {
         if(atom_type[i] == FROZEN)  {
             num_atoms_frozen++;
-        } else {
+        } else if(atom_type[i] == FIXED) {
+            num_atoms_fixed++;
+        } else if(atom_type[i] == ARGON) {
             num_atoms_free++;
+        } else {
+            cout << "WARNING: Unknown atom type in count_frozen_atoms: " << atom_type[i] << endl;
         }
     }
 }
@@ -562,6 +568,10 @@ void System::half_kick() {
     double maxVelocitySquared = minimumSystemSizeComponentSquared/(m_dt*m_dt);
 
     for(int n=0;n<m_numAtoms;n++) {
+        if(atom_type[n] == FIXED) {
+            continue;
+        }
+
         double magnitude = sqrt(accelerations[3*n+0]*m_dt*0.5*accelerations[3*n+0]*m_dt*0.5 + accelerations[3*n+1]*m_dt*0.5*accelerations[3*n+1]*m_dt*0.5 + accelerations[3*n+2]*m_dt*0.5*accelerations[3*n+2]*m_dt*0.5);
         double scaling = (magnitude>maxMagnitude) ? maxMagnitude/magnitude : 1.0;
 
@@ -584,6 +594,9 @@ void System::half_kick() {
 
 void System::full_kick() {
     for(int n=0;n<m_numAtoms;n++) {
+        if(atom_type[n] == FIXED) {
+            continue;
+        }
         velocities[3*n+0] += accelerations[3*n+0]*m_dt;
         velocities[3*n+1] += accelerations[3*n+1]*m_dt;
         velocities[3*n+2] += accelerations[3*n+2]*m_dt;
@@ -592,22 +605,27 @@ void System::full_kick() {
 
 void System::move() {
     for(int n=0;n<m_numAtoms;n++) {
-        if(atom_type[n] != FIXED) {
-            positions[3*n+0] += velocities[3*n+0]*m_dt;
-            positions[3*n+1] += velocities[3*n+1]*m_dt;
-            positions[3*n+2] += velocities[3*n+2]*m_dt;
+        atom_moved[n] = false;
 
-            atom_moved[n] = false;
+        if(atom_type[n] == FIXED) {
+            continue;
         }
+        positions[3*n+0] += velocities[3*n+0]*m_dt;
+        positions[3*n+1] += velocities[3*n+1]*m_dt;
+        positions[3*n+2] += velocities[3*n+2]*m_dt;
     }
 }
 
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*m_dt;
     for(int n=0;n<m_numAtoms;n++) {
-        if(atom_type[n] == ARGON) {
-            velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
+        if(atom_type[n] == FIXED) {
+            continue;
         }
+        if(atom_type[n] == FROZEN) {
+            continue;
+        }
+        velocities[3*n+settings->gravity_direction] += gravity_force_times_dt;
     }
 }
 

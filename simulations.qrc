@@ -12,5 +12,11 @@
         <file>simulations/default.lmp</file>
         <file>simulations/chamber.png</file>
         <file>simulations/chamber.lmp</file>
+        <file>simulations/diffusion.lmp</file>
+        <file>simulations/diffusion.png</file>
+        <file>simulations/pores24.lmp</file>
+        <file>simulations/pores28.lmp</file>
+        <file>simulations/pores32.lmp</file>
+        <file>simulations/pores64.lmp</file>
     </qresource>
 </RCC>
