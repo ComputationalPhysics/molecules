@@ -174,6 +174,8 @@ Item {
 
     Keys.onPressed: {
         if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
+            var saveFileName = "state-"+Date.now()+".lmp"
+            console.log("Saving state to " + saveFileName)
             molecularDynamics.save("state-"+Date.now()+".lmp")
         }
     }
