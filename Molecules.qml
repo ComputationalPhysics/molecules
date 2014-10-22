@@ -9,7 +9,7 @@ import "style" 1.0
 Item {
     id: moleculesRoot
     width: 1280
-    height: 800
+    height: 720
 
     focus: true
 
@@ -149,6 +149,10 @@ Item {
             repeat: true
             interval: 1
             onTriggered: {
+                if(!molecularDynamics.previousStepCompleted) {
+                    return
+                }
+
                 var currentTime = Date.now()
                 var dt = currentTime - lastTime
                 dt /= 1000

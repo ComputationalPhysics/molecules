@@ -108,6 +108,7 @@ class MolecularDynamics : public QQuickItem
     Q_PROPERTY(double potentialEnergy READ potentialEnergy NOTIFY potentialEnergyChanged)
     Q_PROPERTY(double pressure READ pressure NOTIFY pressureChanged)
     Q_PROPERTY(double time READ time NOTIFY timeChanged)
+    Q_PROPERTY(bool previousStepCompleted READ previousStepCompleted NOTIFY previousStepCompletedChanged)
 
 public:
     MolecularDynamics();
@@ -163,6 +164,11 @@ public:
         return m_time;
     }
 
+    bool previousStepCompleted() const
+    {
+        return m_previousStepCompleted;
+    }
+
 public slots:
     void sync();
     void cleanup();
@@ -181,6 +187,14 @@ public slots:
     void setZoom(double arg);
 
     void setRunning(bool arg);
+
+    void setPreviousStepCompleted(bool arg)
+    {
+        if (m_previousStepCompleted != arg) {
+            m_previousStepCompleted = arg;
+            emit previousStepCompletedChanged(arg);
+        }
+    }
 
 private slots:
 
@@ -265,6 +279,8 @@ signals:
 
     void timeChanged(double arg);
 
+    void previousStepCompletedChanged(bool arg);
+
 private slots:
     void handleWindowChanged(QQuickWindow *win);
 
@@ -300,6 +316,7 @@ private:
     double m_potentialEnergy;
     double m_pressure;
     double m_time;
+    bool m_previousStepCompleted;
 };
 //! [2]
 

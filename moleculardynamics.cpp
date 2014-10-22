@@ -152,7 +152,8 @@ MolecularDynamics::MolecularDynamics()
       m_temperature(0),
       m_pressure(0),
       m_kineticEnergy(0),
-      m_potentialEnergy(0)
+      m_potentialEnergy(0),
+      m_previousStepCompleted(true)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
     m_timer.start();
@@ -319,13 +320,18 @@ void MolecularDynamics::sync()
 //    double volume = m_renderer->m_simulator.m_system.volume();
 //    double temperature = m_renderer->m_simulator.m_sampler->temperature;
 //    qDebug() << "PV/NkT=" << pressure*volume/(atomCount()*temperature);
+    m_previousStepCompleted = true;
 }
 
 void MolecularDynamics::step(double dt)
 {
+    if(!m_previousStepCompleted) {
+        return;
+    }
     if(window()) {
         window()->update();
     }
+    m_previousStepCompleted = false;
 }
 
 void MolecularDynamics::save(QString fileName)

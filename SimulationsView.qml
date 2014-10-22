@@ -97,6 +97,8 @@ Item {
                 fill: parent
                 margins: parent.width * 0.07
             }
+            clip: true
+            contentHeight: systemsViewColumn.height
             ColumnLayout {
                 id: systemsViewColumn
                 anchors {
