@@ -16,15 +16,27 @@ Thermostat::Thermostat(double relaxation_time_)
 
 void Thermostat::apply(StatisticsSampler *sampler, System *system, const double &temperature, int atomType) {
     if(atomType != -1) {
-        double kinetic_energy = 0;
+
         int atomCount = 0;
+        QVector3D freeAtomDrift;
+        for(int n=0; n<system->numAtoms(); n++) {
+            if(system->atom_type[n] == atomType) {
+                freeAtomDrift += QVector3D(system->velocities[3*n+0],
+                        system->velocities[3*n+1],
+                        system->velocities[3*n+2]);
+                atomCount++;
+            }
+        }
+        freeAtomDrift /= atomCount;
+
+        double kinetic_energy = 0;
         for(int n=0; n<system->numAtoms();n++) {
             if(system->atom_type[n]==atomType) {
-                double vx = system->velocities[3*n+0];
-                double vy = system->velocities[3*n+1];
-                double vz = system->velocities[3*n+2];
-                kinetic_energy += 0.5*system->settings->mass*(vx*vx + vy*vy + vz*vz);
-                atomCount++;
+                QVector3D relativeVelocity = QVector3D(system->velocities[3*n+0] - freeAtomDrift.x(),
+                        system->velocities[3*n+1] - freeAtomDrift.y(),
+                        system->velocities[3*n+2] - freeAtomDrift.z());
+                double v_squared = relativeVelocity.lengthSquared();
+                kinetic_energy += 0.5*system->settings->mass*v_squared;
             }
         }
 

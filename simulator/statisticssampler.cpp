@@ -67,13 +67,27 @@ void StatisticsSampler::sample_temperature() {
     double kinetic_energy_per_atom = kinetic_energy / system->numAtoms();
     temperature = 2.0/3*kinetic_energy_per_atom;
 
+    QVector3D freeAtomDrift;
+    for(int n=0; n<system->numAtoms(); n++) {
+        if(system->atom_type[n] == ARGON) {
+            freeAtomDrift += QVector3D(system->velocities[3*n+0],
+                    system->velocities[3*n+1],
+                    system->velocities[3*n+2]);
+        }
+    }
+    freeAtomDrift /= system->num_atoms_free;
+
     double kinetic_energy_free_atoms = 0;
     double kinetic_energy_frozen_atoms = 0;
     for(int n=0; n<system->numAtoms(); n++) {
-        double v_squared = system->velocities[3*n+0]*system->velocities[3*n+0] + system->velocities[3*n+1]*system->velocities[3*n+1] + system->velocities[3*n+2]*system->velocities[3*n+2];
         if(system->atom_type[n] == ARGON) {
+            QVector3D relativeVelocity = QVector3D(system->velocities[3*n+0] - freeAtomDrift.x(),
+                    system->velocities[3*n+1] - freeAtomDrift.y(),
+                    system->velocities[3*n+2] - freeAtomDrift.z());
+            double v_squared = relativeVelocity.lengthSquared();
             kinetic_energy_free_atoms += 0.5*system->settings->mass*v_squared;
         } else {
+            double v_squared = system->velocities[3*n+0]*system->velocities[3*n+0] + system->velocities[3*n+1]*system->velocities[3*n+1] + system->velocities[3*n+2]*system->velocities[3*n+2];
             kinetic_energy_frozen_atoms += 0.5*system->settings->mass*v_squared;
         }
     }
@@ -89,7 +103,7 @@ void StatisticsSampler::sample_pressure() {
     pressure = system->pressure_forces;
 
     pressure /= 3*system->volume();
-    pressure += system->num_atoms_free/system->volume()*temperature;
+    pressure += system->num_atoms_free/system->volume()*temperature_free_atoms;
 
     pressure_sampled_at = system->steps;
 }

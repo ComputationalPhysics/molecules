@@ -80,7 +80,7 @@ Item {
         }
 
         onDidScaleVelocitiesDueToHighValuesChanged: {
-            dashboard.thermostatValue = 1000
+//            dashboard.thermostatValue = 1000
             dashboard.thermostatEnabled = true
         }
 

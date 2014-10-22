@@ -29,6 +29,7 @@ Item {
 
     property bool othersPressed: false
     property real hiddenOpacity: 0.2
+    property real hiddenOpacityForPlots: 0.4
 
     function resetControls() {
         thermostatEnabled = false
@@ -318,6 +319,8 @@ Item {
             }
             color: "white"
 
+            opacity: othersPressed ? hiddenOpacity : 1.0
+
             text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
         }
 
@@ -331,7 +334,7 @@ Item {
             }
 
             height: dashboardRectangle.height*0.3
-            opacity: othersPressed ? hiddenOpacity : 1.0
+            opacity: othersPressed ? hiddenOpacityForPlots : 1.0
 
             spacing: anchors.margins
 
