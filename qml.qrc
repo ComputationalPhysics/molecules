@@ -9,5 +9,7 @@
         <file>style/OpacityAnimation.qml</file>
         <file>Plot.qml</file>
         <file>PlotLabels.qml</file>
+        <file>style/qmldir</file>
+        <file>style/Style.qml</file>
     </qresource>
 </RCC>

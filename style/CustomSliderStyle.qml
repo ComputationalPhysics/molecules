@@ -3,14 +3,15 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import QtQuick.Window 2.0
+import "../style" 1.0
 
 SliderStyle {
     id: sliderStyle
 
 
     handle: Rectangle {
-        property double minimumWidth: Screen.width / 30
-        property double maximumWidth: Screen.width / 20
+        property double minimumWidth: Style.windowWidth / 30
+        property double maximumWidth: Style.windowHeight / 20
         implicitWidth: Math.max(Math.min(Screen.pixelDensity * 4, maximumWidth), minimumWidth)
         implicitHeight: implicitWidth
         radius: width
