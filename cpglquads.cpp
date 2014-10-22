@@ -1,5 +1,8 @@
 #include <cpglquads.h>
 #include <QOpenGLFunctions>
+#include <QColor>
+#include <QRgb>
+#include "simulator/atom_types.h"
 
 using std::vector;
 
@@ -32,6 +35,11 @@ void CPGLQuads::ensureInitialized()
     if(!m_funcs) m_funcs = new QOpenGLFunctions(QOpenGLContext::currentContext());
 }
 
+QVector3D CPGLQuads::vectorFromColor(const QColor &color)
+{
+    return QVector3D(color.redF(), color.greenF(), color.blueF());
+}
+
 // void CPGLQuads::update(vector<float> &positions)
 void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, const QVector3D &offset)
 {
@@ -57,8 +65,16 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     m_vertices.resize(numberOfVertices);
     m_indices.resize(6*numPoints);
 
-    QVector3D normalColor =  QVector3D(0.25490196,  0.71372549,  0.76862745);
-    QVector3D frozenColor =  QVector3D(0.13333333333333333, 0.3686274509803922, 0.6588235294117647);
+//    QVector3D normalColor =  QVector3D(0.25490196,  0.71372549,  0.76862745);
+//    QVector3D frozenColor =  QVector3D(0.13333333333333333, 0.3686274509803922, 0.6588235294117647);
+//    QVector3D fixedColor =  QVector3D(0.1450980392156863, 0.20392156862745098, 0.5803921568627451);
+//    QVector3D unknownColor =  QVector3D(1.0, 0.0, 0.0);
+
+    QVector3D normalColor = vectorFromColor(QColor("#41b6c4"));
+    QVector3D frozenColor =  vectorFromColor(QColor("#1f78b4"));
+//    QVector3D fixedColor =  vectorFromColor(QColor("#33a02c"));
+    QVector3D fixedColor =  vectorFromColor(QColor("#1f78b4"));
+    QVector3D unknownColor =  vectorFromColor(QColor("#ff0000"));
 
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
@@ -76,17 +92,22 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
         m_vertices[4*i + 3].position = position + ul;
         m_vertices[4*i + 3].textureCoord= QVector2D(0,0);
 
-        if(atomType[i] == 0) {
-            m_vertices[4*i + 0].color = frozenColor;
-            m_vertices[4*i + 1].color = frozenColor;
-            m_vertices[4*i + 2].color = frozenColor;
-            m_vertices[4*i + 3].color = frozenColor;
+        QVector3D color;
+
+        if(atomType[i] == FROZEN) {
+            color = frozenColor;
+        } else if(atomType[i] == FIXED) {
+            color = fixedColor;
+        } else if(atomType[i] == ARGON) {
+            color = normalColor;
         } else {
-            m_vertices[4*i + 0].color = normalColor;
-            m_vertices[4*i + 1].color = normalColor;
-            m_vertices[4*i + 2].color = normalColor;
-            m_vertices[4*i + 3].color = normalColor;
+            color = unknownColor;
         }
+
+        m_vertices[4*i + 0].color = color;
+        m_vertices[4*i + 1].color = color;
+        m_vertices[4*i + 2].color = color;
+        m_vertices[4*i + 3].color = color;
 
         m_indices [6*i + 0] = 4*i+0;
         m_indices [6*i + 1] = 4*i+1;
