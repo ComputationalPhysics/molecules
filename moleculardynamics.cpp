@@ -211,7 +211,7 @@ void MolecularDynamics::setForceEnabled(bool arg)
         return;
 
     m_forceEnabled = arg;
-    m_renderer->m_simulator.m_settings.gravity_direction = m_forceEnabled ? 2 : -1; // -1 means disabled
+    m_renderer->m_simulator.m_settings.gravity_direction = m_forceEnabled ? 0 : -1; // -1 means disabled
     emit forceEnabledChanged(arg);
 }
 
