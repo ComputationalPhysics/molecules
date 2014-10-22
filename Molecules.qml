@@ -215,6 +215,7 @@ Item {
             var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
             molecularDynamics.zoomSetByLoad = true
             molecularDynamics.zoom = -10 - systemSizeMax
+            dashboard.resetControls()
         }
     }
 

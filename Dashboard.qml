@@ -30,6 +30,19 @@ Item {
     property bool othersPressed: false
     property real hiddenOpacity: 0.2
 
+    function resetControls() {
+        thermostatEnabled = false
+        thermostatValue = 100
+        forceEnabled = false
+        forceValue = 0
+
+        temperaturePlot.clearData()
+        pressurePlot.clearData()
+        totalEnergyPlot.clearData()
+        kineticEnergyPlot.clearData()
+        potentialEnergyPlot.clearData()
+    }
+
     function addTemperature(temperature) {
         temperaturePlot.addValue(temperature)
     }
