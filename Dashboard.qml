@@ -25,6 +25,7 @@ Item {
     property real kineticEnergy: 0.0
     property real potentialEnergy: 0.0
     property real totalEnergy: 0.0
+    property real time: 0.0
 
     property bool othersPressed: false
     property real hiddenOpacity: 0.2
@@ -88,34 +89,6 @@ Item {
         var maxValueOverExponentMinusOne = maxValue / powMaxExponent
         var maxValueRoundedUp = Math.ceil(maxValueOverExponentMinusOne)
         var maxValueOut = maxValueRoundedUp * powMaxExponent
-
-        //        var minExponent = 0
-        //        if(minValue > 0) {
-        //            minExponent = Math.ceil(logMinValue)
-        //        } else {
-        //            minExponent = Math.floor(logMinValue)
-        //        }
-
-        //        var maxExponent = 0
-        //        if(maxValue > 0) {
-        //            maxExponent = Math.floor(logMaxValue)
-        //        } else {
-        //            maxExponent = Math.ceil(logMaxValue)
-        //        }
-
-        //        var minSign = (minValue > 0) ? 1.0 : -1.0
-        //        var maxSign = (maxValue > 0) ? 1.0 : -1.0
-
-        //        var outMinValue = minSign / Math.pow(10, minExponent)
-        //        var outMaxValue = maxSign * Math.pow(10, maxExponent)
-
-        //        if(outMinValue > 0.99 && outMinValue < 1.01) {
-        //            outMinValue = 0
-        //        }
-
-        //        if(outMaxValue < -0.99 && outMaxValue > -1.01) {
-        //            outMaxValue = 0
-        //        }
 
         return [minValueOut, maxValueOut]
     }
@@ -231,27 +204,41 @@ Item {
         }
     }
 
-    Item {
+    Row {
         id: revealToggleButton
         anchors {
             right: parent.right
             bottom: parent.bottom
         }
-        height: parent.height * 0.1
-        width: height
 
-        Image {
+        Text {
             anchors {
-                fill: parent
-                margins: parent.width * 0.2
+                bottom: parent.bottom
+                margins: dashboardRoot.width * 0.01
             }
-            source: "images/tools.png"
+            color: "white"
+
+            text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
         }
 
-        MouseArea {
-            anchors.fill: parent
-            onPressed: {
-                dashboardRoot.revealed = !dashboardRoot.revealed
+        Item {
+            height: dashboardRoot.width * 0.07
+            width: height
+
+            Image {
+                anchors {
+                    fill: parent
+                    margins: dashboardRoot.width * 0.01
+                }
+
+                source: "images/tools.png"
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    dashboardRoot.revealed = !dashboardRoot.revealed
+                }
             }
         }
     }
@@ -309,6 +296,16 @@ Item {
                     dashboardRoot.running = !dashboardRoot.running
                 }
             }
+        }
+        Text {
+            anchors {
+                verticalCenter: playButton.verticalCenter
+                left: playButton.right
+                margins: dashboardRoot.width * 0.01
+            }
+            color: "white"
+
+            text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
         }
 
         RowLayout {

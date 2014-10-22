@@ -184,6 +184,7 @@ void MDIO::load_state_from_file_binary(QString fileName) {
         offset += 3;
 
     }
+    system->setTime(0);
     system->countAtomTypes();
     delete tmp_data;
     //    system->mdtimer->end_io();

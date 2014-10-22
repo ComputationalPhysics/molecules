@@ -183,6 +183,7 @@ Item {
         kineticEnergy: molecularDynamics.kineticEnergy
         potentialEnergy: molecularDynamics.potentialEnergy
         totalEnergy: molecularDynamics.totalEnergy
+        time: molecularDynamics.time
 
         function updateSystemSize() {
             if(molecularDynamics.isSettingSystemSize) {
