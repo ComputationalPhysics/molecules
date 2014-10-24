@@ -18,7 +18,7 @@ Item {
     property alias systemSizeX: systemSizeXSlider.value
     property alias systemSizeY: systemSizeYSlider.value
     property alias systemSizeZ: systemSizeZSlider.value
-    property real  minimumSystemSizeSliderValue: 1
+    property real  minimumSystemSizeSliderValue: 1.0
 
     property real temperature: 0.0
     property real pressure: 0.0

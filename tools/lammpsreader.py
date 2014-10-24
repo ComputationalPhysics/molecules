@@ -50,22 +50,25 @@ def save_atoms(lammpsHeader, atoms, fileName):
     lammpsFile.close()
 
 def create_fcc(nx, ny, nz, Lx, Ly, Lz, atom_type=18, T=0.0):
-    atoms = zeros(nx*ny*nz, dtype=atoms_dtype)
+    x_vector = [0.0, 0.5, 0.5, 0.0]
+    y_vector = [0.0, 0.5, 0.0, 0.5]
+    z_vector = [0.0, 0.0, 0.5, 0.5]
+    atoms = zeros(4*nx*ny*nz, dtype=atoms_dtype)
     for i in range(nx):
         for j in range(ny):
             for k in range(nz):
-                index = i*ny*nz + j*nz + k
-                offset = (i % 2) * 0.5
-                x = float(i) / nx * Lx
-                y = float(j + offset) / ny * Ly
-                z = float(k + offset) / nz * Lz
-                atoms[index]["position"][0] = x + Lx / nx / 2
-                atoms[index]["position"][1] = y + Ly / ny / 2
-                atoms[index]["position"][2] = z + Lz / nz / 2
+                for l in range(4):
+                    index = i*ny*nz*4 + j*nz*4 + k*4 + l
+                    x = float(i) / nx * Lx + x_vector[l] / nx * Lx
+                    y = float(j) / ny * Ly + y_vector[l] / ny * Ly
+                    z = float(k) / nz * Lz + z_vector[l] / nz * Lz
+                    atoms[index]["position"][0] = x + Lx / nx / 4
+                    atoms[index]["position"][1] = y + Ly / ny / 4
+                    atoms[index]["position"][2] = z + Lz / nz / 4
+                    
+                    atoms[index]["velocity"][0] = gauss(0, 1) * sqrt(T)
+                    atoms[index]["velocity"][1] = gauss(0, 1) * sqrt(T)
+                    atoms[index]["velocity"][2] = gauss(0, 1) * sqrt(T)
                 
-                atoms[index]["velocity"][0] = gauss(0, 1) * sqrt(T)
-                atoms[index]["velocity"][1] = gauss(0, 1) * sqrt(T)
-                atoms[index]["velocity"][2] = gauss(0, 1) * sqrt(T)
-                
-                atoms[index]["type"] = atom_type
+                    atoms[index]["type"] = atom_type
     return atoms

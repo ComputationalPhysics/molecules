@@ -19,5 +19,8 @@
         <file>simulations/pores32.lmp</file>
         <file>simulations/pores64.lmp</file>
         <file>simulations/wallcrash.lmp</file>
+        <file>simulations/fracture.lmp</file>
+        <file>simulations/fracture.png</file>
+        <file>simulations/wallcrash.png</file>
     </qresource>
 </RCC>

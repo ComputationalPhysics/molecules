@@ -135,6 +135,7 @@ Item {
                     property var simulations: [
                         { identifier: "default", name: "Default"},
                         { identifier: "wallcrash", name: "Wall crash"},
+                        { identifier: "fracture", name: "Fracture"},
                         { identifier: "chamber", name: "Chamber"},
                         { identifier: "diffusion", name: "Diffusion"},
                         { identifier: "cylinder", name: "Cylinder"},
