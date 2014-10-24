@@ -217,6 +217,7 @@ Item {
                 fill: parent
                 margins: moleculesRoot.width * 0.01
             }
+            smooth: true
 
             source: "images/dashboard.png"
         }
