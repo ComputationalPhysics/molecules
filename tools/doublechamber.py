@@ -8,7 +8,7 @@ fileName = argv[1]
 
 lammps_header = zeros(1, dtype=lammps_header_dtype)
 
-Lx,Ly,Lz = 16.,16.,16.
+Lx,Ly,Lz = 22.,10.,12.
 
 lammps_header["bounds"][0][0] = 0
 lammps_header["bounds"][0][1] = Lx
@@ -17,7 +17,7 @@ lammps_header["bounds"][0][3] = Ly
 lammps_header["bounds"][0][4] = 0
 lammps_header["bounds"][0][5] = Lz
 
-nx,ny,nz = 15,15,15
+nx,ny,nz = 15,int(Ly),int(Lz)
 
 atoms = zeros(nx*ny*nz, dtype=atoms_dtype)
 
@@ -28,9 +28,9 @@ for i in range(2):
     for j in range(ny):
         for k in range(nz):
             if i == 0:
-                x = 0.5 * Lx / nx
+                x = 0.5
             else:
-                x = (nx - 0.5) * Lx / nx
+                x = Lx - 0.5
                 
             offset = (i % 2) * 0.5
             y = float(j + offset) / ny * Ly
@@ -46,9 +46,9 @@ for i in range(2):
     for j in range(ny):
         for k in range(nz):
             if i == 0:
-                x = (nx / 2.0 - 0.5) * Lx / nx
+                x = 0.3 * Lx - 0.5
             else:
-                x = (nx / 2.0 + 0.5) * Lx / nx
+                x = 0.3 * Lx + 0.5
                 
             offset = (i % 2) * 0.5
             y = float(j + offset) / ny * Ly
@@ -62,12 +62,12 @@ for i in range(2):
 
 atoms = resize(atoms, index)
 
-length_x = (nx / 2.0 - 1.0) * Lx / nx - 0.5 * Lx / nx
-atoms_live = create_fcc(3, ny, nz, length_x, Ly, Lz, atom_type=18, T=0.05)
+length_x = 4.5
+atoms_live = create_fcc(5, ny / 2, nz / 2, length_x, Ly, Lz, atom_type=18, T=0.001)
 
 # Move FCC out
 for atom in atoms_live:
-    atom["position"][0] += Lx / nx * 0.75
+    atom["position"][0] += 1.0
 
 atoms = concatenate((atoms, atoms_live))
 
