@@ -61,7 +61,7 @@ Item {
         }
 
         onAtomCountChanged: {
-            //dashboard.minimumSystemSizeSliderValue = Math.pow(atomCount, 1.0/3)
+            dashboard.minimumSystemSizeSliderValue = Math.pow(atomCount, 1.0/3)
         }
 
         onSystemSizeChanged: {
