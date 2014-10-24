@@ -134,14 +134,11 @@ Item {
                     property real elementHeight: elementWidth * 9.0 / 16.0
                     property var simulations: [
                         { identifier: "default", name: "Default"},
-                        { identifier: "wallcrash", name: "Wall crash"},
-                        { identifier: "fracture", name: "Fracture"},
-                        { identifier: "chamber", name: "Chamber"},
                         { identifier: "diffusion", name: "Diffusion"},
+                        { identifier: "chamber", name: "Chamber"},
                         { identifier: "cylinder", name: "Cylinder"},
-                        { identifier: "pores8", name: "Small pores"},
-                        { identifier: "pores16", name: "Medium pores"},
-                        { identifier: "pores20", name: "Large pores"}
+                        { identifier: "fracture", name: "Fracture"},
+                        { identifier: "wallcrash", name: "Wall crash"}
                     ]
 
                     columns: 3
