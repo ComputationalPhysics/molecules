@@ -330,7 +330,7 @@ Item {
             revealed = false
             molecularDynamics.load(fileName)
             var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
-            molecularDynamics.targetZoom = -10 - systemSizeMax
+            molecularDynamics.targetZoom = -10 - molecularDynamics.systemSize.y
             zoomAnimation.restart()
             dashboard.resetControls()
             molecularDynamics.running = true
