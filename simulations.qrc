@@ -18,5 +18,6 @@
         <file>simulations/pores28.lmp</file>
         <file>simulations/pores32.lmp</file>
         <file>simulations/pores64.lmp</file>
+        <file>simulations/wallcrash.lmp</file>
     </qresource>
 </RCC>

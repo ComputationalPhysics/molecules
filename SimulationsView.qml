@@ -134,6 +134,7 @@ Item {
                     property real elementHeight: elementWidth * 9.0 / 16.0
                     property var simulations: [
                         { identifier: "default", name: "Default"},
+                        { identifier: "wallcrash", name: "Wall crash"},
                         { identifier: "chamber", name: "Chamber"},
                         { identifier: "diffusion", name: "Diffusion"},
                         { identifier: "cylinder", name: "Cylinder"},
