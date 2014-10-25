@@ -33,7 +33,6 @@ private:
     void set_topology();
     void init_parameters();
     void create_FCC();
-    void reset();
     inline bool atom_did_change_node(atomDataType* ri, int ku);
     inline bool atom_should_be_copied(atomDataType *ri, int ku);
     inline void cell_index_from_ijk(const int &i, const int &j, const int &k, unsigned int &cell_index);
@@ -103,10 +102,11 @@ public:
     void step();
 
     QVector3D systemSize() const;
-    void setSystemSize(const QVector3D &systemSize);
+    void reset();
+    void setSystemSize(const QVector3D &systemSize, bool autoResetCells = true);
     double volume();
     double rCut() const;
-    void setRCut(double rCut);
+    void setRCut(double rCut, bool autoResetCells = true);
     double dt() const;
     void setDt(double dt);
     double potentialEnergy() const;
@@ -119,4 +119,5 @@ public:
     void setNumAtoms(unsigned long numAtoms);
     bool didScaleVelocitiesDueToHighValues() const;
     void setDidScaleVelocitiesDueToHighValues(bool didScaleVelocitiesDueToHighValues);
+    void resetCells();
 };

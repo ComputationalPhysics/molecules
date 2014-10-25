@@ -8,6 +8,7 @@
 #include <random.h>
 #include <statisticssampler.h>
 #include <atom_types.h>
+#include <algorithm>
 #include <string.h>
 #include <QDebug>
 
@@ -42,7 +43,8 @@ System::System() :
     num_atoms_ghost(0),
     mass_inverse(0),
     pressure_forces(0),
-    m_didScaleVelocitiesDueToHighValues(false)
+    m_didScaleVelocitiesDueToHighValues(false),
+    m_systemSize(-999, -999, -999)
 {
     num_cells[0] = 0;
     num_cells[1] = 0;
@@ -86,7 +88,7 @@ void System::createForcesAndPotentialTable() {
     precomputed_potential.resize(numberOfPrecomputedTwoParticleForces+1);
 
     double rMinSquared = 0;
-    double rMaxSquared = settings->r_cut*settings->r_cut;
+    double rMaxSquared = m_rCut*m_rCut;
 
     deltaR2 = (rMaxSquared - rMinSquared) / (numberOfPrecomputedTwoParticleForces-1);
     oneOverDeltaR2 = 1.0/deltaR2;
@@ -176,10 +178,13 @@ double System::rCut() const
     return m_rCut;
 }
 
-void System::setRCut(double rCut)
+void System::setRCut(double rCut, bool autoResetCells)
 {
     m_rCut = rCut;
     createForcesAndPotentialTable();
+    if(autoResetCells) {
+        resetCells();
+    }
 }
 
 QVector3D System::systemSize() const
@@ -187,8 +192,12 @@ QVector3D System::systemSize() const
     return m_systemSize;
 }
 
-void System::setSystemSize(const QVector3D &systemSize)
+void System::setSystemSize(const QVector3D &systemSize, bool autoResetCells)
 {
+    if(m_systemSize == systemSize) {
+        return;
+    }
+
     float scaleX = m_systemSize.x() == 0 ? 1 : systemSize.x()/m_systemSize.x();
     float scaleY = m_systemSize.y() == 0 ? 1 : systemSize.y()/m_systemSize.y();
     float scaleZ = m_systemSize.z() == 0 ? 1 : systemSize.z()/m_systemSize.z();
@@ -204,6 +213,12 @@ void System::setSystemSize(const QVector3D &systemSize)
 
     m_systemSize = systemSize;
 
+    if(autoResetCells) {
+        resetCells();
+    }
+}
+
+void System::resetCells() {
     for(int a=0;a<3;a++) {
         num_cells[a] = m_systemSize[a]/m_rCut;
         num_cells_including_ghosts[a] = num_cells[a]+2;
@@ -345,12 +360,13 @@ void System::create_FCC() {
 
 void System::init_parameters() {
     mass_inverse = 1.0/settings->mass;
-    m_rCut = settings->r_cut;
+    setRCut(settings->r_cut, false);
     one_over_r_cut_squared = 1.0/(m_rCut*m_rCut);
     m_dt = settings->dt;
     m_time = 0;
 
-    setSystemSize(QVector3D(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b));
+    setSystemSize(QVector3D(settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b,settings->unit_cells_x*settings->FCC_b), false);
+    resetCells();
 }
 
 void System::set_topology() {
@@ -650,7 +666,8 @@ void System::apply_harmonic_oscillator() {
 
 void System::reset() {
     /* Reset the potential, pressure & forces */
-    memset(&accelerations[0],0,3*m_numAtoms*sizeof(double));
+//    memset(&accelerations[0],0,3*m_numAtoms*sizeof(double));
+    fill(accelerations.begin(), accelerations.begin() + 3*m_numAtoms, 0);
     m_potentialEnergy = 0;
     pressure_forces = 0;
 }
