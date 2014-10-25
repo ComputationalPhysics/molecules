@@ -61,7 +61,7 @@ Item {
         }
 
         onAtomCountChanged: {
-//            dashboard.minimumSystemSizeSliderValue = Math.pow(atomCount, 1.0/3)
+            dashboard.minimumSystemSizeSliderValue = Math.pow(atomCount, 1.0/3) / 2.0
         }
 
         onSystemSizeChanged: {
@@ -78,7 +78,7 @@ Item {
 
         onDidScaleVelocitiesDueToHighValuesChanged: {
             //            dashboard.thermostatValue = 1000
-            dashboard.thermostatEnabled = true
+//            dashboard.thermostatEnabled = true
         }
 
         PinchArea {
