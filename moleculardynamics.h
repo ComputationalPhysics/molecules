@@ -317,6 +317,7 @@ private:
     double m_pressure;
     double m_time;
     bool m_previousStepCompleted;
+    bool m_systemSizeIsDirty;
 };
 //! [2]
 

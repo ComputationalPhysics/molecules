@@ -153,7 +153,8 @@ MolecularDynamics::MolecularDynamics()
       m_pressure(0),
       m_kineticEnergy(0),
       m_potentialEnergy(0),
-      m_previousStepCompleted(true)
+      m_previousStepCompleted(true),
+      m_systemSizeIsDirty(false)
 {
     connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
     m_timer.start();
@@ -233,7 +234,7 @@ void MolecularDynamics::setSystemSize(QVector3D arg)
         return;
 
     m_systemSize = arg;
-    m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
+    m_systemSizeIsDirty = true;
     emit systemSizeChanged(arg);
 }
 
@@ -294,14 +295,17 @@ void MolecularDynamics::sync()
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
     m_renderer->setModelViewMatrices(m_zoom, m_tilt, m_pan, m_roll);
-    double dt = m_timer.restart() / 1000.0;
-    double safeDt = min(0.02, dt);
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
         m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
         m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, ARGON);
     }
+    if(m_systemSizeIsDirty) {
+        m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
+    }
 
+    double dt = m_timer.restart() / 1000.0;
+    double safeDt = min(0.02, dt);
     m_renderer->m_simulator.m_system.setDt(safeDt);
 
     if(m_running) {
@@ -348,7 +352,9 @@ void MolecularDynamics::load(QString fileName)
         return;
     }
     m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(fileName);
-    m_systemSize = m_renderer->m_simulator.m_system.systemSize();
+    setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
+    setSystemSize(m_renderer->m_simulator.m_system.systemSize());
+//    m_systemSize = m_renderer->m_simulator.m_system.systemSize();
     emit systemSizeChanged(m_systemSize);
 }
 
