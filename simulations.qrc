@@ -22,5 +22,6 @@
         <file>simulations/fracture.lmp</file>
         <file>simulations/fracture.png</file>
         <file>simulations/wallcrash.png</file>
+        <file>simulations/wallcrash_free.lmp</file>
     </qresource>
 </RCC>

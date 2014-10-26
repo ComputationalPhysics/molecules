@@ -49,7 +49,14 @@ def save_atoms(lammpsHeader, atoms, fileName):
     atoms.tofile(lammpsFile)
     lammpsFile.close()
 
-def create_fcc(nx, ny, nz, Lx, Ly, Lz, atom_type=18, T=0.0):
+def create_fcc(nx, ny, nz, Lx=0, Ly=0, Lz=0, atom_type=18, T=0.0):
+    b = 1.562
+    if Lx == 0:
+        Lx = nx*b
+    if Ly == 0:
+        Ly = ny*b
+    if Lz == 0:
+        Lz = nz*b
     x_vector = [0.0, 0.5, 0.5, 0.0]
     y_vector = [0.0, 0.5, 0.0, 0.5]
     z_vector = [0.0, 0.0, 0.5, 0.5]
