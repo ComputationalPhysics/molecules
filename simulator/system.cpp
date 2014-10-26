@@ -674,9 +674,12 @@ void System::reset() {
 
 void System::ensureAllAtomsAreInsideSystem() {
     for(int n=0;n<m_numAtoms;n++) {
-        positions[3*n+0] = fmod(positions[3*n+0] + 100*m_systemSize.x(), m_systemSize.x());
-        positions[3*n+1] = fmod(positions[3*n+1] + 100*m_systemSize.y(), m_systemSize.y());
-        positions[3*n+2] = fmod(positions[3*n+2] + 100*m_systemSize.z(), m_systemSize.z());
+        for(int a = 0; a < 3; a++) {
+            if(positions[3*n+a] < 0 || positions[3*n+a] >= m_systemSize[a]) {
+                positions[3*n+a] -= int(positions[3*n+a] / m_systemSize[a]) * m_systemSize[a];
+                initial_positions[3*n+a] = positions[3*n+a];
+            }
+        }
     }
 }
 
