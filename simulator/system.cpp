@@ -676,8 +676,9 @@ void System::ensureAllAtomsAreInsideSystem() {
     for(int n=0;n<m_numAtoms;n++) {
         for(int a = 0; a < 3; a++) {
             if(positions[3*n+a] < 0 || positions[3*n+a] >= m_systemSize[a]) {
-                positions[3*n+a] -= int(positions[3*n+a] / m_systemSize[a]) * m_systemSize[a];
-                initial_positions[3*n+a] = positions[3*n+a];
+                double shift = int(positions[3*n+a] / m_systemSize[a]) * m_systemSize[a];
+                positions[3*n+a] -= shift;
+                initial_positions[3*n+a] -= shift;
             }
         }
     }
@@ -696,7 +697,7 @@ void System::step() {
     calculate_accelerations();
     apply_harmonic_oscillator();
     half_kick();
-    ensureAllAtomsAreInsideSystem();
+//    ensureAllAtomsAreInsideSystem();
 
     steps++;
     m_time += m_dt;
