@@ -32,6 +32,7 @@ Item {
     property real hiddenOpacityForPlots: 0.4
 
     function resetControls() {
+        running = true
         thermostatEnabled = false
         thermostatValue = 100
         forceEnabled = false
