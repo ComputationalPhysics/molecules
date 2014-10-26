@@ -145,7 +145,8 @@ void CPGLQuads::createShaderProgram() {
                                            "void main() {\n"
                                            "    gl_Position = modelViewProjectionMatrix*a_position;\n"
                                            "    highp vec4 lightPosition = lightModelViewProjectionMatrix*a_position;\n"
-                                           "    light = clamp((lightFalloffDistance * 0.85 - lightPosition.z) / (lightFalloffDistance * 0.7), 0.4, 1.0);\n"
+                                           "    highp float lightDistance = min(lightPosition.z, gl_Position.z);\n"
+                                           "    light = clamp((lightFalloffDistance * 0.85 - lightDistance) / (lightFalloffDistance * 0.7), 0.4, 1.0);\n"
                                            "    coords = a_texcoord;\n"
                                            "    color = a_color;\n"
                                            "}");
