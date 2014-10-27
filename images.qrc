@@ -5,5 +5,8 @@
         <file>images/play.png</file>
         <file>images/systems.png</file>
         <file>images/dashboard.png</file>
+        <file>images/thermostat_disabled.png</file>
+        <file>images/thermostat_enabled.png</file>
+        <file>images/systemsize.png</file>
     </qresource>
 </RCC>
