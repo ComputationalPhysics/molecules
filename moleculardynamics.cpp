@@ -295,6 +295,12 @@ void MolecularDynamics::sync()
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->resetProjection();
     m_renderer->setModelViewMatrices(m_zoom, m_tilt, m_pan, m_roll);
+
+    if(!m_running) {
+        m_previousStepCompleted = true;
+        return;
+    }
+
     if(m_thermostatEnabled) {
         double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
         m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
@@ -308,9 +314,7 @@ void MolecularDynamics::sync()
     double safeDt = min(0.02, dt);
     m_renderer->m_simulator.m_system.setDt(safeDt);
 
-    if(m_running) {
-        m_renderer->m_simulator.step();
-    }
+    m_renderer->m_simulator.step();
 
     setDidScaleVelocitiesDueToHighValues(m_renderer->m_simulator.m_system.didScaleVelocitiesDueToHighValues());
     setAtomCount(m_renderer->m_simulator.m_system.numAtoms());

@@ -327,14 +327,13 @@ Item {
     SimulationsView {
         id: simulationsView
         onLoadSimulation: {
-            molecularDynamics.running = false
+            dashboard.running = false
             revealed = false
             molecularDynamics.load(fileName)
             var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
             molecularDynamics.targetZoom = -10 - molecularDynamics.systemSize.y
             zoomAnimation.restart()
             dashboard.resetControls()
-            molecularDynamics.running = true
         }
     }
 

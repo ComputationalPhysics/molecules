@@ -12,8 +12,11 @@ Item {
     property alias thermostatValue: thermostatSlider.value
     property alias thermostatEnabled: thermostatCheckbox.checked
 
-    property alias forceValue: forceSlider.value
-    property alias forceEnabled: forceCheckbox.checked
+    //    property alias forceValue: forceSlider.value
+    //    property alias forceEnabled: forceCheckbox.checked
+
+    property double forceValue: 0
+    property bool forceEnabled: false
 
     property alias systemSizeX: systemSizeXSlider.value
     property alias systemSizeY: systemSizeYSlider.value
@@ -32,6 +35,7 @@ Item {
     property real hiddenOpacityForPlots: 0.4
 
     function resetControls() {
+        running = true
         thermostatEnabled = false
         thermostatValue = 100
         forceEnabled = false
@@ -459,29 +463,60 @@ Item {
                 margins: parent.width*0.05
             }
 
-            spacing: anchors.margins
-
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
 
-            CheckBox {
+            //            CheckBox {
+            //                id: thermostatCheckbox
+            //                checked: false
+            //                text: "T"
+            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+            //                onPressedChanged: {
+            //                    if(pressed) {
+            //                        othersPressed = true
+            //                    } else {
+            //                        othersPressed = false
+            //                    }
+            //                }
+            //                style: CheckBoxStyle {
+            //                    label: Text {
+            //                        text: control.text
+            //                        color: "white"
+            //                    }
+            //                }
+
+            //                Behavior on opacity {
+            //                    OpacityAnimation {
+
+            //                    }
+            //                }
+            //            }
+
+            Image {
                 id: thermostatCheckbox
-                checked: false
-                text: "T"
+                property bool checked: false
+                property bool pressed: thermostatMouseArea.pressed
                 opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                }
+
+                source: checked ? "images/thermostat_enabled.png" : "images/thermostat_disabled.png"
+                width: Style.touchableSize * 2.0
+                height: width
+                smooth: true
+                antialiasing: true
+
+                fillMode: Image.PreserveAspectFit
+
                 onPressedChanged: {
                     if(pressed) {
                         othersPressed = true
                     } else {
                         othersPressed = false
-                    }
-                }
-                style: CheckBoxStyle {
-                    label: Text {
-                        text: control.text
-                        color: "white"
                     }
                 }
 
@@ -490,12 +525,46 @@ Item {
 
                     }
                 }
+
+                Text {
+                    id: thermostatText
+                    anchors {
+                        right: parent.right
+                        rightMargin: parent.width * 0.4
+                        verticalCenter: parent.verticalCenter
+                        horizontalCenterOffset: -width / 6
+                    }
+                    font.pixelSize: parent.height * 0.2
+                    text: thermostatSlider.value.toFixed(0)
+                    color: "white"
+                }
+
+                Text {
+                    anchors {
+                        left: thermostatText.right
+                        leftMargin: -width / 6.0
+                        bottom: thermostatText.top
+                        bottomMargin: -height * 2.0 / 3.0
+                    }
+
+                    font.pixelSize: thermostatText.font.pixelSize * 0.6
+                    color: "white"
+                    text: "°C"
+                }
+
+                MouseArea {
+                    id: thermostatMouseArea
+                    anchors.fill: parent
+                    onClicked: {
+                        thermostatCheckbox.checked = !thermostatCheckbox.checked
+                    }
+                }
             }
 
             Slider {
                 id: thermostatSlider
+                height: parent.height
                 orientation: Qt.Vertical
-                Layout.fillHeight: true
                 minimumValue: 1
                 maximumValue: 1000
                 value: 100
@@ -508,7 +577,8 @@ Item {
                     }
                 }
                 style: CustomSliderStyle {
-
+                    handleLabel: "T"
+                    activated: thermostatCheckbox.checked
                 }
 
                 Behavior on opacity {
@@ -518,50 +588,80 @@ Item {
                 }
             }
 
-            CheckBox {
-                id: forceCheckbox
-                checked: false
-                text: "F"
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CheckBoxStyle {
-                    label: Text {
-                        text: control.text
-                        color: "white"
-                    }
-                }
+            //            CheckBox {
+            //                id: forceCheckbox
+            //                checked: false
+            //                text: "F"
+            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+            //                onPressedChanged: {
+            //                    if(pressed) {
+            //                        othersPressed = true
+            //                    } else {
+            //                        othersPressed = false
+            //                    }
+            //                }
+            //                style: CheckBoxStyle {
+            //                    label: Text {
+            //                        text: control.text
+            //                        color: "white"
+            //                    }
+            //                }
 
-                Behavior on opacity {
-                    OpacityAnimation {
+            //                Behavior on opacity {
+            //                    OpacityAnimation {
 
-                    }
-                }
-            }
+            //                    }
+            //                }
+            //            }
 
-            Slider {
-                id: forceSlider
-                orientation: Qt.Vertical
+            //            Slider {
+            //                id: forceSlider
+            //                orientation: Qt.Vertical
+            //                Layout.fillHeight: true
+            //                minimumValue: -100
+            //                maximumValue: 100
+            //                value: 0
+            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+            //                onPressedChanged: {
+            //                    if(pressed) {
+            //                        othersPressed = true
+            //                    } else {
+            //                        othersPressed = false
+            //                    }
+            //                }
+            //                style: CustomSliderStyle {
+
+            //                }
+
+            //                Behavior on opacity {
+            //                    OpacityAnimation {
+
+            //                    }
+            //                }
+            //            }
+
+
+
+            Item {
                 Layout.fillHeight: true
-                minimumValue: -100
-                maximumValue: 100
-                value: 0
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CustomSliderStyle {
+                Layout.preferredWidth: dashboardRoot.width*0.03
+            }
 
+            Image {
+                property bool checked: false
+
+                anchors {
+                    verticalCenter: parent.verticalCenter
                 }
+
+                source: "images/systemsize.png"
+                width: Style.touchableSize * 1.5
+                height: width
+                smooth: true
+                antialiasing: true
+
+                fillMode: Image.PreserveAspectFit
+                opacity: !othersPressed ? 1.0 : hiddenOpacity
 
                 Behavior on opacity {
                     OpacityAnimation {
@@ -586,7 +686,7 @@ Item {
                     }
                 }
                 style: CustomSliderStyle {
-
+                    handleLabel: "X"
                 }
 
                 Behavior on opacity {
@@ -594,6 +694,11 @@ Item {
 
                     }
                 }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.preferredWidth: dashboardRoot.width*0.03
             }
 
             Slider {
@@ -612,7 +717,7 @@ Item {
                     }
                 }
                 style: CustomSliderStyle {
-
+                    handleLabel: "Y"
                 }
 
                 Behavior on opacity {
@@ -620,6 +725,11 @@ Item {
 
                     }
                 }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.preferredWidth: dashboardRoot.width*0.03
             }
 
             Slider {
@@ -639,7 +749,7 @@ Item {
                 }
 
                 style: CustomSliderStyle {
-
+                    handleLabel: "Z"
                 }
 
                 Behavior on opacity {

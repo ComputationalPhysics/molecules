@@ -7,7 +7,8 @@ import "../style" 1.0
 
 SliderStyle {
     id: sliderStyle
-
+    property string handleLabel: ""
+    property bool activated: true
 
     handle: Rectangle {
         implicitWidth: Style.touchableSize
@@ -15,7 +16,16 @@ SliderStyle {
         radius: width
         border.width: width * 0.1
         border.color: "#f7fbff"
-        color: "#deebf7"
+//        color: "#deebf7"
+        color: sliderStyle.activated ? "#deebf7" : "#ccc"
+
+        Text {
+            anchors.centerIn: parent
+            font.pixelSize: parent.height * 0.5
+            text: sliderStyle.handleLabel
+            color: "#444"
+            rotation: control.orientation === Qt.Vertical ? 90 : 0
+        }
     }
     groove: Rectangle {
         id: rect
@@ -25,7 +35,7 @@ SliderStyle {
         radius: 8
 
         Rectangle {
-            color: "#4292c6"
+            color: sliderStyle.activated ? "#4292c6" : "#777"
             anchors {
                 bottom: parent.bottom
                 top: parent.top
