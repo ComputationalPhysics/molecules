@@ -23,5 +23,7 @@
         <file>simulations/fracture.png</file>
         <file>simulations/wallcrash.png</file>
         <file>simulations/wallcrash_free.lmp</file>
+        <file>simulations/bullets.lmp</file>
+        <file>simulations/bullets.png</file>
     </qresource>
 </RCC>
