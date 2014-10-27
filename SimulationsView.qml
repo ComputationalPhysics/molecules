@@ -79,8 +79,8 @@ Item {
         anchors {
             centerIn: parent
         }
-        height: parent.height * 0.8
-        width: parent.width * 0.7
+        height: systemsViewColumn.height+systemsViewColumn.anchors.margins
+        width: parent.width * 0.8
 
         border.width: 1.0
         border.color: Qt.rgba(0.5, 0.5, 0.5, 0.9)
@@ -92,73 +92,81 @@ Item {
             anchors.fill: parent
         }
 
-        Flickable {
+        ColumnLayout {
+            id: systemsViewColumn
             anchors {
-                fill: parent
-                margins: parent.width * 0.07
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                // bottom: parent.bottom
+                margins: systemsViewRectangle.width*0.02
             }
-            clip: true
-            contentHeight: systemsViewColumn.height
-            ColumnLayout {
-                id: systemsViewColumn
+
+            spacing: systemsViewRectangle.width * 0.02
+
+            Text {
                 anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
+                    horizontalCenter: parent.horizontalCenter
                 }
+                text: "Welcome to Molecules!"
+                font.pixelSize: parent.width * 0.04
+                color: "white"
+            }
 
-                spacing: systemsViewRectangle.width * 0.02
-
-                Text {
-                    anchors {
-                        horizontalCenter: parent.horizontalCenter
-                    }
-                    text: "Welcome to Molecules!"
-                    font.pixelSize: parent.width * 0.04
-                    color: "white"
+            Text {
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
                 }
+                text: "Please select a simulation."
+                font.pixelSize: parent.width * 0.025
+                color: "white"
+            }
 
-                Text {
-                    anchors {
-                        horizontalCenter: parent.horizontalCenter
-                    }
-                    text: "Please select a simulation."
-                    font.pixelSize: parent.width * 0.025
-                    color: "white"
-                }
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+            }
 
-                Grid {
-                    id: systemsGrid
+            Grid {
+                id: systemsGrid
+                Layout.fillWidth: true
 
-                    property real elementWidth: systemsViewColumn.width / columns - spacing
-                    property real elementHeight: elementWidth * 9.0 / 16.0
-                    property var simulations: [
-                        { identifier: "default", name: "Default"},
-                        { identifier: "diffusion", name: "Diffusion"},
-                        { identifier: "chamber", name: "Chamber"},
-                        { identifier: "fracture", name: "Fracture"},
-                        { identifier: "wallcrash", name: "Wall crash"},
-                        { identifier: "bullets", name: "Bullets"},
-                    ]
+                property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
+                // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
+                property real elementHeight: elementWidth*9/16
 
-                    columns: 3
-                    spacing: systemsViewRectangle.width * 0.01
+                property var simulations: [
+                    { identifier: "default", name: "Default"},
+                    { identifier: "diffusion", name: "Diffusion"},
+                    { identifier: "chamber", name: "Chamber"},
+                    { identifier: "fracture", name: "Fracture"},
+                    { identifier: "wallcrash", name: "Wall crash"},
+                    { identifier: "bullets", name: "Bullets"},
+                ]
 
-                    Component.onCompleted: {
-                        for(var i in simulations) {
-                            var simulation = simulations[i]
-                            var component = Qt.createComponent("SimulationButton.qml")
-                            var properties = {
-                                width: Qt.binding(function() {return systemsGrid.elementWidth}),
-                                height: Qt.binding(function() {return systemsGrid.elementHeight}),
-                                identifier: simulation.identifier,
-                                name: simulation.name
-                            }
-                            var button = component.createObject(systemsGrid, properties)
-                            button.loadSimulation.connect(systemsViewRoot.loadSimulation)
+                columns: 3
+                rows: 2
+                spacing: systemsViewRectangle.width * 0.01
+
+                Component.onCompleted: {
+                    for(var i in simulations) {
+                        var simulation = simulations[i]
+                        var component = Qt.createComponent("SimulationButton.qml")
+                        var properties = {
+                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
+                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
+                            identifier: simulation.identifier,
+                            name: simulation.name
                         }
+                        var button = component.createObject(systemsGrid, properties)
+                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
                     }
                 }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
             }
         }
     }

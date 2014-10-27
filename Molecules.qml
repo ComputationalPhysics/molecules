@@ -7,6 +7,7 @@ import "style" 1.0
 //import MoleculesStyle 1.0
 
 Item {
+    property real aspectRatio: width/height
     id: moleculesRoot
     width: 1280
     height: 720
