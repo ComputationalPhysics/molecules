@@ -497,6 +497,8 @@ Item {
             Image {
                 id: thermostatCheckbox
                 property bool checked: false
+                property bool pressed: thermostatMouseArea.pressed
+                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
 
                 anchors {
                     verticalCenter: parent.verticalCenter
@@ -509,6 +511,20 @@ Item {
                 antialiasing: true
 
                 fillMode: Image.PreserveAspectFit
+
+                onPressedChanged: {
+                    if(pressed) {
+                        othersPressed = true
+                    } else {
+                        othersPressed = false
+                    }
+                }
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
+                }
 
                 Text {
                     id: thermostatText
@@ -537,6 +553,7 @@ Item {
                 }
 
                 MouseArea {
+                    id: thermostatMouseArea
                     anchors.fill: parent
                     onClicked: {
                         thermostatCheckbox.checked = !thermostatCheckbox.checked
@@ -644,6 +661,13 @@ Item {
                 antialiasing: true
 
                 fillMode: Image.PreserveAspectFit
+                opacity: !othersPressed ? 1.0 : hiddenOpacity
+
+                Behavior on opacity {
+                    OpacityAnimation {
+
+                    }
+                }
             }
 
             Slider {
