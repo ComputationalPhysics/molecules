@@ -136,7 +136,6 @@ Item {
                         { identifier: "default", name: "Default"},
                         { identifier: "diffusion", name: "Diffusion"},
                         { identifier: "chamber", name: "Chamber"},
-                        { identifier: "cylinder", name: "Cylinder"},
                         { identifier: "fracture", name: "Fracture"},
                         { identifier: "wallcrash", name: "Wall crash"},
                         { identifier: "bullets", name: "Bullets"},
