@@ -138,7 +138,8 @@ Item {
                         { identifier: "chamber", name: "Chamber"},
                         { identifier: "cylinder", name: "Cylinder"},
                         { identifier: "fracture", name: "Fracture"},
-                        { identifier: "wallcrash", name: "Wall crash"}
+                        { identifier: "wallcrash", name: "Wall crash"},
+                        { identifier: "bullets", name: "Bullets"},
                     ]
 
                     columns: 3
