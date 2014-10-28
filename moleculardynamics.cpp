@@ -305,7 +305,8 @@ void MolecularDynamics::sync()
 
     if(!didLoadNewSystem) {
         if(m_thermostatEnabled) {
-            double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
+            float temperatureKelvin = m_thermostatValue + 273.15;
+            double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
             m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
             m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, ARGON);
         }
