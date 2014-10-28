@@ -322,7 +322,9 @@ void MolecularDynamics::sync()
 
     setDidScaleVelocitiesDueToHighValues(m_renderer->m_simulator.m_system.didScaleVelocitiesDueToHighValues());
     setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
-    setTemperature(m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature_free_atoms));
+
+    float temperatureCelsius = m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature_free_atoms) - 273.15;
+    setTemperature(temperatureCelsius);
     setKineticEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->kinetic_energy));
     setPotentialEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->potential_energy));
     setPressure(m_renderer->m_simulator.m_system.unit_converter->pressure_to_SI(m_renderer->m_simulator.m_sampler->pressure));

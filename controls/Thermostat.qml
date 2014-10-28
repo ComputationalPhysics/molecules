@@ -7,7 +7,7 @@ Rectangle {
     property real value: 0.0
     property real secondaryValue: 620.0
     property real minimumValue: 0.0
-    property real maximumValue: 1000.0
+    property real maximumValue: 1.0
     property real _valueNormalized: (value - minimumValue) / (maximumValue - minimumValue)
     property real _secondaryValueNormalized: (secondaryValue - minimumValue) / (maximumValue - minimumValue)
     color: "black"
@@ -44,7 +44,7 @@ Rectangle {
 //                    horizontalCenterOffset: -width / 6
 //                }
             anchors.centerIn: parent
-            text: (dialRoot.value - 273.15).toFixed(0)
+            text: (dialRoot.value).toFixed(0)
             color: "white"
             font.pixelSize: parent.height * 0.25
         }
