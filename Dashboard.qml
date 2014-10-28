@@ -282,6 +282,37 @@ Item {
                 }
             }
         }
+
+
+        Image {
+            id: exitButton
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: parent.width*0.01
+            }
+
+            width: Style.touchableSize
+            height: width
+            source: "images/exit.png"
+
+            opacity: othersPressed ? hiddenOpacity : 1.0
+
+            Behavior on opacity {
+                OpacityAnimation {
+
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    dashboardRoot.revealed = false
+                }
+            }
+        }
+
+
         Text {
             anchors {
                 verticalCenter: playButton.verticalCenter
