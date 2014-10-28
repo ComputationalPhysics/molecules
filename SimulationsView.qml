@@ -77,7 +77,8 @@ Item {
         id: systemsViewRectangle
         enabled: revealed // Keeps button presses from being caught by internal MouseAreas
         anchors {
-            centerIn: parent
+            fill: parent
+            margins: systemsViewRoot.width * 0.05
         }
         height: systemsViewColumn.height+systemsViewColumn.anchors.margins
         width: parent.width * 0.8
@@ -95,11 +96,8 @@ Item {
         ColumnLayout {
             id: systemsViewColumn
             anchors {
-                left: parent.left
-                right: parent.right
-                top: parent.top
-                // bottom: parent.bottom
-                margins: systemsViewRectangle.width*0.02
+                fill: parent
+                margins: systemsViewRoot.width * 0.05
             }
 
             spacing: systemsViewRectangle.width * 0.02
@@ -122,52 +120,102 @@ Item {
                 color: "white"
             }
 
+//            Item {
+//                Layout.fillHeight: true
+//                Layout.fillWidth: true
+//            }
+
+
             Item {
+                Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.fillWidth: true
-            }
 
-            Grid {
-                id: systemsGrid
-                Layout.fillWidth: true
 
-                property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
-                // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
-                property real elementHeight: elementWidth*9/16
+                Grid {
+                    id: systemsGrid
+                    anchors.centerIn: parent
+                    property real targetAspectRatio: 16*3 / (2*9)
+                    property real availableAspectRatio: parent.width / parent.height
+                    height: availableAspectRatio > targetAspectRatio ? parent.height : parent.width / targetAspectRatio
+                    width: availableAspectRatio > targetAspectRatio ? parent.height * targetAspectRatio : parent.width
+                    Layout.fillWidth: true
 
-                property var simulations: [
-                    { identifier: "default", name: "Default"},
-                    { identifier: "diffusion", name: "Diffusion"},
-                    { identifier: "chamber", name: "Chamber"},
-                    { identifier: "fracture", name: "Fracture"},
-                    { identifier: "wallcrash", name: "Wall crash"},
-                    { identifier: "bullets", name: "Bullets"},
-                ]
+                    property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
+                    // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
+                    property real elementHeight: elementWidth*9/16
 
-                columns: 3
-                rows: 2
-                spacing: systemsViewRectangle.width * 0.01
+                    property var simulations: [
+                        { identifier: "default", name: "Default"},
+                        { identifier: "diffusion", name: "Diffusion"},
+                        { identifier: "chamber", name: "Chamber"},
+                        { identifier: "fracture", name: "Fracture"},
+                        { identifier: "wallcrash", name: "Wall crash"},
+                        { identifier: "bullets", name: "Bullets"},
+                    ]
 
-                Component.onCompleted: {
-                    for(var i in simulations) {
-                        var simulation = simulations[i]
-                        var component = Qt.createComponent("SimulationButton.qml")
-                        var properties = {
-                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
-                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
-                            identifier: simulation.identifier,
-                            name: simulation.name
+                    columns: 3
+                    rows: 2
+                    spacing: systemsViewRectangle.width * 0.01
+
+                    Component.onCompleted: {
+                        for(var i in simulations) {
+                            var simulation = simulations[i]
+                            var component = Qt.createComponent("SimulationButton.qml")
+                            var properties = {
+                                width: Qt.binding(function() {return systemsGrid.elementWidth}),
+                                height: Qt.binding(function() {return systemsGrid.elementHeight}),
+                                identifier: simulation.identifier,
+                                name: simulation.name
+                            }
+                            var button = component.createObject(systemsGrid, properties)
+                            button.loadSimulation.connect(systemsViewRoot.loadSimulation)
                         }
-                        var button = component.createObject(systemsGrid, properties)
-                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
                     }
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-            }
+
+//            Grid {
+//                id: systemsGrid
+//                Layout.fillWidth: true
+
+//                property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
+//                // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
+//                property real elementHeight: elementWidth*9/16
+
+//                property var simulations: [
+//                    { identifier: "default", name: "Default"},
+//                    { identifier: "diffusion", name: "Diffusion"},
+//                    { identifier: "chamber", name: "Chamber"},
+//                    { identifier: "fracture", name: "Fracture"},
+//                    { identifier: "wallcrash", name: "Wall crash"},
+//                    { identifier: "bullets", name: "Bullets"},
+//                ]
+
+//                columns: 3
+//                rows: 2
+//                spacing: systemsViewRectangle.width * 0.01
+
+//                Component.onCompleted: {
+//                    for(var i in simulations) {
+//                        var simulation = simulations[i]
+//                        var component = Qt.createComponent("SimulationButton.qml")
+//                        var properties = {
+//                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
+//                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
+//                            identifier: simulation.identifier,
+//                            name: simulation.name
+//                        }
+//                        var button = component.createObject(systemsGrid, properties)
+//                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
+//                    }
+//                }
+//            }
+
+//            Item {
+//                Layout.fillHeight: true
+//                Layout.fillWidth: true
+//            }
         }
     }
 }

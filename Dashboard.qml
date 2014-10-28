@@ -4,13 +4,14 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 
 import "style"
+import "controls"
 
 Item {
     id: dashboardRoot
     property bool revealed: false
     property bool running: true
-    property alias thermostatValue: thermostatSlider.value
-    property alias thermostatEnabled: thermostatCheckbox.checked
+    property alias thermostatValue: thermostat.value
+    property alias thermostatEnabled: thermostat.activated
 
     //    property alias forceValue: forceSlider.value
     //    property alias forceEnabled: forceCheckbox.checked
@@ -61,7 +62,7 @@ Item {
     }
 
     function addTotalEnergy(totalEnergy) {
-        totalEnergyPlot.addValue(totalEnergy)
+//        totalEnergyPlot.addValue(totalEnergy)
         resetRange()
     }
 
@@ -112,8 +113,10 @@ Item {
     }
 
     function resetRange() {
-        var minValue = Math.min(min(kineticEnergyPlot.values), Math.min(min(potentialEnergyPlot.values), min(totalEnergyPlot.values)))
-        var maxValue = Math.max(max(kineticEnergyPlot.values), Math.max(max(potentialEnergyPlot.values), max(totalEnergyPlot.values)))
+//        var minValue = Math.min(min(kineticEnergyPlot.values), Math.min(min(potentialEnergyPlot.values), min(totalEnergyPlot.values)))
+//        var maxValue = Math.max(max(kineticEnergyPlot.values), Math.max(max(potentialEnergyPlot.values), max(totalEnergyPlot.values)))
+        var minValue = Math.min(min(kineticEnergyPlot.values), min(potentialEnergyPlot.values))
+        var maxValue = Math.max(max(kineticEnergyPlot.values), max(potentialEnergyPlot.values))
 
         var minMaxExponents = minMaxExponent(minValue, maxValue)
         minValue = minMaxExponents[0]
@@ -123,8 +126,8 @@ Item {
         kineticEnergyPlot.maximumValue = maxValue
         potentialEnergyPlot.minimumValue = minValue
         potentialEnergyPlot.maximumValue = maxValue
-        totalEnergyPlot.minimumValue = minValue
-        totalEnergyPlot.maximumValue = maxValue
+//        totalEnergyPlot.minimumValue = minValue
+//        totalEnergyPlot.maximumValue = maxValue
 
         var minTemperature = min(temperaturePlot.values)
         var maxTemperature = max(temperaturePlot.values)
@@ -337,7 +340,7 @@ Item {
                             anchors.fill: parent
                             minimumValue: temperaturePlot.minimumValue
                             maximumValue: temperaturePlot.maximumValue
-                            title: "T [K]"
+                            title: "T [°C]"
                         }
                     }
 
@@ -422,17 +425,6 @@ Item {
                             strokeStyle: "#a6cee3"
                         }
 
-                        Plot {
-                            id: totalEnergyPlot
-                            anchors {
-                                fill: parent
-                                margins: dashboardRoot.width * 0.01
-                            }
-                            minimumValue: kineticEnergyPlot.minimumValue
-                            maximumValue: kineticEnergyPlot.maximumValue
-                            strokeStyle: "#ff7f00"
-                        }
-
                         PlotLabels {
                             anchors.fill: parent
                             minimumValue: kineticEnergyPlot.minimumValue
@@ -443,18 +435,13 @@ Item {
                     Row {
                         spacing: 12
                         Text {
-                            text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(1) + " eV"
+                            text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(0) + " eV"
                             color: kineticEnergyPlot.strokeStyle
                             font.pixelSize: 12
                         }
                         Text {
-                            text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(1) + " eV"
+                            text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(0) + " eV"
                             color: potentialEnergyPlot.strokeStyle
-                            font.pixelSize: 12
-                        }
-                        Text {
-                            text: "Et = " + dashboardRoot.totalEnergy.toFixed(1) + " eV"
-                            color: totalEnergyPlot.strokeStyle
                             font.pixelSize: 12
                         }
                     }
@@ -469,7 +456,17 @@ Item {
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
-                margins: parent.width*0.05
+                margins: dashboardRoot.width * 0.03
+            }
+
+            Thermostat {
+                id: thermostat
+                Layout.fillHeight: true
+                Layout.preferredWidth: height
+                secondaryValue: dashboardRoot.temperature
+                minimumValue: 0
+                maximumValue: 1500 + 273.15
+                activated: false
             }
 
             Item {
@@ -477,141 +474,12 @@ Item {
                 Layout.fillHeight: true
             }
 
-            //            CheckBox {
-            //                id: thermostatCheckbox
-            //                checked: false
-            //                text: "T"
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CheckBoxStyle {
-            //                    label: Text {
-            //                        text: control.text
-            //                        color: "white"
-            //                    }
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
             Image {
-                id: thermostatCheckbox
                 property bool checked: false
-                property bool pressed: thermostatMouseArea.pressed
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                }
-
-                source: checked ? "images/thermostat_enabled.png" : "images/thermostat_disabled.png"
-                width: Style.touchableSize * 2.0
-                height: width
-                smooth: true
-                antialiasing: true
-
-                fillMode: Image.PreserveAspectFit
-
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-
-                Text {
-                    id: thermostatText
-                    anchors {
-                        right: parent.right
-                        rightMargin: parent.width * 0.4
-                        verticalCenter: parent.verticalCenter
-                        horizontalCenterOffset: -width / 6
-                    }
-                    font.pixelSize: parent.height * 0.2
-                    text: thermostatSlider.value.toFixed(0)
-                    color: "white"
-                }
-
-                Text {
-                    anchors {
-                        left: thermostatText.right
-                        leftMargin: -width / 6.0
-                        bottom: thermostatText.top
-                        bottomMargin: -height * 2.0 / 3.0
-                    }
-
-                    font.pixelSize: thermostatText.font.pixelSize * 0.6
-                    color: "white"
-                    text: "°C"
-                }
-
-                MouseArea {
-                    id: thermostatMouseArea
-                    anchors.fill: parent
-                    onClicked: {
-                        thermostatCheckbox.checked = !thermostatCheckbox.checked
-                    }
-                }
-            }
-
-            Slider {
-                id: thermostatSlider
-                height: parent.height
-                orientation: Qt.Vertical
-                minimumValue: 1
-                maximumValue: 1000
-                value: 100
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "T"
-                    activated: thermostatCheckbox.checked
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-            }
-
-            Item {
                 Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
-            }
-
-            Image {
-                property bool checked: false
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                }
+                Layout.preferredWidth: height
 
                 source: "images/systemsize.png"
-                width: Style.touchableSize * 1.5
-                height: width
                 smooth: true
                 antialiasing: true
 
@@ -625,98 +493,90 @@ Item {
                 }
             }
 
-            Slider {
-                id: systemSizeXSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "X"
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-            }
-
             Item {
                 Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
+                Layout.preferredWidth: dashboardRoot.width*0.01
             }
 
-            Slider {
-                id: systemSizeYSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
+            ColumnLayout {
+                Slider {
+                    id: systemSizeXSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
                     }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "Y"
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
+                    style: CustomSliderStyle {
+                        handleLabel: "X"
                     }
-                }
-            }
 
-            Item {
-                Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
-            }
+                    Behavior on opacity {
+                        OpacityAnimation {
 
-            Slider {
-                id: systemSizeZSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
+                        }
                     }
                 }
 
-                style: CustomSliderStyle {
-                    handleLabel: "Z"
-                }
+                Slider {
+                    id: systemSizeYSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
+                    }
+                    style: CustomSliderStyle {
+                        handleLabel: "Y"
+                    }
 
-                Behavior on opacity {
-                    OpacityAnimation {
+                    Behavior on opacity {
+                        OpacityAnimation {
 
+                        }
                     }
                 }
-            }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                Slider {
+                    id: systemSizeZSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
+                    }
+
+                    style: CustomSliderStyle {
+                        handleLabel: "Z"
+                    }
+
+                    Behavior on opacity {
+                        OpacityAnimation {
+
+                        }
+                    }
+                }
             }
         }
     }
