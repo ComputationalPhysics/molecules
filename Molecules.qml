@@ -98,7 +98,7 @@ Item {
             property: "tilt"
             from: molecularDynamics.tilt
             to: molecularDynamics.targetTilt
-            duration: 520
+            duration: 430
             easing.type: Easing.InOutQuad
         }
 

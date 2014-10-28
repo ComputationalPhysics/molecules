@@ -128,7 +128,7 @@ Item {
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
-                text: "Welcome to Molecules!"
+                text: "Welcome to Atomify"
                 font.pixelSize: parent.width * 0.04
                 color: "white"
             }
