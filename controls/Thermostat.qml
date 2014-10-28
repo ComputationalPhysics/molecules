@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.2
 import "../style"
 
 Rectangle {
@@ -79,28 +80,52 @@ Rectangle {
         text: "°C"
     }
 
-    Row {
+    Text {
         anchors {
             top: thermostatText.bottom
-            topMargin: height * 0.5
             horizontalCenter: parent.horizontalCenter
         }
-        spacing: dialRoot.width * 0.05
-        Rectangle {
-            id: greenCircle
-            width: dialRoot.width * 0.03
-            height: width
-            radius: width / 2
-            color: dialRoot.activated ? "#2FFF1C" : "#39663B"
-        }
-        Rectangle {
-            id: redCircle
-            width: greenCircle.width
-            height: width
-            radius: width / 2
-            color: dialRoot.activated ? "#702C2C" : "#FF3D3D"
-        }
+
+        font.pixelSize: parent.height * 0.10
+        color: dialRoot.activated ? "#2FFF1C" : "#ccc"
+
+        text: dialRoot.activated ? "ON" : "OFF"
+
     }
+
+//    Switch {
+//        anchors {
+//            top: thermostatText.bottom
+//            horizontalCenter: parent.horizontalCenter
+//        }
+
+//        height: parent.height * 0.10
+//        checked: dialRoot.activated
+
+//    }
+
+//    Row {
+//        anchors {
+//            top: thermostatText.bottom
+//            topMargin: height * 0.5
+//            horizontalCenter: parent.horizontalCenter
+//        }
+//        spacing: dialRoot.width * 0.05
+//        Rectangle {
+//            id: greenCircle
+//            width: dialRoot.width * 0.03
+//            height: width
+//            radius: width / 2
+//            color: dialRoot.activated ? "#2FFF1C" : "#39663B"
+//        }
+//        Rectangle {
+//            id: redCircle
+//            width: greenCircle.width
+//            height: width
+//            radius: width / 2
+//            color: dialRoot.activated ? "#702C2C" : "#FF3D3D"
+//        }
+//    }
 
 
     PathInterpolator {
@@ -222,7 +247,7 @@ Rectangle {
             var posX = mouse.x - centerX
             var posY = mouse.y - centerY
             var angle = (-Math.atan2(-posY, posX) + 4*Math.PI - Math.PI / 3) % (2*Math.PI) + Math.PI/3
-            var value = (angle - 2*Math.PI/3) / (2*Math.PI - Math.PI/3) * (dialRoot.maximumValue - dialRoot.minimumValue)
+            var value = (angle - 2*Math.PI/3) / (2*Math.PI - Math.PI/3) * (dialRoot.maximumValue - dialRoot.minimumValue) + dialRoot.minimumValue
             if(value < dialRoot.minimumValue) {
                 if(posX > 0) {
                     value = dialRoot.maximumValue

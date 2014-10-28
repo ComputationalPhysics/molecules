@@ -508,6 +508,8 @@ Item {
                 height: Math.min(parent.width * 0.25, parent.height)
 
                 secondaryValue: dashboardRoot.temperature
+//                minimumValue: -273.15
+//                maximumValue: 1500
                 minimumValue: -273.15
                 maximumValue: 1500
                 value: 300
