@@ -66,8 +66,8 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     m_indices.resize(6*numPoints);
 
     QVector3D normalColor = vectorFromColor(QColor("#41b6c4"));
-    QVector3D frozenColor =  vectorFromColor(QColor("#ffffff"));
-    QVector3D fixedColor =  vectorFromColor(QColor("#ffffff"));
+    QVector3D frozenColor =  vectorFromColor(QColor("#bcbddc"));
+    QVector3D fixedColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D unknownColor =  vectorFromColor(QColor("#ff0000"));
 
     for(int i=0; i<numPoints; i++) {
