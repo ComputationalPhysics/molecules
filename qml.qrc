@@ -11,5 +11,6 @@
         <file>PlotLabels.qml</file>
         <file>style/qmldir</file>
         <file>style/Style.qml</file>
+        <file>controls/Thermostat.qml</file>
     </qresource>
 </RCC>

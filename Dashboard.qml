@@ -4,13 +4,14 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 
 import "style"
+import "controls"
 
 Item {
     id: dashboardRoot
     property bool revealed: false
     property bool running: true
-    property alias thermostatValue: thermostatSlider.value
-    property alias thermostatEnabled: thermostatCheckbox.checked
+    property alias thermostatValue: thermostat.value
+    property alias thermostatEnabled: thermostat.activated
 
     //    property alias forceValue: forceSlider.value
     //    property alias forceEnabled: forceCheckbox.checked
@@ -460,7 +461,15 @@ Item {
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
-                margins: parent.width*0.05
+                margins: dashboardRoot.width * 0.03
+            }
+
+            Thermostat {
+                id: thermostat
+                Layout.fillHeight: true
+                Layout.preferredWidth: height
+                secondaryValue: dashboardRoot.temperature
+                activated: false
             }
 
             Item {
@@ -468,195 +477,12 @@ Item {
                 Layout.fillHeight: true
             }
 
-            //            CheckBox {
-            //                id: thermostatCheckbox
-            //                checked: false
-            //                text: "T"
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CheckBoxStyle {
-            //                    label: Text {
-            //                        text: control.text
-            //                        color: "white"
-            //                    }
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
             Image {
-                id: thermostatCheckbox
                 property bool checked: false
-                property bool pressed: thermostatMouseArea.pressed
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                }
-
-                source: checked ? "images/thermostat_enabled.png" : "images/thermostat_disabled.png"
-                width: Style.touchableSize * 2.0
-                height: width
-                smooth: true
-                antialiasing: true
-
-                fillMode: Image.PreserveAspectFit
-
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-
-                Text {
-                    id: thermostatText
-                    anchors {
-                        right: parent.right
-                        rightMargin: parent.width * 0.4
-                        verticalCenter: parent.verticalCenter
-                        horizontalCenterOffset: -width / 6
-                    }
-                    font.pixelSize: parent.height * 0.2
-                    text: thermostatSlider.value.toFixed(0)
-                    color: "white"
-                }
-
-                Text {
-                    anchors {
-                        left: thermostatText.right
-                        leftMargin: -width / 6.0
-                        bottom: thermostatText.top
-                        bottomMargin: -height * 2.0 / 3.0
-                    }
-
-                    font.pixelSize: thermostatText.font.pixelSize * 0.6
-                    color: "white"
-                    text: "°C"
-                }
-
-                MouseArea {
-                    id: thermostatMouseArea
-                    anchors.fill: parent
-                    onClicked: {
-                        thermostatCheckbox.checked = !thermostatCheckbox.checked
-                    }
-                }
-            }
-
-            Slider {
-                id: thermostatSlider
-                height: parent.height
-                orientation: Qt.Vertical
-                minimumValue: 1
-                maximumValue: 1000
-                value: 100
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "T"
-                    activated: thermostatCheckbox.checked
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-            }
-
-            //            CheckBox {
-            //                id: forceCheckbox
-            //                checked: false
-            //                text: "F"
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CheckBoxStyle {
-            //                    label: Text {
-            //                        text: control.text
-            //                        color: "white"
-            //                    }
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
-            //            Slider {
-            //                id: forceSlider
-            //                orientation: Qt.Vertical
-            //                Layout.fillHeight: true
-            //                minimumValue: -100
-            //                maximumValue: 100
-            //                value: 0
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CustomSliderStyle {
-
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
-
-
-            Item {
                 Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
-            }
-
-            Image {
-                property bool checked: false
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                }
+                Layout.preferredWidth: height
 
                 source: "images/systemsize.png"
-                width: Style.touchableSize * 1.5
-                height: width
                 smooth: true
                 antialiasing: true
 
@@ -670,98 +496,90 @@ Item {
                 }
             }
 
-            Slider {
-                id: systemSizeXSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
-                    }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "X"
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
-                    }
-                }
-            }
-
             Item {
                 Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
+                Layout.preferredWidth: dashboardRoot.width*0.01
             }
 
-            Slider {
-                id: systemSizeYSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
+            ColumnLayout {
+                Slider {
+                    id: systemSizeXSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
                     }
-                }
-                style: CustomSliderStyle {
-                    handleLabel: "Y"
-                }
-
-                Behavior on opacity {
-                    OpacityAnimation {
-
+                    style: CustomSliderStyle {
+                        handleLabel: "X"
                     }
-                }
-            }
 
-            Item {
-                Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.03
-            }
+                    Behavior on opacity {
+                        OpacityAnimation {
 
-            Slider {
-                id: systemSizeZSlider
-                orientation: Qt.Vertical
-                Layout.fillHeight: true
-                minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                maximumValue: 100
-                value: 10
-                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-                onPressedChanged: {
-                    if(pressed) {
-                        othersPressed = true
-                    } else {
-                        othersPressed = false
+                        }
                     }
                 }
 
-                style: CustomSliderStyle {
-                    handleLabel: "Z"
-                }
+                Slider {
+                    id: systemSizeYSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
+                    }
+                    style: CustomSliderStyle {
+                        handleLabel: "Y"
+                    }
 
-                Behavior on opacity {
-                    OpacityAnimation {
+                    Behavior on opacity {
+                        OpacityAnimation {
 
+                        }
                     }
                 }
-            }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                Slider {
+                    id: systemSizeZSlider
+                    orientation: Qt.Horizontal
+                    Layout.fillHeight: true
+                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
+                    maximumValue: 100
+                    value: 10
+                    opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
+                    onPressedChanged: {
+                        if(pressed) {
+                            othersPressed = true
+                        } else {
+                            othersPressed = false
+                        }
+                    }
+
+                    style: CustomSliderStyle {
+                        handleLabel: "Z"
+                    }
+
+                    Behavior on opacity {
+                        OpacityAnimation {
+
+                        }
+                    }
+                }
             }
         }
     }
