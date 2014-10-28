@@ -10,6 +10,7 @@ Rectangle {
     property real maximumValue: 1.0
     property real _valueNormalized: (value - minimumValue) / (maximumValue - minimumValue)
     property real _secondaryValueNormalized: (secondaryValue - minimumValue) / (maximumValue - minimumValue)
+    property real _secondaryValueLastUpdate: Date.now()
     color: "black"
 //    width: 64
 //    height: width
@@ -24,6 +25,17 @@ Rectangle {
         if(value < minimumValue) {
             value = minimumValue
         }
+    }
+
+    onSecondaryValueChanged: {
+        var currentTime = Date.now()
+        var timeDiff = currentTime - _secondaryValueLastUpdate
+        if(timeDiff <= 0 || timeDiff > 1000) {
+            return
+        }
+
+        secondaryValueAnimation.duration = timeDiff * 1.1
+        _secondaryValueLastUpdate = currentTime
     }
 
     Rectangle {
@@ -97,6 +109,7 @@ Rectangle {
 
         Behavior on progress {
             NumberAnimation {
+                id: secondaryValueAnimation
                 duration: 200
             }
         }

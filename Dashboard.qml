@@ -281,6 +281,37 @@ Item {
                 }
             }
         }
+
+
+        Image {
+            id: exitButton
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: parent.width*0.01
+            }
+
+            width: Style.touchableSize
+            height: width
+            source: "images/exit.png"
+
+            opacity: othersPressed ? hiddenOpacity : 1.0
+
+            Behavior on opacity {
+                OpacityAnimation {
+
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    dashboardRoot.revealed = false
+                }
+            }
+        }
+
+
         Text {
             anchors {
                 verticalCenter: playButton.verticalCenter
@@ -348,7 +379,7 @@ Item {
                     Text {
                         text: "T = " + dashboardRoot.temperature.toFixed(1) + " °C"
                         color: temperaturePlot.strokeStyle
-                        font.pixelSize: 12
+                        font.pixelSize: dashboardRoot.height * 0.03
                     }
                 }
             }
@@ -387,7 +418,7 @@ Item {
                     Text {
                         text: "P = " + (dashboardRoot.pressure * 1e-6).toFixed(1) + " MPa"
                         color: pressurePlot.strokeStyle
-                        font.pixelSize: 12
+                        font.pixelSize: dashboardRoot.height * 0.03
                     }
                 }
             }
@@ -434,16 +465,16 @@ Item {
                         }
                     }
                     Row {
-                        spacing: 12
+                        spacing: dashboardRoot.height * 0.03
                         Text {
                             text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(0) + " eV"
                             color: kineticEnergyPlot.strokeStyle
-                            font.pixelSize: 12
+                            font.pixelSize: dashboardRoot.height * 0.03
                         }
                         Text {
                             text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(0) + " eV"
                             color: potentialEnergyPlot.strokeStyle
-                            font.pixelSize: 12
+                            font.pixelSize: dashboardRoot.height * 0.03
                         }
                     }
                 }
@@ -477,6 +508,7 @@ Item {
                 maximumValue: 1500
                 value: 300
                 activated: false
+                opacity: !othersPressed ? 1.0 : hiddenOpacity
             }
 
             Image {

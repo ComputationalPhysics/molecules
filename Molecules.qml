@@ -53,7 +53,7 @@ Item {
         forceValue: dashboard.forceValue
 
         pan: 2
-        tilt: 17
+        tilt: 10
         zoom: -40
 
         running: dashboard.running
@@ -64,7 +64,7 @@ Item {
 
         onLoaded: {
             molecularDynamics.targetPan  = 10
-            molecularDynamics.targetTilt = 10
+            molecularDynamics.targetTilt = 20
             molecularDynamics.targetZoom = -10 - 1.5*molecularDynamics.systemSize.y
             zoomAnimation.restart()
             panAnimation.restart()

@@ -2,6 +2,8 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 
+import "style"
+
 Item {
     id: systemsViewRoot
     property bool revealed: true
@@ -90,6 +92,27 @@ Item {
             // Dummy mouse area to avoid interacting with underlying simulation
             enabled: systemsViewRoot.revealed
             anchors.fill: parent
+        }
+
+
+        Image {
+            id: exitButton
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: parent.width*0.01
+            }
+
+            width: Style.touchableSize
+            height: width
+            source: "images/exit.png"
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    simulationsView.revealed = false
+                }
+            }
         }
 
         ColumnLayout {
