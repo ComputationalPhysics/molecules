@@ -9,5 +9,9 @@
         <file>images/thermostat_enabled.png</file>
         <file>images/systemsize.png</file>
         <file>images/exit.png</file>
+        <file>images/poweroff.png</file>
+        <file>images/poweron.png</file>
+        <file>images/button_disabled.png</file>
+        <file>images/button_enabled.png</file>
     </qresource>
 </RCC>
