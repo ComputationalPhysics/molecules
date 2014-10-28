@@ -44,7 +44,6 @@ Item {
 
         temperaturePlot.clearData()
         pressurePlot.clearData()
-        totalEnergyPlot.clearData()
         kineticEnergyPlot.clearData()
         potentialEnergyPlot.clearData()
     }
@@ -323,7 +322,7 @@ Item {
 
             opacity: othersPressed ? hiddenOpacity : 1.0
 
-            text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
+            text: "t = " + (dashboardRoot.time * 1e12).toFixed(1) + " ps"
         }
 
         RowLayout {
@@ -378,7 +377,7 @@ Item {
                     }
 
                     Text {
-                        text: "T = " + dashboardRoot.temperature.toFixed(1) + " K"
+                        text: "T = " + dashboardRoot.temperature.toFixed(1) + " °C"
                         color: temperaturePlot.strokeStyle
                         font.pixelSize: dashboardRoot.height * 0.03
                     }
@@ -505,8 +504,8 @@ Item {
                 height: Math.min(parent.width * 0.25, parent.height)
 
                 secondaryValue: dashboardRoot.temperature
-                minimumValue: 0
-                maximumValue: 1500 + 273.15
+                minimumValue: -273.15
+                maximumValue: 1500
                 value: 300
                 activated: false
                 opacity: !othersPressed ? 1.0 : hiddenOpacity

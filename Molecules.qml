@@ -20,6 +20,11 @@ Item {
         console.log("Styled: " + Style.windowHeight)
     }
 
+    function loadSimulation(fileName) {
+        dashboard.running = false
+        molecularDynamics.load(fileName)
+    }
+
     onWidthChanged: {
         resetStyle()
     }
@@ -34,6 +39,8 @@ Item {
         id: molecularDynamics
         anchors.fill: parent
         property real targetZoom: 0.0
+        property real targetPan: 0.0
+        property real targetTilt: 0.0
         property bool isSettingSystemSize: false
         property real volume: systemSize.x*systemSize.y*systemSize.z
         property real density: atomCount / volume
@@ -45,11 +52,25 @@ Item {
         forceEnabled: dashboard.forceEnabled
         forceValue: dashboard.forceValue
 
-        pan: 30
-        tilt: 30
+        pan: 2
+        tilt: 10
         zoom: -40
 
         running: dashboard.running
+
+        Component.onCompleted: {
+            moleculesRoot.loadSimulation(":/simulations/crystal.lmp")
+        }
+
+        onLoaded: {
+            molecularDynamics.targetPan  = 10
+            molecularDynamics.targetTilt = 20
+            molecularDynamics.targetZoom = -10 - 1.5*molecularDynamics.systemSize.y
+            zoomAnimation.restart()
+            panAnimation.restart()
+            tiltAnimation.restart()
+            dashboard.resetControls()
+        }
 
         PropertyAnimation {
             id: zoomAnimation
@@ -58,6 +79,26 @@ Item {
             from: molecularDynamics.zoom
             to: molecularDynamics.targetZoom
             duration: 400
+            easing.type: Easing.InOutQuad
+        }
+
+        PropertyAnimation {
+            id: panAnimation
+            target: molecularDynamics
+            property: "pan"
+            from: molecularDynamics.pan
+            to: molecularDynamics.targetPan
+            duration: 450
+            easing.type: Easing.InOutQuad
+        }
+
+        PropertyAnimation {
+            id: tiltAnimation
+            target: molecularDynamics
+            property: "tilt"
+            from: molecularDynamics.tilt
+            to: molecularDynamics.targetTilt
+            duration: 520
             easing.type: Easing.InOutQuad
         }
 
@@ -327,13 +368,8 @@ Item {
     SimulationsView {
         id: simulationsView
         onLoadSimulation: {
-            dashboard.running = false
+            moleculesRoot.loadSimulation(fileName)
             revealed = false
-            molecularDynamics.load(fileName)
-            var systemSizeMax = Math.max(molecularDynamics.systemSize.x, molecularDynamics.systemSize.y, molecularDynamics.systemSize.z)
-            molecularDynamics.targetZoom = -10 - molecularDynamics.systemSize.y
-            zoomAnimation.restart()
-            dashboard.resetControls()
         }
     }
 

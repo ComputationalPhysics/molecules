@@ -167,7 +167,7 @@ Item {
                     property real elementHeight: elementWidth*9/16
 
                     property var simulations: [
-                        { identifier: "default", name: "Default"},
+                        { identifier: "crystal", name: "Crystal"},
                         { identifier: "diffusion", name: "Diffusion"},
                         { identifier: "chamber", name: "Chamber"},
                         { identifier: "fracture", name: "Fracture"},

@@ -296,18 +296,23 @@ void MolecularDynamics::sync()
     m_renderer->resetProjection();
     m_renderer->setModelViewMatrices(m_zoom, m_tilt, m_pan, m_roll);
 
+    bool didLoadNewSystem = loadIfPlanned();
+
     if(!m_running) {
         m_previousStepCompleted = true;
         return;
     }
 
-    if(m_thermostatEnabled) {
-        double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(m_thermostatValue);
-        m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
-        m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, ARGON);
-    }
-    if(m_systemSizeIsDirty) {
-        m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
+    if(!didLoadNewSystem) {
+        if(m_thermostatEnabled) {
+            float temperatureKelvin = m_thermostatValue + 273.15;
+            double systemTemperature = m_renderer->m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
+            m_renderer->m_simulator.m_thermostat->relaxation_time = 1;
+            m_renderer->m_simulator.m_thermostat->apply(m_renderer->m_simulator.m_sampler, &(m_renderer->m_simulator.m_system), systemTemperature, ARGON);
+        }
+        if(m_systemSizeIsDirty) {
+            m_renderer->m_simulator.m_system.setSystemSize(m_systemSize);
+        }
     }
 
     double dt = m_timer.restart() / 1000.0;
@@ -318,16 +323,14 @@ void MolecularDynamics::sync()
 
     setDidScaleVelocitiesDueToHighValues(m_renderer->m_simulator.m_system.didScaleVelocitiesDueToHighValues());
     setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
-    setTemperature(m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature_free_atoms));
+
+    float temperatureCelsius = m_renderer->m_simulator.m_system.unit_converter->temperature_to_SI(m_renderer->m_simulator.m_sampler->temperature_free_atoms) - 273.15;
+    setTemperature(temperatureCelsius);
     setKineticEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->kinetic_energy));
     setPotentialEnergy(m_renderer->m_simulator.m_system.unit_converter->energy_to_ev(m_renderer->m_simulator.m_sampler->potential_energy));
     setPressure(m_renderer->m_simulator.m_system.unit_converter->pressure_to_SI(m_renderer->m_simulator.m_sampler->pressure));
     setTime(m_renderer->m_simulator.m_system.unit_converter->time_to_SI(m_renderer->m_simulator.m_system.time()));
 
-//    double pressure = m_renderer->m_simulator.m_sampler->pressure;
-//    double volume = m_renderer->m_simulator.m_system.volume();
-//    double temperature = m_renderer->m_simulator.m_sampler->temperature;
-//    qDebug() << "PV/NkT=" << pressure*volume/(atomCount()*temperature);
     m_previousStepCompleted = true;
 }
 
@@ -350,16 +353,28 @@ void MolecularDynamics::save(QString fileName)
     m_renderer->m_simulator.m_system.mdio->save_state_to_file_binary(fileName);
 }
 
+bool MolecularDynamics::loadIfPlanned() {
+    if(!m_renderer) {
+        qDebug() << "Warning, loading without renderer.";
+        return false;
+    }
+
+    if(m_systemToLoad.size()) {
+        m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(m_systemToLoad);
+        setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
+        setSystemSize(m_renderer->m_simulator.m_system.systemSize());
+        emit systemSizeChanged(m_systemSize);
+        m_systemToLoad = "";
+        emit loaded();
+        return true;
+    }
+
+    return false;
+}
+
 void MolecularDynamics::load(QString fileName)
 {
-    if(!m_renderer) {
-        return;
-    }
-    m_renderer->m_simulator.m_system.mdio->load_state_from_file_binary(fileName);
-    setAtomCount(m_renderer->m_simulator.m_system.numAtoms());
-    setSystemSize(m_renderer->m_simulator.m_system.systemSize());
-//    m_systemSize = m_renderer->m_simulator.m_system.systemSize();
-    emit systemSizeChanged(m_systemSize);
+    m_systemToLoad = fileName;
 }
 
 double MolecularDynamics::thermostatValue() const

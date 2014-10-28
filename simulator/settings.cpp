@@ -3,7 +3,7 @@ Settings::Settings() {
     FCC_b = 2.0;
     temperature = 1.0;
     dt = 0.02;
-    r_cut = 2.5;
+    r_cut = 2.0;
     thermostat_relaxation_time = 1;
     gravity_force = 0;
     mass = 39.948;

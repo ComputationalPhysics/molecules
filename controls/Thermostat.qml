@@ -7,7 +7,7 @@ Rectangle {
     property real value: 0.0
     property real secondaryValue: 620.0
     property real minimumValue: 0.0
-    property real maximumValue: 1000.0
+    property real maximumValue: 1.0
     property real _valueNormalized: (value - minimumValue) / (maximumValue - minimumValue)
     property real _secondaryValueNormalized: (secondaryValue - minimumValue) / (maximumValue - minimumValue)
     property real _secondaryValueLastUpdate: Date.now()
@@ -53,7 +53,6 @@ Rectangle {
         anchors.centerIn: parent
         width: parent.width * 0.7
         height: width
-//        radius: width / 2
 
         source: dialRoot.activated ? "../images/button_enabled.png" : "../images/button_disabled.png"
 //        source: "../images/button_disabled.png"
@@ -62,7 +61,7 @@ Rectangle {
     Text {
         id: thermostatText
         anchors.centerIn: parent
-        text: (dialRoot.value - 273.15).toFixed(0)
+        text: (dialRoot.value).toFixed(0)
         color: "white"
         font.pixelSize: parent.height * 0.25
     }

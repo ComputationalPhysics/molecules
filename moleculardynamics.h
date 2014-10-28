@@ -281,6 +281,8 @@ signals:
 
     void previousStepCompletedChanged(bool arg);
 
+    void loaded();
+
 private slots:
     void handleWindowChanged(QQuickWindow *win);
 
@@ -301,6 +303,7 @@ private:
     QElapsedTimer m_timer;
     bool m_running;
     int m_atomCount;
+    QString m_systemToLoad;
 
     void setAtomCount(int arg)
     {
@@ -318,6 +321,7 @@ private:
     double m_time;
     bool m_previousStepCompleted;
     bool m_systemSizeIsDirty;
+    bool loadIfPlanned();
 };
 //! [2]
 
