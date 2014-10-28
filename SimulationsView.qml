@@ -76,12 +76,11 @@ Item {
     Rectangle {
         id: systemsViewRectangle
         enabled: revealed // Keeps button presses from being caught by internal MouseAreas
+
         anchors {
             fill: parent
-            margins: systemsViewRoot.width * 0.05
+            margins: Math.min(parent.width, parent.height) * 0.1
         }
-        height: systemsViewColumn.height+systemsViewColumn.anchors.margins
-        width: parent.width * 0.8
 
         border.width: 1.0
         border.color: Qt.rgba(0.5, 0.5, 0.5, 0.9)
