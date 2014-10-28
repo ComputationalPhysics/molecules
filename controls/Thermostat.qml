@@ -11,8 +11,8 @@ Rectangle {
     property real _valueNormalized: (value - minimumValue) / (maximumValue - minimumValue)
     property real _secondaryValueNormalized: (secondaryValue - minimumValue) / (maximumValue - minimumValue)
     color: "black"
-    width: 64
-    height: width
+//    width: 64
+//    height: width
     radius: width / 2
     border.width: width * 0.01
     border.color: "white"

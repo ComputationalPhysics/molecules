@@ -220,9 +220,11 @@ Item {
     Rectangle {
         id: dashboardRectangle
         enabled: revealed
-        anchors.centerIn: parent
-        height: parent.height * 0.8
-        width: parent.width * 0.7
+        anchors {
+            fill: parent
+            margins: Math.min(parent.width, parent.height) * 0.1
+        }
+
         border.width: 1.0
         border.color: Qt.rgba(0.5, 0.5, 0.5, 0.9)
         color: Qt.rgba(0.05, 0.05, 0.05, othersPressed ? hiddenOpacity : 0.8)
@@ -449,35 +451,45 @@ Item {
             }
         }
 
-        RowLayout {
+        Item {
             id: controlsRow
+
             anchors {
                 top: plotRow.bottom
+                bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-                bottom: parent.bottom
-                margins: dashboardRoot.width * 0.03
+                margins: Math.min(dashboardRoot.width, dashboardRoot.height) * 0.05
             }
 
             Thermostat {
                 id: thermostat
-                Layout.fillHeight: true
-                Layout.preferredWidth: height
+
+                anchors {
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+
+                width: height
+                height: Math.min(parent.width * 0.25, parent.height)
+
                 secondaryValue: dashboardRoot.temperature
                 minimumValue: 0
                 maximumValue: 1500 + 273.15
+                value: 300
                 activated: false
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
             }
 
             Image {
                 property bool checked: false
-                Layout.fillHeight: true
-                Layout.preferredWidth: height
+
+                anchors {
+                    right: sliderColumn.left
+                    verticalCenter: parent.verticalCenter
+                }
+
+                width: height
+                height: Math.min(parent.width * 0.25, parent.height)
 
                 source: "images/systemsize.png"
                 smooth: true
@@ -493,16 +505,20 @@ Item {
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
-                Layout.preferredWidth: dashboardRoot.width*0.01
-            }
-
             ColumnLayout {
+                id: sliderColumn
+                anchors {
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+                height: parent.height
+                width: parent.width / 3
+
                 Slider {
                     id: systemSizeXSlider
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
+                    Layout.fillWidth: true
                     minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                     maximumValue: 100
                     value: 10
@@ -529,6 +545,7 @@ Item {
                     id: systemSizeYSlider
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
+                    Layout.fillWidth: true
                     minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                     maximumValue: 100
                     value: 10
@@ -555,6 +572,7 @@ Item {
                     id: systemSizeZSlider
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
+                    Layout.fillWidth: true
                     minimumValue: dashboardRoot.minimumSystemSizeSliderValue
                     maximumValue: 100
                     value: 10
