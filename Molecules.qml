@@ -183,6 +183,8 @@ Item {
         }
         enabled: revealed
         state: revealed ? "revealed" : "hidden"
+        width: Style.touchableSize * 2.5
+        height: width
 
         states: [
             State {
@@ -210,8 +212,6 @@ Item {
                 }
             }
         ]
-        width: Style.touchableSize * 2
-        height: width
 
         Image {
             anchors {
@@ -242,7 +242,7 @@ Item {
             top: moleculesRoot.top
             left: moleculesRoot.left
         }
-        width: Style.touchableSize * 2
+        width: Style.touchableSize * 2.5
         height: width
 
         enabled: revealed

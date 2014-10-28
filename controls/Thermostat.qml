@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import "../style"
 
 Rectangle {
     id: dialRoot
@@ -43,7 +44,7 @@ Rectangle {
 //                    horizontalCenterOffset: -width / 6
 //                }
             anchors.centerIn: parent
-            text: dialRoot.value.toFixed(0)
+            text: (dialRoot.value - 273.15).toFixed(0)
             color: "white"
             font.pixelSize: parent.height * 0.25
         }
@@ -175,7 +176,7 @@ Rectangle {
             var deltaX = mouse.x - startPosition.x
             var deltaY = mouse.y - startPosition.y
             var dr2 = deltaX*deltaX + deltaY*deltaY
-            var changeThreshold = dialRoot.width / 4
+            var changeThreshold = Style.touchableSize
             if(dr2 > changeThreshold*changeThreshold) {
                 changeStarted = true
             }
@@ -189,7 +190,7 @@ Rectangle {
             var posX = mouse.x - centerX
             var posY = mouse.y - centerY
             var angle = (-Math.atan2(-posY, posX) + 4*Math.PI - Math.PI / 3) % (2*Math.PI) + Math.PI/3
-            var value = (angle - 2*Math.PI/3) / (2*Math.PI - Math.PI/3) * 1000
+            var value = (angle - 2*Math.PI/3) / (2*Math.PI - Math.PI/3) * (dialRoot.maximumValue - dialRoot.minimumValue)
             if(value < dialRoot.minimumValue) {
                 if(posX > 0) {
                     value = dialRoot.maximumValue

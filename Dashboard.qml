@@ -62,7 +62,7 @@ Item {
     }
 
     function addTotalEnergy(totalEnergy) {
-        totalEnergyPlot.addValue(totalEnergy)
+//        totalEnergyPlot.addValue(totalEnergy)
         resetRange()
     }
 
@@ -113,8 +113,10 @@ Item {
     }
 
     function resetRange() {
-        var minValue = Math.min(min(kineticEnergyPlot.values), Math.min(min(potentialEnergyPlot.values), min(totalEnergyPlot.values)))
-        var maxValue = Math.max(max(kineticEnergyPlot.values), Math.max(max(potentialEnergyPlot.values), max(totalEnergyPlot.values)))
+//        var minValue = Math.min(min(kineticEnergyPlot.values), Math.min(min(potentialEnergyPlot.values), min(totalEnergyPlot.values)))
+//        var maxValue = Math.max(max(kineticEnergyPlot.values), Math.max(max(potentialEnergyPlot.values), max(totalEnergyPlot.values)))
+        var minValue = Math.min(min(kineticEnergyPlot.values), min(potentialEnergyPlot.values))
+        var maxValue = Math.max(max(kineticEnergyPlot.values), max(potentialEnergyPlot.values))
 
         var minMaxExponents = minMaxExponent(minValue, maxValue)
         minValue = minMaxExponents[0]
@@ -124,8 +126,8 @@ Item {
         kineticEnergyPlot.maximumValue = maxValue
         potentialEnergyPlot.minimumValue = minValue
         potentialEnergyPlot.maximumValue = maxValue
-        totalEnergyPlot.minimumValue = minValue
-        totalEnergyPlot.maximumValue = maxValue
+//        totalEnergyPlot.minimumValue = minValue
+//        totalEnergyPlot.maximumValue = maxValue
 
         var minTemperature = min(temperaturePlot.values)
         var maxTemperature = max(temperaturePlot.values)
@@ -414,17 +416,6 @@ Item {
                             strokeStyle: "#a6cee3"
                         }
 
-                        Plot {
-                            id: totalEnergyPlot
-                            anchors {
-                                fill: parent
-                                margins: dashboardRoot.width * 0.01
-                            }
-                            minimumValue: kineticEnergyPlot.minimumValue
-                            maximumValue: kineticEnergyPlot.maximumValue
-                            strokeStyle: "#ff7f00"
-                        }
-
                         PlotLabels {
                             anchors.fill: parent
                             minimumValue: kineticEnergyPlot.minimumValue
@@ -435,18 +426,13 @@ Item {
                     Row {
                         spacing: 12
                         Text {
-                            text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(1) + " eV"
+                            text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(0) + " eV"
                             color: kineticEnergyPlot.strokeStyle
                             font.pixelSize: 12
                         }
                         Text {
-                            text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(1) + " eV"
+                            text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(0) + " eV"
                             color: potentialEnergyPlot.strokeStyle
-                            font.pixelSize: 12
-                        }
-                        Text {
-                            text: "Et = " + dashboardRoot.totalEnergy.toFixed(1) + " eV"
-                            color: totalEnergyPlot.strokeStyle
                             font.pixelSize: 12
                         }
                     }
@@ -469,6 +455,8 @@ Item {
                 Layout.fillHeight: true
                 Layout.preferredWidth: height
                 secondaryValue: dashboardRoot.temperature
+                minimumValue: 0
+                maximumValue: 1500 + 273.15
                 activated: false
             }
 
