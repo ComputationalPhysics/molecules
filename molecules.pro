@@ -29,7 +29,7 @@ RESOURCES += qml.qrc \
 
 OTHER_FILES +=
 
-DEFINES += MD_DEBUG
+# DEFINES += MD_DEBUG
 
 ios {
     QMAKE_INFO_PLIST = iOS.plist
