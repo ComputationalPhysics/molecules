@@ -8,5 +8,6 @@
         <file>images/thermostat_disabled.png</file>
         <file>images/thermostat_enabled.png</file>
         <file>images/systemsize.png</file>
+        <file>simulations/crystal.png</file>
     </qresource>
 </RCC>

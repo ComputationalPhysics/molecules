@@ -25,5 +25,6 @@
         <file>simulations/wallcrash_free.lmp</file>
         <file>simulations/bullets.lmp</file>
         <file>simulations/bullets.png</file>
+        <file>simulations/crystal.lmp</file>
     </qresource>
 </RCC>

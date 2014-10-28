@@ -44,7 +44,6 @@ Item {
 
         temperaturePlot.clearData()
         pressurePlot.clearData()
-        totalEnergyPlot.clearData()
         kineticEnergyPlot.clearData()
         potentialEnergyPlot.clearData()
     }
@@ -347,7 +346,7 @@ Item {
                     }
 
                     Text {
-                        text: "T = " + dashboardRoot.temperature.toFixed(1) + " K"
+                        text: "T = " + dashboardRoot.temperature.toFixed(1) + " °C"
                         color: temperaturePlot.strokeStyle
                         font.pixelSize: 12
                     }
