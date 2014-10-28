@@ -1,6 +1,10 @@
 TEMPLATE = app
 
-TARGET = molecules
+android {
+    TARGET = Atomify
+} else {
+    TARGET = atomify
+}
 
 QT += qml quick widgets opengl openglextensions
 CONFIG += c++11
@@ -55,4 +59,9 @@ HEADERS += \
 
 OTHER_FILES += \
     iOS.plist
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+
+OTHER_FILES += \
+    android/AndroidManifest.xml
 
