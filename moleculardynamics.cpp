@@ -118,7 +118,7 @@ void MolecularDynamicsRenderer::paint()
     float systemSizeY = m_simulator.m_system.systemSize().y();
     float systemSizeZ = m_simulator.m_system.systemSize().z();
 
-    float systemSizeMax = sqrt(systemSizeX*systemsizex + systemSizeY*systemSizeY + systemSizeZ*systemSizeZ);
+    float systemSizeMax = sqrt(systemSizeX*systemSizeX + systemSizeY*systemSizeY + systemSizeZ*systemSizeZ);
 
     QMatrix4x4 modelViewProjectionMatrix = m_projectionMatrix * m_modelViewMatrix;
     QMatrix4x4 lightModelViewProjectionMatrix = m_projectionMatrix * m_lightModelViewMatrix;
@@ -131,7 +131,7 @@ void MolecularDynamicsRenderer::paint()
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
     m_glCube->update(&(m_simulator.m_system),offset);
-    // m_glCube->render(modelViewProjectionMatrix);
+    m_glCube->render(modelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
 }
