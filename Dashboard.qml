@@ -291,7 +291,7 @@ Item {
 
             opacity: othersPressed ? hiddenOpacity : 1.0
 
-            text: (dashboardRoot.time * 1e12).toFixed(1) + " ps"
+            text: "t = " + (dashboardRoot.time * 1e12).toFixed(1) + " ps"
         }
 
         RowLayout {
