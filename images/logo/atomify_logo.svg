@@ -15,7 +15,10 @@
    id="svg5465"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="atomify_logo.svg">
+   sodipodi:docname="atomify_logo.svg"
+   inkscape:export-filename="atomify_logo_512.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs5467">
     <linearGradient
@@ -243,7 +246,7 @@
      inkscape:cx="363.68401"
      inkscape:cy="148.87074"
      inkscape:document-units="px"
-     inkscape:current-layer="layer7"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="3111"
      inkscape:window-height="1767"
@@ -269,6 +272,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -305,7 +309,7 @@
        height="512"
        x="0"
        y="540.36218"
-       ry="144" />
+       ry="0" />
   </g>
   <g
      inkscape:groupmode="layer"
