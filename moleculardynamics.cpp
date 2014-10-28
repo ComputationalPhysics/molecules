@@ -131,7 +131,7 @@ void MolecularDynamicsRenderer::paint()
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
     m_glCube->update(&(m_simulator.m_system),offset);
-    // m_glCube->render(modelViewProjectionMatrix);
+    m_glCube->render(modelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
 }
