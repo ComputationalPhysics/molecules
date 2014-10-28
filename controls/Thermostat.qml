@@ -38,48 +38,68 @@ Rectangle {
         _secondaryValueLastUpdate = currentTime
     }
 
-    Rectangle {
+//    Rectangle {
+//        id: innerCircle
+//        anchors.centerIn: parent
+//        width: parent.width * 0.7
+//        height: width
+//        radius: width / 2
+
+//        color: dialRoot.activated ? "#2171b5" : "#777"
+//    }
+
+    Image {
         id: innerCircle
         anchors.centerIn: parent
         width: parent.width * 0.7
         height: width
-        radius: width / 2
 
-        color: dialRoot.activated ? "#2171b5" : "#777"
+        source: dialRoot.activated ? "../images/button_enabled.png" : "../images/button_disabled.png"
+//        source: "../images/button_disabled.png"
+    }
 
-        Text {
-            id: thermostatText
-//                anchors {
-//                    right: parent.right
-//                    rightMargin: parent.width * 0.4
-//                    verticalCenter: parent.verticalCenter
-//                    horizontalCenterOffset: -width / 6
-//                }
-            anchors.centerIn: parent
-            text: (dialRoot.value).toFixed(0)
-            color: "white"
-            font.pixelSize: parent.height * 0.25
+    Text {
+        id: thermostatText
+        anchors.centerIn: parent
+        text: (dialRoot.value).toFixed(0)
+        color: "white"
+        font.pixelSize: parent.height * 0.25
+    }
+
+    Text {
+        anchors {
+            bottom: thermostatText.top
+            bottomMargin: -height / 4
+            horizontalCenter: thermostatText.horizontalCenter
         }
 
-        Text {
-//                anchors {
-//                    left: thermostatText.right
-//                    leftMargin: -width / 6.0
-//                    bottom: thermostatText.top
-//                    bottomMargin: -height * 2.0 / 3.0
-//                }
-            anchors {
-                bottom: thermostatText.top
-                horizontalCenter: thermostatText.horizontalCenter
-            }
+        font.pixelSize: thermostatText.font.pixelSize * 0.6
+        color: "white"
+        opacity: 0.7
+        text: "°C"
+    }
 
-            font.pixelSize: thermostatText.font.pixelSize * 0.6
-            color: "white"
-            opacity: 0.7
-            text: "°C"
+    Row {
+        anchors {
+            top: thermostatText.bottom
+            topMargin: height * 0.5
+            horizontalCenter: parent.horizontalCenter
         }
-
-
+        spacing: dialRoot.width * 0.05
+        Rectangle {
+            id: greenCircle
+            width: dialRoot.width * 0.03
+            height: width
+            radius: width / 2
+            color: dialRoot.activated ? "#2FFF1C" : "#39663B"
+        }
+        Rectangle {
+            id: redCircle
+            width: greenCircle.width
+            height: width
+            radius: width / 2
+            color: dialRoot.activated ? "#702C2C" : "#FF3D3D"
+        }
     }
 
 
@@ -166,7 +186,6 @@ Rectangle {
 
     MouseArea {
         anchors {
-            margins: -width * 0.1
             fill: parent
         }
         property point startPosition
