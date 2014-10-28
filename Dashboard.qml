@@ -235,14 +235,23 @@ Item {
             }
         }
 
-        MouseArea {
-            // Dummy area to keep input on background from being passed through to MD object
+        PinchArea {
             anchors.fill: parent
-            onPressed: {
-                othersPressed = true
-            }
-            onReleased: {
-                othersPressed = false
+            MouseArea {
+                // Dummy area to keep input on background from being passed through to MD object
+                anchors.fill: parent
+                onPressed: {
+                    othersPressed = true
+                }
+
+                onReleased: {
+                    othersPressed = false
+                }
+
+                onCanceled: {
+                    // Extra tap will create cancel event
+                    othersPressed = false
+                }
             }
         }
 
@@ -333,7 +342,7 @@ Item {
                             anchors.fill: parent
                             minimumValue: temperaturePlot.minimumValue
                             maximumValue: temperaturePlot.maximumValue
-                            title: "T [K]"
+                            title: "T [°C]"
                         }
                     }
 
