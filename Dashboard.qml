@@ -230,14 +230,23 @@ Item {
             }
         }
 
-        MouseArea {
-            // Dummy area to keep input on background from being passed through to MD object
+        PinchArea {
             anchors.fill: parent
-            onPressed: {
-                othersPressed = true
-            }
-            onReleased: {
-                othersPressed = false
+            MouseArea {
+                // Dummy area to keep input on background from being passed through to MD object
+                anchors.fill: parent
+                onPressed: {
+                    othersPressed = true
+                }
+
+                onReleased: {
+                    othersPressed = false
+                }
+
+                onCanceled: {
+                    // Extra tap will create cancel event
+                    othersPressed = false
+                }
             }
         }
 
@@ -587,60 +596,6 @@ Item {
                     }
                 }
             }
-
-            //            CheckBox {
-            //                id: forceCheckbox
-            //                checked: false
-            //                text: "F"
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CheckBoxStyle {
-            //                    label: Text {
-            //                        text: control.text
-            //                        color: "white"
-            //                    }
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
-            //            Slider {
-            //                id: forceSlider
-            //                orientation: Qt.Vertical
-            //                Layout.fillHeight: true
-            //                minimumValue: -100
-            //                maximumValue: 100
-            //                value: 0
-            //                opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
-            //                onPressedChanged: {
-            //                    if(pressed) {
-            //                        othersPressed = true
-            //                    } else {
-            //                        othersPressed = false
-            //                    }
-            //                }
-            //                style: CustomSliderStyle {
-
-            //                }
-
-            //                Behavior on opacity {
-            //                    OpacityAnimation {
-
-            //                    }
-            //                }
-            //            }
-
-
 
             Item {
                 Layout.fillHeight: true
