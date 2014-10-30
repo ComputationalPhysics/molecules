@@ -2,6 +2,7 @@ TEMPLATE = app
 
 android {
     TARGET = Atomify
+    ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 } else {
     TARGET = atomify
 }
@@ -27,7 +28,9 @@ RESOURCES += qml.qrc \
     images.qrc \
     simulations.qrc
 
-OTHER_FILES +=
+OTHER_FILES += \
+    android/com/compphys/atomify/AtomifyActivity.java \
+    android/src/com/compphys/atomify/AtomifyActivity.java
 
 # DEFINES += MD_DEBUG
 
@@ -59,8 +62,6 @@ HEADERS += \
 
 OTHER_FILES += \
     iOS.plist
-
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 OTHER_FILES += \
     android/AndroidManifest.xml
