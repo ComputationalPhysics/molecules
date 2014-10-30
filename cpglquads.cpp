@@ -211,5 +211,9 @@ void CPGLQuads::render(float lightFalloffDistance, const QMatrix4x4 &modelViewPr
     // glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
     m_funcs->glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
 
+    m_program->disableAttributeArray(vertexLocation);
+    m_program->disableAttributeArray(colorLocation);
+    m_program->disableAttributeArray(texcoordLocation);
+
     m_program->release();
 }

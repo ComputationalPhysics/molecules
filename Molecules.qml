@@ -63,8 +63,8 @@ Item {
         }
 
         onLoaded: {
-            molecularDynamics.targetPan  = 10
-            molecularDynamics.targetTilt = 20
+            molecularDynamics.targetPan  = -10
+            molecularDynamics.targetTilt = -20
             molecularDynamics.targetZoom = -10 - 1.5*molecularDynamics.systemSize.y
             zoomAnimation.restart()
             panAnimation.restart()
@@ -167,8 +167,8 @@ Item {
 
                     var deltaX = mouse.x - lastPosition.x
                     var deltaY = mouse.y - lastPosition.y
-                    var deltaPan = deltaX / width * 360 // max 3 rounds
-                    var deltaTilt = deltaY / height * 180 // max 0.5 round
+                    var deltaPan = -deltaX / width * 360 // max 3 rounds
+                    var deltaTilt = -deltaY / height * 180 // max 0.5 round
                     //                    molecularDynamics.incrementRotation(deltaPan, deltaTilt, 0)
                     molecularDynamics.pan += deltaPan
                     molecularDynamics.tilt += deltaTilt

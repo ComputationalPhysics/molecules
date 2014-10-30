@@ -46,13 +46,15 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QElapsedTimer>
 #include <QMatrix4x4>
+#include <QQuickFramebufferObject>
 #include "cpglquads.h"
 #include "cpglcube.h"
 #include "simulator.h"
 
 //! [1]
-class MolecularDynamicsRenderer : public QObject {
-    Q_OBJECT
+class MolecularDynamicsRenderer : public QQuickFramebufferObject::Renderer
+{
+//    Q_OBJECT
 public:
     Simulator m_simulator;
     MolecularDynamicsRenderer();
@@ -69,8 +71,11 @@ public:
 //    double pinchScale() const;
 //    void setPinchScale(double pinchScale);
 
-public slots:
-    void paint();
+
+
+    QOpenGLFramebufferObject *createFramebufferObject(const QSize &size);
+    void synchronize(QQuickFramebufferObject *item);
+    void render();
 
 private:
     QSize m_viewportSize;
@@ -88,7 +93,7 @@ private:
 //! [1]
 
 //! [2]
-class MolecularDynamics : public QQuickItem
+class MolecularDynamics : public QQuickFramebufferObject
 {
     Q_OBJECT
     Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
@@ -112,6 +117,9 @@ class MolecularDynamics : public QQuickItem
 
 public:
     MolecularDynamics();
+
+    MolecularDynamicsRenderer* createRenderer() const;
+
     Q_INVOKABLE void step(double dt);
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);
@@ -128,50 +136,16 @@ public:
     double zoom() const;
 
     bool running() const;
-
-    int atomCount() const
-    {
-        return m_atomCount;
-    }
-
-    bool didScaleVelocitiesDueToHighValues() const
-    {
-        return m_didScaleVelocitiesDueToHighValues;
-    }
-
-    double temperature() const
-    {
-        return m_temperature;
-    }
-
-    double kineticEnergy() const
-    {
-        return m_kineticEnergy;
-    }
-
-    double potentialEnergy() const
-    {
-        return m_potentialEnergy;
-    }
-
-    double pressure() const
-    {
-        return m_pressure;
-    }
-
-    double time() const
-    {
-        return m_time;
-    }
-
-    bool previousStepCompleted() const
-    {
-        return m_previousStepCompleted;
-    }
+    int atomCount() const;
+    bool didScaleVelocitiesDueToHighValues() const;
+    double temperature() const;
+    double kineticEnergy() const;
+    double potentialEnergy() const;
+    double pressure() const;
+    double time() const;
+    bool previousStepCompleted() const;
 
 public slots:
-    void sync();
-    void cleanup();
     void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
 
@@ -321,7 +295,9 @@ private:
     double m_time;
     bool m_previousStepCompleted;
     bool m_systemSizeIsDirty;
-    bool loadIfPlanned();
+    bool loadIfPlanned(MolecularDynamicsRenderer *renderer);
+
+    friend class MolecularDynamicsRenderer;
 };
 //! [2]
 
