@@ -35,6 +35,9 @@ Item {
     property real hiddenOpacity: 0.2
     property real hiddenOpacityForPlots: 0.4
 
+    anchors.fill: parent
+    state: revealed ? "revealed" : "hidden"
+
     function resetControls() {
         running = true
         thermostatEnabled = false
@@ -148,9 +151,6 @@ Item {
         pressurePlot.minimumValue = minPressure
         pressurePlot.maximumValue = maxPressure
     }
-
-    anchors.fill: parent
-    state: revealed ? "revealed" : "hidden"
 
     states: [
         State {
@@ -635,6 +635,4 @@ Item {
             }
         }
     }
-
-
 }

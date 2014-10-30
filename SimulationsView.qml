@@ -195,49 +195,6 @@ Item {
                     }
                 }
             }
-
-
-//            Grid {
-//                id: systemsGrid
-//                Layout.fillWidth: true
-
-//                property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
-//                // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
-//                property real elementHeight: elementWidth*9/16
-
-//                property var simulations: [
-//                    { identifier: "default", name: "Default"},
-//                    { identifier: "diffusion", name: "Diffusion"},
-//                    { identifier: "chamber", name: "Chamber"},
-//                    { identifier: "fracture", name: "Fracture"},
-//                    { identifier: "wallcrash", name: "Wall crash"},
-//                    { identifier: "bullets", name: "Bullets"},
-//                ]
-
-//                columns: 3
-//                rows: 2
-//                spacing: systemsViewRectangle.width * 0.01
-
-//                Component.onCompleted: {
-//                    for(var i in simulations) {
-//                        var simulation = simulations[i]
-//                        var component = Qt.createComponent("SimulationButton.qml")
-//                        var properties = {
-//                            width: Qt.binding(function() {return systemsGrid.elementWidth}),
-//                            height: Qt.binding(function() {return systemsGrid.elementHeight}),
-//                            identifier: simulation.identifier,
-//                            name: simulation.name
-//                        }
-//                        var button = component.createObject(systemsGrid, properties)
-//                        button.loadSimulation.connect(systemsViewRoot.loadSimulation)
-//                    }
-//                }
-//            }
-
-//            Item {
-//                Layout.fillHeight: true
-//                Layout.fillWidth: true
-//            }
         }
     }
 }
