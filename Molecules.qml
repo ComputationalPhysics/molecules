@@ -7,8 +7,21 @@ import "style" 1.0
 //import MoleculesStyle 1.0
 
 Item {
-    property real aspectRatio: width/height
     id: moleculesRoot
+
+    property real aspectRatio: width/height
+    property bool applicationActive: {
+        if(Qt.platform.os === "android" || Qt.platform.os === "ios") {
+            if(Qt.application.state === Qt.ApplicationActive) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return true
+        }
+    }
+
     width: 1280
     height: 720
 
@@ -23,6 +36,10 @@ Item {
     function loadSimulation(fileName) {
         dashboard.running = false
         molecularDynamics.load(fileName)
+    }
+
+    onApplicationActiveChanged: {
+        console.log("applicationActive: " + applicationActive)
     }
 
     onWidthChanged: {
@@ -187,7 +204,7 @@ Item {
             id: timer
             property real lastTime: Date.now()
             property real lastSampleTime: Date.now()
-            running: true
+            running: molecularDynamics.running && moleculesRoot.applicationActive
             repeat: true
             interval: 1
             onTriggered: {

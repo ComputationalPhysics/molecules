@@ -23,7 +23,7 @@ int main (int argc, char * argv [])
 {
     qmlRegisterType<MolecularDynamics>("MolecularDynamics", 1, 0, "MolecularDynamics");
 
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     QQuickView view;
 
     view.setResizeMode(QQuickView::SizeRootObjectToView);

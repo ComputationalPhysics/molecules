@@ -278,6 +278,7 @@ private:
     bool m_running;
     int m_atomCount;
     QString m_systemToLoad;
+    bool m_stepRequested;
 
     void setAtomCount(int arg)
     {

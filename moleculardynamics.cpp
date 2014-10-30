@@ -112,8 +112,6 @@ QOpenGLFramebufferObject *MolecularDynamicsRenderer::createFramebufferObject(con
 
 void MolecularDynamicsRenderer::render()
 {
-//    qDebug() << "MolecularDynamicsRenderer::render() called";
-//    glViewport(0, 0, 1280, 800);
     glDepthMask(true);
 
     glClearColor(0, 0, 0, 1.0);
@@ -153,7 +151,6 @@ void MolecularDynamicsRenderer::render()
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    update();
 }
 
 MolecularDynamics::MolecularDynamics()
@@ -173,8 +170,9 @@ MolecularDynamics::MolecularDynamics()
       m_pressure(0),
       m_kineticEnergy(0),
       m_potentialEnergy(0),
-      m_previousStepCompleted(true),
-      m_systemSizeIsDirty(false)
+      m_systemSizeIsDirty(false),
+      m_stepRequested(false),
+      m_previousStepCompleted(true)
 {
 //    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
     m_timer.start();
@@ -309,8 +307,7 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
 
     bool didLoadNewSystem = molecularDynamics->loadIfPlanned(this);
 
-    if(!molecularDynamics->running()) {
-        molecularDynamics->m_previousStepCompleted = true;
+    if(!molecularDynamics->m_stepRequested || !molecularDynamics->m_running) {
         return;
     }
 
@@ -329,7 +326,6 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
     double dt = molecularDynamics->m_timer.restart() / 1000.0;
     double safeDt = min(0.02, dt);
     m_simulator.m_system.setDt(safeDt);
-
     m_simulator.step();
 
     molecularDynamics->setDidScaleVelocitiesDueToHighValues(m_simulator.m_system.didScaleVelocitiesDueToHighValues());
@@ -341,7 +337,6 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
     molecularDynamics->setPotentialEnergy(m_simulator.m_system.unit_converter->energy_to_ev(m_simulator.m_sampler->potential_energy));
     molecularDynamics->setPressure(m_simulator.m_system.unit_converter->pressure_to_SI(m_simulator.m_sampler->pressure));
     molecularDynamics->setTime(m_simulator.m_system.unit_converter->time_to_SI(m_simulator.m_system.time()));
-
     molecularDynamics->m_previousStepCompleted = true;
 }
 
@@ -351,6 +346,7 @@ void MolecularDynamics::step(double dt)
         return;
     }
     m_previousStepCompleted = false;
+    m_stepRequested = true;
     update();
 }
 
