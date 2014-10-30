@@ -367,6 +367,7 @@ Item {
 
     SimulationsView {
         id: simulationsView
+        focus: true
         onLoadSimulation: {
             moleculesRoot.loadSimulation(fileName)
             revealed = false
@@ -378,6 +379,18 @@ Item {
             var saveFileName = "state-"+Date.now()+".lmp"
             console.log("Saving state to " + saveFileName)
             molecularDynamics.save("state-"+Date.now()+".lmp")
+        }
+
+        if(event.key === Qt.Key_Back) {
+            if(dashboard.revealed) {
+                dashboard.revealed = false
+                event.accepted = true
+            } else if(simulationsView.revealed) {
+                simulationsView.revealed = false
+                event.accepted = true
+            } else {
+                console.log("Nothing to hide, quitting because back button pressed.")
+            }
         }
     }
 }
