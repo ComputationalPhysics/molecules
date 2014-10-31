@@ -30,16 +30,11 @@ Item {
     function resetStyle() {
         Style.windowWidth = width
         Style.windowHeight = height
-        console.log("Styled: " + Style.windowHeight)
     }
 
     function loadSimulation(fileName) {
         dashboard.running = false
         molecularDynamics.load(fileName)
-    }
-
-    onApplicationActiveChanged: {
-        console.log("applicationActive: " + applicationActive)
     }
 
     onWidthChanged: {
@@ -49,6 +44,9 @@ Item {
         resetStyle()
     }
     Component.onCompleted: {
+        console.log("Atomify started.")
+        console.log("Platform: " + Qt.platform.os)
+
         resetStyle()
     }
 

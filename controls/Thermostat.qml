@@ -65,6 +65,8 @@ Rectangle {
         text: (dialRoot.value).toFixed(0)
         color: "white"
         font.pixelSize: parent.height * 0.25
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 
     Text {
@@ -78,6 +80,8 @@ Rectangle {
         color: "white"
         opacity: 0.7
         text: "°C"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 
     Text {
@@ -90,6 +94,8 @@ Rectangle {
         color: dialRoot.activated ? "#2FFF1C" : "#ccc"
 
         text: dialRoot.activated ? "ON" : "OFF"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
 
     }
 

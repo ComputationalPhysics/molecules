@@ -34,6 +34,8 @@ Item {
         font.pixelSize: 12
         text: formatValue(maximumValue)
         color: "white"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 
     Text {
@@ -45,6 +47,8 @@ Item {
         font.pixelSize: 12
         text: formatValue(minimumValue)
         color: "white"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 
     Text {
@@ -56,5 +60,7 @@ Item {
         font.pixelSize: 12
         text: title
         color: "white"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 }

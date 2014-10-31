@@ -322,10 +322,14 @@ Item {
 
             opacity: othersPressed ? hiddenOpacity : 1.0
 
+            renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+
             Text {
                 text: "t = " + (dashboardRoot.time * 1e12).toFixed(1) + " ps"
                 color: "white"
                 font.pixelSize: dashboardRoot.height * 0.03
+
+                renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
             }
         }
 
@@ -384,6 +388,8 @@ Item {
                         text: "T = " + dashboardRoot.temperature.toFixed(1) + " °C"
                         color: temperaturePlot.strokeStyle
                         font.pixelSize: dashboardRoot.height * 0.03
+
+                        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
                     }
                 }
             }
@@ -423,6 +429,8 @@ Item {
                         text: "P = " + (dashboardRoot.pressure * 1e-6).toFixed(1) + " MPa"
                         color: pressurePlot.strokeStyle
                         font.pixelSize: dashboardRoot.height * 0.03
+
+                        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
                     }
                 }
             }
@@ -474,11 +482,15 @@ Item {
                             text: "Ek = " + dashboardRoot.kineticEnergy.toFixed(0) + " eV"
                             color: kineticEnergyPlot.strokeStyle
                             font.pixelSize: dashboardRoot.height * 0.03
+
+                            renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
                         }
                         Text {
                             text: "Ep = " + dashboardRoot.potentialEnergy.toFixed(0) + " eV"
                             color: potentialEnergyPlot.strokeStyle
                             font.pixelSize: dashboardRoot.height * 0.03
+
+                            renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
                         }
                     }
                 }

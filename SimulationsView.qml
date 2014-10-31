@@ -131,6 +131,8 @@ Item {
                 text: "Welcome to Atomify"
                 font.pixelSize: parent.width * 0.04
                 color: "white"
+
+                renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
             }
 
             Text {
@@ -140,6 +142,8 @@ Item {
                 text: "Please select a simulation."
                 font.pixelSize: parent.width * 0.025
                 color: "white"
+
+                renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
             }
 
 //            Item {

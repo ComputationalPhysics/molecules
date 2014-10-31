@@ -39,6 +39,8 @@ Item {
         }
         text: buttonRoot.name
         color: "white"
+
+        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }
 
     MouseArea {
