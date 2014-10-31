@@ -26,7 +26,8 @@ SOURCES += main.cpp \
 
 RESOURCES += qml.qrc \
     images.qrc \
-    simulations.qrc
+    simulations.qrc \
+    fonts.qrc
 
 OTHER_FILES += \
     android/com/compphys/atomify/AtomifyActivity.java \

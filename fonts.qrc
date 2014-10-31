@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/SourceSansPro-Black.ttf</file>
+        <file>fonts/SourceSansPro-BlackItalic.ttf</file>
+        <file>fonts/SourceSansPro-Bold.ttf</file>
+        <file>fonts/SourceSansPro-BoldItalic.ttf</file>
+        <file>fonts/SourceSansPro-ExtraLight.ttf</file>
+        <file>fonts/SourceSansPro-ExtraLightItalic.ttf</file>
+        <file>fonts/SourceSansPro-Italic.ttf</file>
+        <file>fonts/SourceSansPro-Light.ttf</file>
+        <file>fonts/SourceSansPro-LightItalic.ttf</file>
+        <file>fonts/SourceSansPro-Regular.ttf</file>
+        <file>fonts/SourceSansPro-Semibold.ttf</file>
+        <file>fonts/SourceSansPro-SemiboldItalic.ttf</file>
+    </qresource>
+</RCC>

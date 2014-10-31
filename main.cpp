@@ -13,6 +13,7 @@
 #include <thermostat.h>
 #include <statisticssampler.h>
 #include <iostream>
+#include <QFontDatabase>
 using namespace std;
 
 # if defined (Q_OS_IOS)
@@ -25,6 +26,9 @@ int main (int argc, char * argv [])
 
     QGuiApplication app(argc, argv);
     QQuickView view;
+
+//    QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
+//    app.setFont(QFont("Source Sans Pro"));
 
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("qrc:///Molecules.qml"));
