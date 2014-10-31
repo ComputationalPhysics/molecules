@@ -27,8 +27,8 @@ int main (int argc, char * argv [])
     QGuiApplication app(argc, argv);
     QQuickView view;
 
-//    QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
-//    app.setFont(QFont("Source Sans Pro"));
+    QFontDatabase::addApplicationFont(":/fonts/SourceSansPro-Regular.ttf");
+    app.setFont(QFont("Source Sans Pro"));
 
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("qrc:///Molecules.qml"));
@@ -36,17 +36,3 @@ int main (int argc, char * argv [])
 
     return app.exec();
 }
-
-//int main(int argc, char **argv)
-//{
-//    QGuiApplication app(argc, argv);
-
-//    qmlRegisterType<MolecularDynamics>("MolecularDynamics", 1, 0, "MolecularDynamics");
-
-//    QQuickView view;
-//    view.setResizeMode(QQuickView::SizeRootObjectToView);
-//    view.setSource(QUrl("qrc:///Molecules.qml"));
-//    view.show();
-
-//    return app.exec();
-//}
