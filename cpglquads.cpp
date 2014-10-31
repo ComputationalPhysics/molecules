@@ -209,7 +209,7 @@ void CPGLQuads::render(float lightFalloffDistance, const QMatrix4x4 &modelViewPr
 
     // Draw cube geometry using indices from VBO 1
     // glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
-    m_funcs->glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
 
     m_program->disableAttributeArray(vertexLocation);
     m_program->disableAttributeArray(colorLocation);

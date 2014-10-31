@@ -94,7 +94,7 @@ void CPGLCube::render(const QMatrix4x4 &modelViewProjectionMatrix)
     m_funcs->glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(QVector3D), 0);
 
     // Draw cube geometry using indices from VBO 1
-    m_funcs->glDrawElements(GL_LINES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_LINES, m_indices.size(), GL_UNSIGNED_SHORT, 0);
 
     m_program->disableAttributeArray(vertexLocation);
     m_program->release();
