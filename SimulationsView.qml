@@ -19,6 +19,14 @@ Item {
         Simulation{ name: "Bullets"; stateFile: "simulations/bullets.lmp"; imageSource: "simulations/bullets.png"; zoom: -55; pan: -80; tilt: -15}
     ]
 
+    Component.onCompleted: {
+        systemsGrid.setup()
+    }
+
+    onSimulationsChanged: {
+        systemsGrid.setup()
+    }
+
     state: revealed ? "revealed" : "hidden"
 
     function loadFirstSimulation() {
@@ -132,7 +140,11 @@ Item {
                     rows: 2
                     spacing: systemsViewRectangle.width * 0.01
 
-                    Component.onCompleted: {
+                    function setup() {
+                        for(var i in children) {
+                            children[i].destroy()
+                        }
+
                         for(var i in simulations) {
                             var simulation = simulations[i]
                             var component = Qt.createComponent("SimulationButton.qml")
