@@ -10,6 +10,7 @@ Item {
     id: moleculesRoot
 
     property real aspectRatio: width/height
+    property Simulation simulation
     property bool applicationActive: {
         if(Qt.platform.os === "android" || Qt.platform.os === "ios") {
             if(Qt.application.state === Qt.ApplicationActive) {
@@ -32,9 +33,10 @@ Item {
         Style.windowHeight = height
     }
 
-    function loadSimulation(fileName) {
+    function loadSimulation(simulation) {
         dashboard.running = false
-        molecularDynamics.load(fileName)
+        moleculesRoot.simulation = simulation
+        molecularDynamics.load(simulation.stateFile)
     }
 
     onWidthChanged: {
@@ -53,6 +55,7 @@ Item {
     MolecularDynamics {
         id: molecularDynamics
         anchors.fill: parent
+
         property real targetZoom: 0.0
         property real targetPan: 0.0
         property real targetTilt: 0.0
@@ -73,14 +76,10 @@ Item {
 
         running: dashboard.running
 
-        Component.onCompleted: {
-            moleculesRoot.loadSimulation(":/simulations/crystal.lmp")
-        }
-
         onLoaded: {
-            molecularDynamics.targetPan  = -10
-            molecularDynamics.targetTilt = -20
-            molecularDynamics.targetZoom = -10 - 1.5*molecularDynamics.systemSize.y
+            molecularDynamics.targetPan  = moleculesRoot.simulation.pan
+            molecularDynamics.targetTilt = moleculesRoot.simulation.tilt
+            molecularDynamics.targetZoom = moleculesRoot.simulation.zoom
             zoomAnimation.restart()
             panAnimation.restart()
             tiltAnimation.restart()
@@ -382,9 +381,13 @@ Item {
 
     SimulationsView {
         id: simulationsView
-        focus: true
+        Component.onCompleted: {
+            loadFirstSimulation()
+            revealed = true
+        }
+
         onLoadSimulation: {
-            moleculesRoot.loadSimulation(fileName)
+            moleculesRoot.loadSimulation(simulation)
             revealed = false
         }
     }

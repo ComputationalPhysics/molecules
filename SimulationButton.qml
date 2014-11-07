@@ -2,8 +2,7 @@ import QtQuick 2.0
 
 Item {
     id: buttonRoot
-    property string identifier: ""
-    property string name: ""
+    property Simulation simulation
     signal loadSimulation(var fileName)
 
 //    width: 200
@@ -28,7 +27,7 @@ Item {
                 margins: buttonRoot.width * 0.05
             }
             fillMode: Image.PreserveAspectFit
-            source: buttonRoot.identifier !== "" ? "simulations/" + buttonRoot.identifier + ".png" : ""
+            source: buttonRoot.identifier !== "" ? simulation.imageSource : ""
         }
     }
     Text {
@@ -37,7 +36,7 @@ Item {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
         }
-        text: buttonRoot.name
+        text: simulation.name
         color: "white"
 
         renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
@@ -50,7 +49,8 @@ Item {
                 return
             }
 
-            loadSimulation(":/simulations/" + buttonRoot.identifier + ".lmp")
+//            loadSimulation(":/simulations/" + simulation.stateFile)
+            loadSimulation(simulation)
         }
     }
 }

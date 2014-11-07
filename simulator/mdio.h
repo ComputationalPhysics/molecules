@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <QString>
+#include <QUrl>
 
 class System;
 class Settings;
@@ -23,6 +24,6 @@ public:
     void setup(System *system_);
     void save_state_to_file_binary(QString fileName);
 //    void save_state_to_movie_file();
-    void load_state_from_file_binary(QString fileName);
+    void load_state_from_file_binary(QUrl fileName);
     void finalize();
 };

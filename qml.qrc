@@ -12,5 +12,6 @@
         <file>style/qmldir</file>
         <file>style/Style.qml</file>
         <file>controls/Thermostat.qml</file>
+        <file>Simulation.qml</file>
     </qresource>
 </RCC>

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QFile>
 #include <QDebug>
+#include <QQmlFile>
 //#include <mdtimer.h>
 
 MDIO::MDIO()
@@ -110,11 +111,12 @@ void MDIO::save_state_to_file_binary(QString fileName) {
     //    system->mdtimer->end_io();
 }
 
-void MDIO::load_state_from_file_binary(QString fileName) {
-    QFile file(fileName);
+void MDIO::load_state_from_file_binary(QUrl fileName) {
+    QString fileNameString = QQmlFile::urlToLocalFileOrQrc(fileName);
+    QFile file(fileNameString);
     file.open(QIODevice::ReadOnly);
     if(!file.isOpen()) {
-        qDebug() << "WARNING: Could not open" << fileName;
+        qDebug() << "WARNING: Could not open" << fileNameString;
         return;
     }
 
