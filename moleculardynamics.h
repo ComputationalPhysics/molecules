@@ -159,71 +159,16 @@ public slots:
     void setPan(double arg);
     void setRoll(double arg);
     void setZoom(double arg);
-
     void setRunning(bool arg);
-
-    void setPreviousStepCompleted(bool arg)
-    {
-        if (m_previousStepCompleted != arg) {
-            m_previousStepCompleted = arg;
-            emit previousStepCompletedChanged(arg);
-        }
-    }
+    void setPreviousStepCompleted(bool arg);
 
 private slots:
-
-    void setDidScaleVelocitiesDueToHighValues(bool arg)
-    {
-        if (m_didScaleVelocitiesDueToHighValues == arg)
-            return;
-
-        m_didScaleVelocitiesDueToHighValues = arg;
-        emit didScaleVelocitiesDueToHighValuesChanged(arg);
-    }
-
-    void setTemperature(double arg)
-    {
-        if (m_temperature == arg)
-            return;
-
-        m_temperature = arg;
-        emit temperatureChanged(arg);
-    }
-
-    void setKineticEnergy(double arg)
-    {
-        if (m_kineticEnergy == arg)
-            return;
-
-        m_kineticEnergy = arg;
-        emit kineticEnergyChanged(arg);
-    }
-
-    void setPotentialEnergy(double arg)
-    {
-        if (m_potentialEnergy == arg)
-            return;
-
-        m_potentialEnergy = arg;
-        emit potentialEnergyChanged(arg);
-    }
-
-    void setPressure(double arg)
-    {
-        if (m_pressure == arg)
-            return;
-
-        m_pressure = arg;
-        emit pressureChanged(arg);
-    }
-
-    void setTime(double arg)
-    {
-        if (m_time != arg) {
-            m_time = arg;
-            emit timeChanged(arg);
-        }
-    }
+    void setDidScaleVelocitiesDueToHighValues(bool arg);
+    void setTemperature(double arg);
+    void setKineticEnergy(double arg);
+    void setPotentialEnergy(double arg);
+    void setPressure(double arg);
+    void setTime(double arg);
 
 signals:
     void thermostatValueChanged(double arg);
