@@ -125,11 +125,13 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
     setSimulator(molecularDynamics->simulator());
     resetProjection();
     setModelViewMatrices(molecularDynamics->zoom(), molecularDynamics->tilt(), molecularDynamics->pan(), molecularDynamics->roll(), m_simulator->m_system.systemSize());
-    if(molecularDynamics->simulatorDirty()) {
-        m_dirtyCount++;
-        m_positions = molecularDynamics->m_mdSimulator.m_simulator.m_system.positions;
-        m_atomTypes = molecularDynamics->m_mdSimulator.m_simulator.m_system.atom_type;
-        molecularDynamics->setSimulatorDirty(false);
+    if(molecularDynamics->m_simulatorMutex.tryLock()) {
+        if(molecularDynamics->simulatorDirty()) {
+            m_dirtyCount++;
+            m_positions = molecularDynamics->m_mdSimulator.m_simulator.m_system.positions;
+            m_atomTypes = molecularDynamics->m_mdSimulator.m_simulator.m_system.atom_type;
+            molecularDynamics->setSimulatorDirty(false);
+        }
         molecularDynamics->m_simulatorMutex.unlock();
     }
 //    qDebug() << "Counts: " << m_syncCount << m_renderCount << m_dirtyCount;
@@ -182,6 +184,12 @@ void MolecularDynamicsRenderer::render()
 void MolecularDynamicsRenderer::setSimulator(Simulator *simulator)
 {
     m_simulator = simulator;
+}
+
+void MolecularDynamicsSimulator::step()
+{
+    m_simulator.step();
+    emit stepCompleted();
 }
 
 MolecularDynamics::MolecularDynamics()
@@ -346,7 +354,7 @@ Simulator *MolecularDynamics::simulator()
 
 void MolecularDynamics::step()
 {
-    if(!m_running) {
+    if(!m_running || m_simulatorDirty) {
         return;
     }
 
@@ -371,6 +379,23 @@ void MolecularDynamics::step()
 
         emit requestStep();
     }
+}
+
+void MolecularDynamics::finalizeStep()
+{
+    setDidScaleVelocitiesDueToHighValues(m_mdSimulator.m_simulator.m_system.didScaleVelocitiesDueToHighValues());
+    setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
+
+    float temperatureCelsius = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_to_SI(m_mdSimulator.m_simulator.m_sampler->temperature_free_atoms) - 273.15;
+    setTemperature(temperatureCelsius);
+    setKineticEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->kinetic_energy));
+    setPotentialEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->potential_energy));
+    setPressure(m_mdSimulator.m_simulator.m_system.unit_converter->pressure_to_SI(m_mdSimulator.m_simulator.m_sampler->pressure));
+    setTime(m_mdSimulator.m_simulator.m_system.unit_converter->time_to_SI(m_mdSimulator.m_simulator.m_system.time()));
+    m_previousStepCompleted = true;
+    m_simulatorDirty = true;
+    m_simulatorMutex.unlock();
+    update();
 }
 
 void MolecularDynamics::save(QString fileName)
@@ -409,28 +434,6 @@ void MolecularDynamics::setAtomCount(int arg)
 
     m_atomCount = arg;
     emit atomCountChanged(arg);
-}
-
-void MolecularDynamicsSimulator::step()
-{
-    m_simulator.step();
-    emit stepCompleted();
-}
-
-void MolecularDynamics::finalizeStep()
-{
-    setDidScaleVelocitiesDueToHighValues(m_mdSimulator.m_simulator.m_system.didScaleVelocitiesDueToHighValues());
-    setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
-
-    float temperatureCelsius = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_to_SI(m_mdSimulator.m_simulator.m_sampler->temperature_free_atoms) - 273.15;
-    setTemperature(temperatureCelsius);
-    setKineticEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->kinetic_energy));
-    setPotentialEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->potential_energy));
-    setPressure(m_mdSimulator.m_simulator.m_system.unit_converter->pressure_to_SI(m_mdSimulator.m_simulator.m_sampler->pressure));
-    setTime(m_mdSimulator.m_simulator.m_system.unit_converter->time_to_SI(m_mdSimulator.m_simulator.m_system.time()));
-    m_previousStepCompleted = true;
-    m_simulatorDirty = true;
-    update();
 }
 
 // ********************************************
