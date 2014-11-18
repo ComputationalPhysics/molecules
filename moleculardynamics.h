@@ -51,10 +51,8 @@
 #include "cpglcube.h"
 #include "simulator.h"
 
-//! [1]
 class MolecularDynamicsRenderer : public QQuickFramebufferObject::Renderer
 {
-//    Q_OBJECT
 public:
     Simulator m_simulator;
     MolecularDynamicsRenderer();
@@ -62,16 +60,7 @@ public:
 
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void resetProjection();
-//    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
-//    void incrementZoom(double deltaZoom);
-
-//    double zoom() const;
     void setModelViewMatrices(double zoom, double tilt, double pan, double roll);
-
-//    double pinchScale() const;
-//    void setPinchScale(double pinchScale);
-
-
 
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size);
     void synchronize(QQuickFramebufferObject *item);
@@ -79,10 +68,6 @@ public:
 
 private:
     QSize m_viewportSize;
-//    double m_tilt;
-//    double m_pan;
-//    double m_roll;
-//    double m_zoom;
 
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_modelViewMatrix;
@@ -90,9 +75,7 @@ private:
     CPGLQuads *m_glQuads;
     CPGLCube *m_glCube;
 };
-//! [1]
 
-//! [2]
 class MolecularDynamics : public QQuickFramebufferObject
 {
     Q_OBJECT
@@ -245,6 +228,5 @@ private:
 
     friend class MolecularDynamicsRenderer;
 };
-//! [2]
 
 #endif // SQUIRCLE_H
