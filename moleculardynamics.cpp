@@ -54,7 +54,11 @@
 #include "simulator/atom_types.h"
 using namespace std;
 
-MolecularDynamicsRenderer::MolecularDynamicsRenderer()
+MolecularDynamicsRenderer::MolecularDynamicsRenderer() :
+    m_skipNextFrame(false),
+    m_syncCount(0),
+    m_renderCount(0),
+    m_dirtyCount(0)
 {
     m_glQuads = new CPGLQuads();
     m_glCube = new CPGLCube();
@@ -80,11 +84,12 @@ void MolecularDynamicsRenderer::resetProjection()
     m_projectionMatrix.perspective(fov, aspect, zNear, zFar);
 }
 
-void MolecularDynamicsRenderer::setModelViewMatrices(double zoom, double tilt, double pan, double roll)
+void MolecularDynamicsRenderer::setModelViewMatrices(double zoom, double tilt, double pan, double roll, const QVector3D &systemSize)
 {
-    float systemSizeX = m_simulator.m_system.systemSize().x();
-    float systemSizeY = m_simulator.m_system.systemSize().y();
-    float systemSizeZ = m_simulator.m_system.systemSize().z();
+    m_systemSize = systemSize;
+    float systemSizeX = systemSize.x();
+    float systemSizeY = systemSize.y();
+    float systemSizeZ = systemSize.z();
     float systemSizeMax = sqrt(systemSizeX*systemSizeX + systemSizeY*systemSizeY + systemSizeZ*systemSizeZ);
 
     m_modelViewMatrix.setToIdentity();
@@ -110,8 +115,29 @@ QOpenGLFramebufferObject *MolecularDynamicsRenderer::createFramebufferObject(con
     return new QOpenGLFramebufferObject(size, format);
 }
 
+void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
+{
+    m_syncCount++;
+    MolecularDynamics *molecularDynamics = (MolecularDynamics*)item; // TODO: Use correct casting method
+    if(!molecularDynamics) {
+        return;
+    }
+    setSimulator(molecularDynamics->simulator());
+    resetProjection();
+    setModelViewMatrices(molecularDynamics->zoom(), molecularDynamics->tilt(), molecularDynamics->pan(), molecularDynamics->roll(), m_simulator->m_system.systemSize());
+    if(molecularDynamics->simulatorDirty()) {
+        m_dirtyCount++;
+        m_positions = molecularDynamics->m_mdSimulator.m_simulator.m_system.positions;
+        m_atomTypes = molecularDynamics->m_mdSimulator.m_simulator.m_system.atom_type;
+        molecularDynamics->setSimulatorDirty(false);
+        molecularDynamics->m_simulatorMutex.unlock();
+    }
+//    qDebug() << "Counts: " << m_syncCount << m_renderCount << m_dirtyCount;
+}
+
 void MolecularDynamicsRenderer::render()
 {
+    m_renderCount++;
     glDepthMask(true);
 
     glClearColor(0, 0, 0, 1.0);
@@ -128,9 +154,9 @@ void MolecularDynamicsRenderer::render()
     // Calculate model view transformation
     //    QMatrix4x4 matrix;
     //    QMatrix4x4 lightMatrix;
-    float systemSizeX = m_simulator.m_system.systemSize().x();
-    float systemSizeY = m_simulator.m_system.systemSize().y();
-    float systemSizeZ = m_simulator.m_system.systemSize().z();
+    float systemSizeX = m_systemSize.x();
+    float systemSizeY = m_systemSize.y();
+    float systemSizeZ = m_systemSize.z();
 
     float systemSizeMax = sqrt(systemSizeX*systemSizeX + systemSizeY*systemSizeY + systemSizeZ*systemSizeZ);
 
@@ -139,18 +165,23 @@ void MolecularDynamicsRenderer::render()
 
     QVector3D offset(-systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
 
-    int n = 3*m_simulator.m_system.numAtoms();
+    int n = 3*m_simulator->m_system.numAtoms();
     m_glQuads->setModelViewMatrix(m_modelViewMatrix);
-    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
+    m_glQuads->update(&(m_positions[0]), &(m_atomTypes[0]), n, offset);
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
-    m_glCube->update(&(m_simulator.m_system),offset);
+    m_glCube->update(&(m_simulator->m_system),offset);
     m_glCube->render(modelViewProjectionMatrix);
 
     glDepthMask(GL_TRUE);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+}
+
+void MolecularDynamicsRenderer::setSimulator(Simulator *simulator)
+{
+    m_simulator = simulator;
 }
 
 MolecularDynamics::MolecularDynamics()
@@ -172,10 +203,22 @@ MolecularDynamics::MolecularDynamics()
       m_potentialEnergy(0),
       m_systemSizeIsDirty(false),
       m_stepRequested(false),
-      m_previousStepCompleted(true)
+      m_previousStepCompleted(true),
+      m_simulatorDirty(true)
 {
-//    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(handleWindowChanged(QQuickWindow*)));
     m_timer.start();
+
+    m_mdSimulator.moveToThread(&m_simulatorWorker);
+    connect(this, &MolecularDynamics::requestStep, &m_mdSimulator, &MolecularDynamicsSimulator::step);
+    connect(&m_mdSimulator, &MolecularDynamicsSimulator::stepCompleted, this, &MolecularDynamics::finalizeStep);
+    m_simulatorWorker.start();
+}
+
+MolecularDynamics::~MolecularDynamics()
+{
+    m_simulatorWorker.quit();
+    m_simulatorWorker.wait();
+    m_simulatorMutex.unlock();
 }
 
 MolecularDynamicsRenderer *MolecularDynamics::createRenderer() const
@@ -230,7 +273,7 @@ void MolecularDynamics::setForceValue(double arg)
         return;
 
     m_forceValue = arg;
-    m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
+//    m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
     emit forceValueChanged(arg);
     update();
 }
@@ -296,12 +339,115 @@ void MolecularDynamics::setRunning(bool arg)
     update();
 }
 
+Simulator *MolecularDynamics::simulator()
+{
+    return &(m_mdSimulator.m_simulator);
+}
+
+void MolecularDynamics::step()
+{
+    if(!m_running) {
+        return;
+    }
+
+    if(m_simulatorMutex.tryLock()) {
+        bool didLoadNewSystem = loadIfPlanned();
+
+        if(!didLoadNewSystem) {
+            if(thermostatEnabled()) {
+                float temperatureKelvin = thermostatValue() + 273.15;
+                double systemTemperature = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
+                m_mdSimulator.m_simulator.m_thermostat->relaxation_time = 1;
+                m_mdSimulator.m_simulator.m_thermostat->apply(m_mdSimulator.m_simulator.m_sampler, &(m_mdSimulator.m_simulator.m_system), systemTemperature, ARGON);
+            }
+            if(m_systemSizeIsDirty) {
+                m_mdSimulator.m_simulator.m_system.setSystemSize(systemSize());
+            }
+        }
+
+        double dt = m_timer.restart() / 1000.0;
+        double safeDt = min(0.02, dt);
+        m_mdSimulator.m_simulator.m_system.setDt(safeDt);
+
+        emit requestStep();
+    }
+}
+
+void MolecularDynamics::save(QString fileName)
+{
+    qWarning() << "Save not yet implemented!";
+}
+
+bool MolecularDynamics::loadIfPlanned() {
+    if(m_systemToLoad.size()) {
+        m_mdSimulator.m_simulator.m_system.mdio->load_state_from_file_binary(m_systemToLoad);
+        setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
+        setSystemSize(m_mdSimulator.m_simulator.m_system.systemSize());
+        emit systemSizeChanged(m_systemSize);
+        m_systemToLoad = "";
+        emit loaded();
+        return true;
+    }
+    return false;
+}
+
+void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
+{
+    if (win) {
+        //        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(sync()), Qt::DirectConnection);
+//        connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(cleanup()), Qt::DirectConnection);
+        // If we allow QML to do the clearing, they would clear what we paint
+        // and nothing would show.
+        win->setClearBeforeRendering(false);
+    }
+}
+
+void MolecularDynamics::setAtomCount(int arg)
+{
+    if (m_atomCount == arg)
+        return;
+
+    m_atomCount = arg;
+    emit atomCountChanged(arg);
+}
+
+void MolecularDynamicsSimulator::step()
+{
+    m_simulator.step();
+    emit stepCompleted();
+}
+
+void MolecularDynamics::finalizeStep()
+{
+    setDidScaleVelocitiesDueToHighValues(m_mdSimulator.m_simulator.m_system.didScaleVelocitiesDueToHighValues());
+    setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
+
+    float temperatureCelsius = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_to_SI(m_mdSimulator.m_simulator.m_sampler->temperature_free_atoms) - 273.15;
+    setTemperature(temperatureCelsius);
+    setKineticEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->kinetic_energy));
+    setPotentialEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->potential_energy));
+    setPressure(m_mdSimulator.m_simulator.m_system.unit_converter->pressure_to_SI(m_mdSimulator.m_simulator.m_sampler->pressure));
+    setTime(m_mdSimulator.m_simulator.m_system.unit_converter->time_to_SI(m_mdSimulator.m_simulator.m_system.time()));
+    m_previousStepCompleted = true;
+    m_simulatorDirty = true;
+    update();
+}
+
+// ********************************************
+// ******* Basic setters and getters **********
+// ********************************************
+
 void MolecularDynamics::setPreviousStepCompleted(bool arg)
 {
     if (m_previousStepCompleted != arg) {
         m_previousStepCompleted = arg;
         emit previousStepCompletedChanged(arg);
     }
+}
+
+void MolecularDynamics::setSimulatorDirty(bool arg)
+{
+    m_simulatorDirty = arg;
 }
 
 void MolecularDynamics::setDidScaleVelocitiesDueToHighValues(bool arg)
@@ -355,78 +501,6 @@ void MolecularDynamics::setTime(double arg)
         m_time = arg;
         emit timeChanged(arg);
     }
-}
-
-void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
-{
-    MolecularDynamics *molecularDynamics = (MolecularDynamics*)item; // TODO: Use correct casting method
-    if(!molecularDynamics) {
-        return;
-    }
-    resetProjection();
-    setModelViewMatrices(molecularDynamics->zoom(), molecularDynamics->tilt(), molecularDynamics->pan(), molecularDynamics->roll());
-
-    bool didLoadNewSystem = molecularDynamics->loadIfPlanned(this);
-
-    if(!molecularDynamics->m_stepRequested || !molecularDynamics->m_running) {
-        return;
-    }
-
-    if(!didLoadNewSystem) {
-        if(molecularDynamics->thermostatEnabled()) {
-            float temperatureKelvin = molecularDynamics->thermostatValue() + 273.15;
-            double systemTemperature = m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
-            m_simulator.m_thermostat->relaxation_time = 1;
-            m_simulator.m_thermostat->apply(m_simulator.m_sampler, &(m_simulator.m_system), systemTemperature, ARGON);
-        }
-        if(molecularDynamics->m_systemSizeIsDirty) {
-            m_simulator.m_system.setSystemSize(molecularDynamics->systemSize());
-        }
-    }
-
-    double dt = molecularDynamics->m_timer.restart() / 1000.0;
-    double safeDt = min(0.02, dt);
-    m_simulator.m_system.setDt(safeDt);
-    m_simulator.step();
-
-    molecularDynamics->setDidScaleVelocitiesDueToHighValues(m_simulator.m_system.didScaleVelocitiesDueToHighValues());
-    molecularDynamics->setAtomCount(m_simulator.m_system.numAtoms());
-
-    float temperatureCelsius = m_simulator.m_system.unit_converter->temperature_to_SI(m_simulator.m_sampler->temperature_free_atoms) - 273.15;
-    molecularDynamics->setTemperature(temperatureCelsius);
-    molecularDynamics->setKineticEnergy(m_simulator.m_system.unit_converter->energy_to_ev(m_simulator.m_sampler->kinetic_energy));
-    molecularDynamics->setPotentialEnergy(m_simulator.m_system.unit_converter->energy_to_ev(m_simulator.m_sampler->potential_energy));
-    molecularDynamics->setPressure(m_simulator.m_system.unit_converter->pressure_to_SI(m_simulator.m_sampler->pressure));
-    molecularDynamics->setTime(m_simulator.m_system.unit_converter->time_to_SI(m_simulator.m_system.time()));
-    molecularDynamics->m_previousStepCompleted = true;
-}
-
-void MolecularDynamics::step(double dt)
-{
-    if(!m_previousStepCompleted) {
-        return;
-    }
-    m_previousStepCompleted = false;
-    m_stepRequested = true;
-    update();
-}
-
-void MolecularDynamics::save(QString fileName)
-{
-    qWarning() << "Save not yet implemented!";
-}
-
-bool MolecularDynamics::loadIfPlanned(MolecularDynamicsRenderer* renderer) {
-    if(m_systemToLoad.size()) {
-        renderer->m_simulator.m_system.mdio->load_state_from_file_binary(m_systemToLoad);
-        setAtomCount(renderer->m_simulator.m_system.numAtoms());
-        setSystemSize(renderer->m_simulator.m_system.systemSize());
-        emit systemSizeChanged(m_systemSize);
-        m_systemToLoad = "";
-        emit loaded();
-        return true;
-    }
-    return false;
 }
 
 void MolecularDynamics::load(QString fileName)
@@ -524,17 +598,7 @@ bool MolecularDynamics::previousStepCompleted() const
     return m_previousStepCompleted;
 }
 
-void MolecularDynamics::handleWindowChanged(QQuickWindow *win)
+bool MolecularDynamics::simulatorDirty() const
 {
-    if (win) {
-        //        connect(win, SIGNAL(beforeSynchronizing()), this, SLOT(sync()), Qt::DirectConnection);
-//        connect(win, SIGNAL(sceneGraphInvalidated()), this, SLOT(cleanup()), Qt::DirectConnection);
-        // If we allow QML to do the clearing, they would clear what we paint
-        // and nothing would show.
-        win->setClearBeforeRendering(false);
-    }
+    return m_simulatorDirty;
 }
-
-
-
-

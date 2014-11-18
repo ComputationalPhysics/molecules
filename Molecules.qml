@@ -37,6 +37,7 @@ Item {
         dashboard.running = false
         moleculesRoot.simulation = simulation
         molecularDynamics.load(simulation.stateFile)
+        dashboard.running = true
     }
 
     onWidthChanged: {

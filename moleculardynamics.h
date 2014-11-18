@@ -47,6 +47,8 @@
 #include <QElapsedTimer>
 #include <QMatrix4x4>
 #include <QQuickFramebufferObject>
+#include <QThread>
+#include <QMutex>
 #include "cpglquads.h"
 #include "cpglcube.h"
 #include "simulator.h"
@@ -54,26 +56,51 @@
 class MolecularDynamicsRenderer : public QQuickFramebufferObject::Renderer
 {
 public:
-    Simulator m_simulator;
     MolecularDynamicsRenderer();
     ~MolecularDynamicsRenderer();
 
     void setViewportSize(const QSize &size) { m_viewportSize = size; }
     void resetProjection();
-    void setModelViewMatrices(double zoom, double tilt, double pan, double roll);
+    void setModelViewMatrices(double zoom, double tilt, double pan, double roll, const QVector3D &systemSize);
 
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size);
     void synchronize(QQuickFramebufferObject *item);
     void render();
+    void setSimulator(Simulator* simulator);
 
 private:
     QSize m_viewportSize;
 
+    QVector3D m_systemSize;
+    int m_atomCount;
+    Simulator *m_simulator;
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_modelViewMatrix;
     QMatrix4x4 m_lightModelViewMatrix;
     CPGLQuads *m_glQuads;
     CPGLCube *m_glCube;
+
+    std::vector<atomDataType> m_positions;
+    std::vector<unsigned long> m_atomTypes;
+
+    bool m_skipNextFrame;
+
+    int m_syncCount;
+    int m_renderCount;
+    int m_dirtyCount;
+};
+
+class MolecularDynamicsSimulator : public QObject
+{
+    Q_OBJECT
+public:
+    Simulator m_simulator;
+
+public slots:
+    void step();
+
+signals:
+    void stepCompleted();
 };
 
 class MolecularDynamics : public QQuickFramebufferObject
@@ -100,10 +127,11 @@ class MolecularDynamics : public QQuickFramebufferObject
 
 public:
     MolecularDynamics();
+    ~MolecularDynamics();
 
     MolecularDynamicsRenderer* createRenderer() const;
 
-    Q_INVOKABLE void step(double dt);
+    Q_INVOKABLE void step();
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);
 
@@ -127,7 +155,8 @@ public:
     double pressure() const;
     double time() const;
     bool previousStepCompleted() const;
-
+    bool simulatorDirty() const;
+    Simulator *simulator();
 public slots:
     void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
@@ -144,6 +173,7 @@ public slots:
     void setZoom(double arg);
     void setRunning(bool arg);
     void setPreviousStepCompleted(bool arg);
+    void setSimulatorDirty(bool arg);
 
 private slots:
     void setDidScaleVelocitiesDueToHighValues(bool arg);
@@ -152,6 +182,7 @@ private slots:
     void setPotentialEnergy(double arg);
     void setPressure(double arg);
     void setTime(double arg);
+    void finalizeStep();
 
 signals:
     void thermostatValueChanged(double arg);
@@ -159,37 +190,28 @@ signals:
     void forceEnabledChanged(bool arg);
     void forceValueChanged(double arg);
     void systemSizeChanged(QVector3D arg);
-
     void tiltChanged(double arg);
     void panChanged(double arg);
     void rollChanged(double arg);
     void zoomChanged(double arg);
-
     void runningChanged(bool arg);
-
     void atomCountChanged(int arg);
-
     void didScaleVelocitiesDueToHighValuesChanged(bool arg);
-
     void temperatureChanged(double arg);
-
     void kineticEnergyChanged(double arg);
-
     void potentialEnergyChanged(double arg);
-
     void pressureChanged(double arg);
-
     void timeChanged(double arg);
-
     void previousStepCompletedChanged(bool arg);
-
     void loaded();
+    void requestStep();
 
 private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
     MolecularDynamicsRenderer *m_renderer;
+    MolecularDynamicsSimulator m_mdSimulator;
     double m_xPoint;
     double m_yPoint;
 
@@ -208,14 +230,7 @@ private:
     QString m_systemToLoad;
     bool m_stepRequested;
 
-    void setAtomCount(int arg)
-    {
-        if (m_atomCount == arg)
-            return;
-
-        m_atomCount = arg;
-        emit atomCountChanged(arg);
-    }
+    void setAtomCount(int arg);
     bool m_didScaleVelocitiesDueToHighValues;
     double m_temperature;
     double m_kineticEnergy;
@@ -224,7 +239,11 @@ private:
     double m_time;
     bool m_previousStepCompleted;
     bool m_systemSizeIsDirty;
-    bool loadIfPlanned(MolecularDynamicsRenderer *renderer);
+    bool loadIfPlanned();
+    QMutex m_simulatorMutex;
+    QThread m_simulatorWorker;
+
+    bool m_simulatorDirty;
 
     friend class MolecularDynamicsRenderer;
 };
