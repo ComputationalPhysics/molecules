@@ -9,7 +9,7 @@ class CPGLCube
 public:
     CPGLCube();
     ~CPGLCube();
-    void update(System *system, const QVector3D &offset);
+    void update(const QVector3D &systemSize, const QVector3D &offset);
     void render(const QMatrix4x4 &modelViewProjectionMatrix);
     void ensureInitialized();
 

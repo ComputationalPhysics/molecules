@@ -15,13 +15,12 @@ CPGLCube::~CPGLCube()
     if(m_program) delete m_program;
 }
 
-void CPGLCube::update(System *system, const QVector3D &offset)
+void CPGLCube::update(const QVector3D &systemSize, const QVector3D &offset)
 {
     ensureInitialized();
 
     m_vertices.clear();
     m_indices.clear();
-    QVector3D systemSize = system->systemSize();
     m_vertices.push_back(QVector3D(offset.x(), offset.y(), offset.z())); // 0,0,0
     m_vertices.push_back(QVector3D(systemSize.x()+offset.x(), offset.y(), offset.z())); // 1,0,0
     m_vertices.push_back(QVector3D(offset.x(), offset.y(), systemSize.z() + offset.z())); // 0,0,1

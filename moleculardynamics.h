@@ -73,7 +73,6 @@ private:
 
     QVector3D m_systemSize;
     int m_atomCount;
-    Simulator *m_simulator;
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_modelViewMatrix;
     QMatrix4x4 m_lightModelViewMatrix;
@@ -155,8 +154,11 @@ public:
     double pressure() const;
     double time() const;
     bool previousStepCompleted() const;
-    bool simulatorDirty() const;
-    Simulator *simulator();
+    bool simulatorOutputDirty() const;
+
+    std::vector<atomDataType> m_positions;
+    std::vector<unsigned long> m_atomTypes;
+
 public slots:
     void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
     void incrementZoom(double deltaZoom);
@@ -173,7 +175,7 @@ public slots:
     void setZoom(double arg);
     void setRunning(bool arg);
     void setPreviousStepCompleted(bool arg);
-    void setSimulatorDirty(bool arg);
+    void setSimulatorOutputDirty(bool arg);
 
 private slots:
     void setDidScaleVelocitiesDueToHighValues(bool arg);
@@ -240,10 +242,12 @@ private:
     bool m_previousStepCompleted;
     bool m_systemSizeIsDirty;
     bool loadIfPlanned();
-    QMutex m_simulatorMutex;
+    QMutex m_simulatorInputMutex;
+    QMutex m_simulatorOutputMutex;
+    QMutex m_simulatorRunningMutex;
     QThread m_simulatorWorker;
 
-    bool m_simulatorDirty;
+    bool m_simulatorOutputDirty;
 
     friend class MolecularDynamicsRenderer;
 };
