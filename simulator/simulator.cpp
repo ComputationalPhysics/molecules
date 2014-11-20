@@ -1,20 +1,36 @@
 #include "simulator.h"
-#include <iostream>
-using namespace std;
 
-Simulator::Simulator()
+
+bool Simulator::thermostatEnabled() const
 {
-    m_system.setup(&m_settings);
+    return m_thermostatEnabled;
+}
 
-    m_thermostat = new Thermostat(m_settings.thermostat_relaxation_time);
-    m_sampler = new StatisticsSampler(&m_system);
+void Simulator::setThermostatEnabled(bool thermostatEnabled)
+{
+    m_thermostatEnabled = thermostatEnabled;
+}
+
+float Simulator::temperature() const
+{
+    return m_temperature;
+}
+
+void Simulator::setTemperature(float temperature)
+{
+    m_temperature = temperature;
+}
+Simulator::Simulator() :
+    m_thermostatEnabled(false),
+    m_temperature(300)
+{
+    m_thermostat = new BerendsenThermostat(300, 0.01);
+    m_sampler = new StatisticsSampler();
 }
 
 void Simulator::step() {
 
-    m_system.sample_statistics = m_settings.statistics_interval && ((m_system.steps) % m_settings.statistics_interval == 0);
     m_system.step();
-    if(m_system.sample_statistics) m_sampler->sample();
-    if(m_settings.thermostat_enabled) m_thermostat->apply(m_sampler,&m_system,m_settings.temperature, false);
-    if(m_settings.thermostat_frozen_enabled) m_thermostat->apply(m_sampler,&m_system,m_settings.temperature,true);
+    m_sampler->sample(&m_system);
+    if(m_thermostatEnabled) m_thermostat->apply(&m_system, &m_sampler, m_temperature);
 }

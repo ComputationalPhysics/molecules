@@ -1,131 +1,88 @@
-#include <statisticssampler.h>
-#include <settings.h>
-#include <unitconverter.h>
-#include <system.h>
-#include <iomanip>
-#include <atom_types.h>
-#include <string.h>
+#include "statisticssampler.h"
+#include "potentials/potential.h"
+#include "cpelapsedtimer.h"
+#include "potentials/lennardjones.h"
 
-#include <iostream>
-using namespace std;
-
-StatisticsSampler::StatisticsSampler(System *system_) :
-    temperature_sampled_at(-1),
-    kinetic_energy_sampled_at(-1),
-    pressure_sampled_at(-1),
-    potential_energy_sampled_at(-1),
-    count_periodic_sampled_at(-1)
+StatisticsSampler::StatisticsSampler() :
+    m_kineticEnergy(0),
+    m_potentialEnergy(0),
+    m_temperature(0),
+    m_pressure(0)
 {
-    system = system_;
-    settings = system->settings;
 
 }
 
-void StatisticsSampler::sample_momentum_cm() {
-    double v_cm_local[3];
+StatisticsSampler::~StatisticsSampler()
+{
 
-    v_cm[0] = 0; v_cm[1] = 0; v_cm[2] = 0;
-    v_cm_local[0] = 0; v_cm_local[1] = 0; v_cm_local[2] = 0;
+}
 
-    for(unsigned int i=system->num_atoms_frozen;i<system->numAtoms();i++) {
-        v_cm_local[0] += system->velocities[3*i+0];
-        v_cm_local[1] += system->velocities[3*i+1];
-        v_cm_local[2] += system->velocities[3*i+2];
+void StatisticsSampler::sample(System *system)
+{
+    // Here you should measure different kinds of statistical properties and save it to a file.
+    CPElapsedTimer::sampling().start();
+    sampleKineticEnergy(system);
+    samplePotentialEnergy(system);
+    sampleTemperature(system);
+    sampleDensity(system);
+    samplePressure(system);
+    CPElapsedTimer::sampling().stop();
+}
+
+float StatisticsSampler::sampleKineticEnergy(System *system)
+{
+    m_kineticEnergy = 0;
+    for(int i=0; i<system->atoms().size(); i++) {
+        Atom *atom = system->atoms()[i];
+        m_kineticEnergy += 0.5*atom->mass()*atom->velocity.lengthSquared();
     }
 
-    p_cm[0] = v_cm[0]*settings->mass;
-    p_cm[1] = v_cm[1]*settings->mass;
-    p_cm[2] = v_cm[2]*settings->mass;
+    return m_kineticEnergy;
 }
 
-void StatisticsSampler::sample_kinetic_energy() {
-    if(system->steps == kinetic_energy_sampled_at) return;
-    kinetic_energy_sampled_at = system->steps;
+float StatisticsSampler::samplePotentialEnergy(System *system)
+{
+    m_potentialEnergy = system->potential()->potentialEnergy();
+    return m_potentialEnergy;
+}
 
-    kinetic_energy = 0;
+float StatisticsSampler::sampleTemperature(System *system)
+{
+    m_temperature = 2.0*m_kineticEnergy/(3*system->atoms().size());
+    return m_temperature;
+}
 
-    for(unsigned int i=0;i<system->numAtoms();i++) {
-        double vx = system->velocities[3*i+0];
-        double vy = system->velocities[3*i+1];
-        double vz = system->velocities[3*i+2];
-        kinetic_energy += 0.5*settings->mass*(vx*vx + vy*vy + vz*vz);
+float StatisticsSampler::sampleDensity(System *system)
+{
+    m_density = system->atoms().size() / system->volume();
+    return m_density;
+}
+
+float StatisticsSampler::samplePressure(System *system)
+{
+    float idealGasPressure = m_density*m_temperature;
+    float virialPressure = ((LennardJones*)system->potential())->pressureVirial();
+//    float virialPressure = 0;
+//    for(int i=0; i<system->atoms().size(); i++) {
+//        Atom *atom = system->atoms()[i];
+//        virialPressure += atom->position.dot(atom->force);
+//    }
+    virialPressure /= 3*system->volume();
+    m_pressure = idealGasPressure + virialPressure;
+}
+
+float StatisticsSampler::totalEnergy()
+{
+    return m_potentialEnergy + m_kineticEnergy;
+}
+
+vec3 StatisticsSampler::sampleMomentum(System *system)
+{
+    m_momentum.setToZero();
+
+    for(int i=0; i<system->atoms().size(); i++) {
+        Atom *atom = system->atoms()[i];
+        m_momentum.addAndMultiply(atom->velocity, atom->mass());
     }
-}
-
-void StatisticsSampler::sample_potential_energy() {
-    if(system->steps == potential_energy_sampled_at) return;
-    potential_energy_sampled_at = system->steps;
-
-    potential_energy = system->potentialEnergy();
-}
-
-void StatisticsSampler::sample_temperature() {
-    if(system->steps == temperature_sampled_at) return;
-    temperature_sampled_at = system->steps;
-
-    sample_kinetic_energy();
-    double kinetic_energy_per_atom = kinetic_energy / system->numAtoms();
-    temperature = 2.0/3*kinetic_energy_per_atom;
-
-    QVector3D freeAtomDrift;
-    for(int n=0; n<system->numAtoms(); n++) {
-        if(system->atom_type[n] == ARGON) {
-            freeAtomDrift += QVector3D(system->velocities[3*n+0],
-                    system->velocities[3*n+1],
-                    system->velocities[3*n+2]);
-        }
-    }
-    freeAtomDrift /= system->num_atoms_free;
-
-    double kinetic_energy_free_atoms = 0;
-    double kinetic_energy_frozen_atoms = 0;
-    for(int n=0; n<system->numAtoms(); n++) {
-        if(system->atom_type[n] == ARGON) {
-            QVector3D relativeVelocity = QVector3D(system->velocities[3*n+0] - freeAtomDrift.x(),
-                    system->velocities[3*n+1] - freeAtomDrift.y(),
-                    system->velocities[3*n+2] - freeAtomDrift.z());
-            double v_squared = relativeVelocity.lengthSquared();
-            kinetic_energy_free_atoms += 0.5*system->settings->mass*v_squared;
-        } else {
-            double v_squared = system->velocities[3*n+0]*system->velocities[3*n+0] + system->velocities[3*n+1]*system->velocities[3*n+1] + system->velocities[3*n+2]*system->velocities[3*n+2];
-            kinetic_energy_frozen_atoms += 0.5*system->settings->mass*v_squared;
-        }
-    }
-
-    temperature_free_atoms = 2.0/(3*system->num_atoms_free)*kinetic_energy_free_atoms;
-    temperature_frozen_atoms = 2.0/(3*system->num_atoms_frozen)*kinetic_energy_frozen_atoms;
-}
-
-void StatisticsSampler::sample_pressure() {
-    if(system->steps == pressure_sampled_at) return;
-    sample_temperature();
-
-    pressure = system->pressure_forces;
-
-    pressure /= 3*system->volume();
-    pressure += system->num_atoms_free/system->volume()*temperature_free_atoms;
-
-    pressure_sampled_at = system->steps;
-}
-
-void StatisticsSampler::sample() {
-    double t_in_pico_seconds = system->unit_converter->time_to_SI(system->time())*1e12;
-    sample_temperature();
-    sample_potential_energy();
-    sample_pressure();
-    sample_velocity_distribution();
-    sample_count_periodic();
-
-    cout.setf(ios::fixed);
-    cout.precision(5);
-    double total_energy = kinetic_energy + potential_energy;
-    cout << "Timestep " << setw(6) << system->steps << "   t=" << t_in_pico_seconds << " ps   T=" << system->unit_converter->temperature_to_SI(temperature) << " K   T(gas)=" << system->unit_converter->temperature_to_SI(temperature_free_atoms) << "K   E=" << system->unit_converter->energy_to_ev(total_energy) << " eV   Pot=" << system->unit_converter->energy_to_ev(potential_energy) << " eV" << endl;
-}
-
-void StatisticsSampler::sample_velocity_distribution() {
-
-}
-
-void StatisticsSampler::sample_count_periodic() {
-
+    return m_momentum;
 }

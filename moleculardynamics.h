@@ -98,8 +98,6 @@ class MolecularDynamics : public QQuickFramebufferObject
     Q_OBJECT
     Q_PROPERTY(double thermostatValue READ thermostatValue WRITE setThermostatValue NOTIFY thermostatValueChanged)
     Q_PROPERTY(bool thermostatEnabled READ thermostatEnabled WRITE setThermostatEnabled NOTIFY thermostatEnabledChanged)
-    Q_PROPERTY(bool forceEnabled READ forceEnabled WRITE setForceEnabled NOTIFY forceEnabledChanged)
-    Q_PROPERTY(double forceValue READ forceValue WRITE setForceValue NOTIFY forceValueChanged)
     Q_PROPERTY(QVector3D systemSize READ systemSize WRITE setSystemSize NOTIFY systemSizeChanged)
     Q_PROPERTY(double tilt READ tilt WRITE setTilt NOTIFY tiltChanged)
     Q_PROPERTY(double pan READ pan WRITE setPan NOTIFY panChanged)
@@ -126,8 +124,6 @@ public:
 
     double thermostatValue() const;
     bool thermostatEnabled() const;
-    bool forceEnabled() const;
-    double forceValue() const;
     QVector3D systemSize() const;
 
     double tilt() const;
@@ -151,8 +147,6 @@ public slots:
 
     void setThermostatValue(double arg);
     void setThermostatEnabled(bool arg);
-    void setForceEnabled(bool arg);
-    void setForceValue(double arg);
     void setSystemSize(QVector3D arg);
 
     void setTilt(double arg);
@@ -228,8 +222,6 @@ private slots:
 signals:
     void thermostatValueChanged(double arg);
     void thermostatEnabledChanged(bool arg);
-    void forceEnabledChanged(bool arg);
-    void forceValueChanged(double arg);
     void systemSizeChanged(QVector3D arg);
 
     void tiltChanged(double arg);
@@ -267,8 +259,6 @@ private:
 
     double m_thermostatValue;
     bool m_thermostatEnabled;
-    bool m_forceEnabled;
-    double m_forceValue;
     QVector3D m_systemSize;
     double m_tilt;
     double m_pan;

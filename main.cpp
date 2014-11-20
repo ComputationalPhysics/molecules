@@ -7,11 +7,6 @@
 #include <QSurfaceFormat>
 #include <QGLFormat>
 #include <QOpenGLContext>
-
-#include <settings.h>
-#include <system.h>
-#include <thermostat.h>
-#include <statisticssampler.h>
 #include <iostream>
 #include <QFontDatabase>
 using namespace std;

@@ -41,11 +41,10 @@ QVector3D CPGLQuads::vectorFromColor(const QColor &color)
 }
 
 // void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, const QVector3D &offset)
+void CPGLQuads::update(vector<Atom*> &atoms, const QVector3D &offset)
 {
     ensureInitialized();
-    int numPoints = n / 3; // x,y,z
-
+    int numAtoms = atoms.size();
     QVector3D right;
     right.setX(m_modelViewMatrix(0,0));
     right.setY(m_modelViewMatrix(0,1));
@@ -61,18 +60,20 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     QVector3D dl = (-0.5*up - 0.5*right)*scale;
     QVector3D dr = (-0.5*up + 0.5*right)*scale;
 
-    int numberOfVertices = numPoints*4;
+    int numberOfVertices = numAtoms*4;
     m_vertices.resize(numberOfVertices);
-    m_indices.resize(6*numPoints);
+    m_indices.resize(6*numAtoms);
 
     QVector3D normalColor = vectorFromColor(QColor("#41b6c4"));
     QVector3D frozenColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D fixedColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D unknownColor =  vectorFromColor(QColor("#ff0000"));
 
-    for(int i=0; i<numPoints; i++) {
+    for(int i=0; i<numAtoms; i++) {
         // NOTE: Y and Z are swapped!
-        QVector3D position(positions[3*i + 0] + offset.x(), positions[3*i + 1] + offset.y(), positions[3*i + 2] + offset.z());
+        Atom *atom = atoms[i];
+
+        QVector3D position(atom->position[0] + offset.x(), atom->position[1] + offset.y(), atom->position[2] + offset.z());
 
         m_vertices[4*i + 0].position = position + dl;
         m_vertices[4*i + 0].textureCoord= QVector2D(0,1);
@@ -86,17 +87,17 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
         m_vertices[4*i + 3].position = position + ul;
         m_vertices[4*i + 3].textureCoord= QVector2D(0,0);
 
-        QVector3D color;
+        QVector3D color = normalColor;
 
-        if(atomType[i] == FROZEN) {
-            color = frozenColor;
-        } else if(atomType[i] == FIXED) {
-            color = fixedColor;
-        } else if(atomType[i] == ARGON) {
-            color = normalColor;
-        } else {
-            color = unknownColor;
-        }
+//        if(atomType[i] == FROZEN) {
+//            color = frozenColor;
+//        } else if(atomType[i] == FIXED) {
+//            color = fixedColor;
+//        } else if(atomType[i] == ARGON) {
+//            color = normalColor;
+//        } else {
+//            color = unknownColor;
+//        }
 
         m_vertices[4*i + 0].color = color;
         m_vertices[4*i + 1].color = color;

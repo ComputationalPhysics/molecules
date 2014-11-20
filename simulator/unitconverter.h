@@ -1,55 +1,83 @@
 #pragma once
-#include <math.h>
+#include <string>
+#include <vector>
+#include <math/vec3.h>
+
+using std::vector;
+
+enum Units {SIUnits = 0, AtomicUnits, MDUnits};
 
 class UnitConverter
 {
 public:
-    double m0;
-    double L0;
-    double L0_angstrom;
-    double E0;
-    double E0ev;
-    double kb;
-    double t0;
-    double F0;
-    double T0;
-    double P0;
-    double v0;
-    double visc0;
-    double diff0;
+    static float m0;
+    static float q0;
+    static float hbar0;
+    static float electricConstant0;
+    static float a0;
+    static float a0_angstrom;
+    static float E0;
+    static float E0ev;
+    static float kb;
+    static float t0;
+    static float F0;
+    static float T0;
+    static float P0;
+    static float v0;
+    static float visc0;
+    static float diff0;
+    static std::string currentUnits;
 
-    UnitConverter();
+    static void makeSureInitialized();
+    static void initialize(Units type);
+    static bool initialized;
 
-    double pressure_to_SI(double P);
-    double pressure_from_SI(double P);
+    static float pressureToSI(float P);
+    static float pressureFromSI(float P);
 
-    double temperature_to_SI(double T);
-    double temperature_from_SI(double T);
+    static float temperatureToSI(float T);
+    static float temperatureFromSI(float T);
 
-    double mass_to_SI(double m);
-    double mass_from_SI(double m);
+    static float massToSI(float m);
+    static float massFromSI(float m);
 
-    double length_to_SI(double L);
-    double length_from_SI(double L);
+    static float lengthToSI(float L);
+    static float lengthFromSI(float L);
+    static vec3 lengthToSI(vec3 position);
+    static vec3 lengthFromSI(vec3 position);
 
-    double force_to_SI(double F);
-    double force_from_SI(double F);
+    static vec3 velocityToSI(vec3 position);
+    static vec3 velocityFromSI(vec3 position);
 
-    double energy_to_SI(double E);
-    double energy_from_SI(double E);
+    static vec3 lengthToAngstroms(vec3 position);
+    static vec3 lengthFromAngstroms(vec3 position);
 
-    double energy_to_ev(double E);
-    double energy_from_ev(double E);
+    static float lengthToAngstroms(float L);
+    static float lengthFromAngstroms(float L);
 
-    double time_to_SI(double t);
-    double time_from_SI(double t);
+    static float forceToSI(float F);
+    static float forceFromSI(float F);
 
-    double velocity_to_SI(double v);
-    double velocity_from_SI(double v);
+    static float energyToSI(float E);
+    static float energyFromSI(float E);
 
-    double viscosity_to_SI(double v);
-    double viscosity_from_SI(double v);
+    static float timeToSI(float t);
+    static float timeFromSI(float t);
 
-    double diffusion_to_SI(double d);
-    double diffusion_from_SI(double d);
+    static float velocityToSI(float v);
+    static float velocityFromSI(float v);
+
+    static float diffusionToSI(float d);
+    static float diffusionFromSI(float d);
+
+    static float energyToEv(float E);
+    static float energyFromEv(float E);
+
+    static float degreesToRadians(float v);
+    static float radiansToDegrees(float v);
+
+    static void initializeAtomicUnits();
+    static void initializeMDUnits();
 };
+
+typedef UnitConverter UC;

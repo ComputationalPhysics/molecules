@@ -51,7 +51,8 @@
 #include <QOpenGLFramebufferObjectFormat>
 #include "simulator/unitconverter.h"
 #include "simulator/mdio.h"
-#include "simulator/atom_types.h"
+#include "simulator/unitconverter.h"
+
 using namespace std;
 
 MolecularDynamicsRenderer::MolecularDynamicsRenderer()
@@ -139,9 +140,8 @@ void MolecularDynamicsRenderer::render()
 
     QVector3D offset(-systemSizeX/2.0, -systemSizeY/2.0, -systemSizeZ/2.0);
 
-    int n = 3*m_simulator.m_system.numAtoms();
     m_glQuads->setModelViewMatrix(m_modelViewMatrix);
-    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
+    m_glQuads->update(m_simulator.m_system.atoms(), offset);
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
     m_glCube->update(&(m_simulator.m_system),offset);
@@ -157,8 +157,6 @@ MolecularDynamics::MolecularDynamics()
     :
       m_thermostatValue(1.0),
       m_thermostatEnabled(false),
-      m_forceEnabled(false),
-      m_forceValue(0),
       m_tilt(0),
       m_pan(0),
       m_roll(0),
@@ -212,27 +210,6 @@ void MolecularDynamics::setThermostatEnabled(bool arg)
         emit thermostatEnabledChanged(arg);
         update();
     }
-}
-
-void MolecularDynamics::setForceEnabled(bool arg)
-{
-    if (m_forceEnabled == arg)
-        return;
-
-    m_forceEnabled = arg;
-    emit forceEnabledChanged(arg);
-    update();
-}
-
-void MolecularDynamics::setForceValue(double arg)
-{
-    if (m_forceValue == arg)
-        return;
-
-    m_forceValue = arg;
-    m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
-    emit forceValueChanged(arg);
-    update();
 }
 
 void MolecularDynamics::setSystemSize(QVector3D arg)
@@ -314,7 +291,7 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
     if(!didLoadNewSystem) {
         if(molecularDynamics->thermostatEnabled()) {
             float temperatureKelvin = molecularDynamics->thermostatValue() + 273.15;
-            double systemTemperature = m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
+            double systemTemperature = UC::temperatureFromSI(temperatureKelvin);
             m_simulator.m_thermostat->relaxation_time = 1;
             m_simulator.m_thermostat->apply(m_simulator.m_sampler, &(m_simulator.m_system), systemTemperature, ARGON);
         }
