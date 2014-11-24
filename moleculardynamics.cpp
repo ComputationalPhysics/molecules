@@ -395,7 +395,8 @@ void MolecularDynamics::finalizeStep()
     m_simulatorRunningMutex.unlock();
     update();
 
-    if(m_lastStepWasBlocked) {
+    if(m_lastStepWasBlocked && m_running) {
+        m_lastStepWasBlocked = false;
         emit requestStep();
     }
 }
