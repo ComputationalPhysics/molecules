@@ -248,6 +248,7 @@ private:
     QThread m_simulatorWorker;
 
     bool m_simulatorOutputDirty;
+    bool m_lastStepWasBlocked;
 
     friend class MolecularDynamicsRenderer;
 };

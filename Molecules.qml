@@ -204,7 +204,7 @@ Item {
             property real lastSampleTime: Date.now()
             running: molecularDynamics.running && moleculesRoot.applicationActive
             repeat: true
-            interval: 16
+            interval: 1
             onTriggered: {
                 if(!molecularDynamics.previousStepCompleted) {
                     return

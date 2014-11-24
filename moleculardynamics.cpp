@@ -126,7 +126,6 @@ void MolecularDynamicsRenderer::synchronize(QQuickFramebufferObject* item)
     resetProjection();
     setModelViewMatrices(molecularDynamics->zoom(), molecularDynamics->tilt(), molecularDynamics->pan(), molecularDynamics->roll(), molecularDynamics->systemSize());
     if(molecularDynamics->simulatorOutputDirty()) {
-        qDebug() << "Setting positions";
         molecularDynamics->m_simulatorOutputMutex.lock();
         m_atomCount = molecularDynamics->m_atomCount;
         m_positions = molecularDynamics->m_positions;
@@ -207,7 +206,8 @@ MolecularDynamics::MolecularDynamics()
       m_systemSizeIsDirty(false),
       m_stepRequested(false),
       m_previousStepCompleted(true),
-      m_simulatorOutputDirty(false)
+      m_simulatorOutputDirty(false),
+      m_lastStepWasBlocked(false)
 {
     m_timer.start();
 
@@ -344,14 +344,9 @@ void MolecularDynamics::setRunning(bool arg)
     update();
 }
 
-Simulator *MolecularDynamics::simulator()
-{
-    return &(m_mdSimulator.m_simulator);
-}
-
 void MolecularDynamics::step()
 {
-    if(!m_running || m_simulatorOutputDirty) {
+    if(!m_running) {
         return;
     }
 
@@ -373,7 +368,10 @@ void MolecularDynamics::step()
         double dt = m_timer.restart() / 1000.0;
         double safeDt = min(0.02, dt);
         m_mdSimulator.m_simulator.m_system.setDt(safeDt);
+        m_lastStepWasBlocked = false;
         emit requestStep();
+    } else {
+        m_lastStepWasBlocked = true;
     }
 
 }
@@ -396,6 +394,10 @@ void MolecularDynamics::finalizeStep()
     m_simulatorOutputMutex.unlock();
     m_simulatorRunningMutex.unlock();
     update();
+
+    if(m_lastStepWasBlocked) {
+        emit requestStep();
+    }
 }
 
 void MolecularDynamics::save(QString fileName)
