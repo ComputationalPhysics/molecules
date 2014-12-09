@@ -17,7 +17,8 @@ public:
     CPGLQuads();
     ~CPGLQuads();
     // void update(std::vector<float> &positions);
-    void update(atomDataType *positions, unsigned long *atomType, int n, const QVector3D &offset);
+
+    void update(atomDataType *positions, unsigned long *atomType, unsigned long *atomIds, int n, const QVector3D &offset);
     void render(float lightFalloffDistance, const QMatrix4x4 &modelViewProjectionMatrix, const QMatrix4x4 &lightModelViewProjectionMatrix);
     void setModelViewMatrix(QMatrix4x4& matrix);
 private:

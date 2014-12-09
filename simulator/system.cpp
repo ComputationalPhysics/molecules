@@ -330,8 +330,8 @@ void System::create_FCC() {
 
     int numberOfAtoms = settings->unit_cells_x*settings->unit_cells_y*settings->unit_cells_z*4;
     setNumAtoms(numberOfAtoms);
-
     int currentAtomIndex = 0;
+    cout << settings->unit_cells_x << " " << settings->unit_cells_y << " " << settings->unit_cells_z << endl;
     for(int x = 0; x < settings->unit_cells_x; x++) {
         for(int y = 0; y < settings->unit_cells_y; y++) {
             for(int z = 0; z < settings->unit_cells_z; z++) {

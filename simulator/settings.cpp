@@ -10,7 +10,7 @@ Settings::Settings() {
     gravity_direction = -1;
     unit_cells_x = 7;
     unit_cells_y = 7;
-    unit_cells_z = 7;
+    unit_cells_z = 20;
     statistics_interval = 10;
     thermostat_enabled = false;
     thermostat_frozen_enabled = false;

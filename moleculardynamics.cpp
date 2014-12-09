@@ -141,7 +141,7 @@ void MolecularDynamicsRenderer::render()
 
     int n = 3*m_simulator.m_system.numAtoms();
     m_glQuads->setModelViewMatrix(m_modelViewMatrix);
-    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), n, offset);
+    m_glQuads->update(&(m_simulator.m_system.positions[0]), &(m_simulator.m_system.atom_type[0]), &(m_simulator.m_system.atom_ids[0]), n, offset);
     m_glQuads->render(systemSizeMax, modelViewProjectionMatrix, lightModelViewProjectionMatrix);
 
     m_glCube->update(&(m_simulator.m_system),offset);

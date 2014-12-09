@@ -46,7 +46,7 @@ private:
     QVector3D cellLength;
     vector<atomDataType> m_dataBuffer;
     vector<bool> atom_moved;
-    vector<unsigned long> atom_ids;
+
     vector<int> head_all_atoms;
     vector<int> head_free_atoms;
     vector<int> linked_list_all_atoms;
@@ -76,6 +76,7 @@ public:
     MDIO *mdio;
     Random *rnd;
     UnitConverter *unit_converter;
+    vector<unsigned long> atom_ids;
 
     bool sample_statistics;
     unsigned long steps;

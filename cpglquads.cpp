@@ -41,7 +41,7 @@ QVector3D CPGLQuads::vectorFromColor(const QColor &color)
 }
 
 // void CPGLQuads::update(vector<float> &positions)
-void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int n, const QVector3D &offset)
+void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, unsigned long *atomIds, int n, const QVector3D &offset)
 {
     ensureInitialized();
     int numPoints = n / 3; // x,y,z
@@ -70,6 +70,10 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     QVector3D fixedColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D unknownColor =  vectorFromColor(QColor("#ff0000"));
 
+    QVector3D typeAColor =  vectorFromColor(QColor("#d7191c"));
+    QVector3D typeBColor =  vectorFromColor(QColor("#1a9641"));
+
+
     for(int i=0; i<numPoints; i++) {
         // NOTE: Y and Z are swapped!
         QVector3D position(positions[3*i + 0] + offset.x(), positions[3*i + 1] + offset.y(), positions[3*i + 2] + offset.z());
@@ -88,15 +92,21 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
         QVector3D color;
 
-        if(atomType[i] == FROZEN) {
-            color = frozenColor;
-        } else if(atomType[i] == FIXED) {
-            color = fixedColor;
-        } else if(atomType[i] == ARGON) {
-            color = normalColor;
+        if(atomIds[i] < 686) {
+            color = typeAColor;
         } else {
-            color = unknownColor;
+            color = typeBColor;
         }
+
+//        if(atomType[i] == FROZEN) {
+//            color = frozenColor;
+//        } else if(atomType[i] == FIXED) {
+//            color = fixedColor;
+//        } else if(atomType[i] == ARGON) {
+//            color = normalColor;
+//        } else {
+//            color = normalColor;
+//        }
 
         m_vertices[4*i + 0].color = color;
         m_vertices[4*i + 1].color = color;
