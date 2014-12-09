@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     simulator/simulator.cpp \
     simulator/mdio.cpp \
     vec3.cpp \
-    cpglcube.cpp
+    cpglcube.cpp \
+    moleculardynamicsrenderer.cpp
 
 RESOURCES += qml.qrc \
     images.qrc \
@@ -59,7 +60,8 @@ HEADERS += \
     simulator/simulator.h \
     simulator/mdio.h \
     vec3.h \
-    cpglcube.h
+    cpglcube.h \
+    moleculardynamicsrenderer.h
 
 OTHER_FILES += \
     iOS.plist
