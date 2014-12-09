@@ -56,12 +56,6 @@
 #include <QOpenGLFramebufferObjectFormat>
 using namespace std;
 
-void MolecularDynamicsSimulator::step()
-{
-    m_simulator.step();
-    emit stepCompleted();
-}
-
 MolecularDynamics::MolecularDynamics()
     :
       m_thermostatValue(1.0),
@@ -88,8 +82,8 @@ MolecularDynamics::MolecularDynamics()
     m_timer.start();
 
     m_mdSimulator.moveToThread(&m_simulatorWorker);
-    connect(this, &MolecularDynamics::requestStep, &m_mdSimulator, &MolecularDynamicsSimulator::step);
-    connect(&m_mdSimulator, &MolecularDynamicsSimulator::stepCompleted, this, &MolecularDynamics::finalizeStep);
+    connect(this, &MolecularDynamics::requestStep, &m_mdSimulator, &Simulator::step);
+    connect(&m_mdSimulator, &Simulator::stepCompleted, this, &MolecularDynamics::finalizeStep);
     m_simulatorWorker.start();
 }
 
@@ -154,7 +148,7 @@ void MolecularDynamics::setForceValue(double arg)
         return;
 
     m_forceValue = arg;
-    //    m_renderer->m_simulator.m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
+    //    m_renderer->m_settings.gravity_force = m_forceValue*1e-3; // Nice scaling
     emit forceValueChanged(arg);
     update();
 }
@@ -232,18 +226,18 @@ void MolecularDynamics::step()
         if(!didLoadNewSystem) {
             if(thermostatEnabled()) {
                 float temperatureKelvin = thermostatValue() + 273.15;
-                double systemTemperature = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
-                m_mdSimulator.m_simulator.m_thermostat->relaxation_time = 1;
-                m_mdSimulator.m_simulator.m_thermostat->apply(m_mdSimulator.m_simulator.m_sampler, &(m_mdSimulator.m_simulator.m_system), systemTemperature, ARGON);
+                double systemTemperature = m_mdSimulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
+                m_mdSimulator.m_thermostat->relaxation_time = 1;
+                m_mdSimulator.m_thermostat->apply(m_mdSimulator.m_sampler, &(m_mdSimulator.m_system), systemTemperature, ARGON);
             }
             if(m_systemSizeIsDirty) {
-                m_mdSimulator.m_simulator.m_system.setSystemSize(systemSize());
+                m_mdSimulator.m_system.setSystemSize(systemSize());
             }
         }
 
         double dt = m_timer.restart() / 1000.0;
         double safeDt = min(0.02, dt);
-        m_mdSimulator.m_simulator.m_system.setDt(safeDt);
+        m_mdSimulator.m_system.setDt(safeDt);
         m_lastStepWasBlocked = false;
         emit requestStep();
     } else {
@@ -255,16 +249,16 @@ void MolecularDynamics::step()
 void MolecularDynamics::finalizeStep()
 {
     m_simulatorOutputMutex.lock();
-    setDidScaleVelocitiesDueToHighValues(m_mdSimulator.m_simulator.m_system.didScaleVelocitiesDueToHighValues());
-    setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
-    float temperatureCelsius = m_mdSimulator.m_simulator.m_system.unit_converter->temperature_to_SI(m_mdSimulator.m_simulator.m_sampler->temperature_free_atoms) - 273.15;
+    setDidScaleVelocitiesDueToHighValues(m_mdSimulator.m_system.didScaleVelocitiesDueToHighValues());
+    setAtomCount(m_mdSimulator.m_system.numAtoms());
+    float temperatureCelsius = m_mdSimulator.m_system.unit_converter->temperature_to_SI(m_mdSimulator.m_sampler->temperature_free_atoms) - 273.15;
     setTemperature(temperatureCelsius);
-    setKineticEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->kinetic_energy));
-    setPotentialEnergy(m_mdSimulator.m_simulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_simulator.m_sampler->potential_energy));
-    setPressure(m_mdSimulator.m_simulator.m_system.unit_converter->pressure_to_SI(m_mdSimulator.m_simulator.m_sampler->pressure));
-    setTime(m_mdSimulator.m_simulator.m_system.unit_converter->time_to_SI(m_mdSimulator.m_simulator.m_system.time()));
-    m_positions = m_mdSimulator.m_simulator.m_system.positions;
-    m_atomTypes = m_mdSimulator.m_simulator.m_system.atom_type;
+    setKineticEnergy(m_mdSimulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_sampler->kinetic_energy));
+    setPotentialEnergy(m_mdSimulator.m_system.unit_converter->energy_to_ev(m_mdSimulator.m_sampler->potential_energy));
+    setPressure(m_mdSimulator.m_system.unit_converter->pressure_to_SI(m_mdSimulator.m_sampler->pressure));
+    setTime(m_mdSimulator.m_system.unit_converter->time_to_SI(m_mdSimulator.m_system.time()));
+    m_positions = m_mdSimulator.m_system.positions;
+    m_atomTypes = m_mdSimulator.m_system.atom_type;
     m_previousStepCompleted = true;
     m_simulatorOutputDirty = true;
     m_simulatorOutputMutex.unlock();
@@ -284,9 +278,9 @@ void MolecularDynamics::save(QString fileName)
 
 bool MolecularDynamics::loadIfPlanned() {
     if(m_systemToLoad.size()) {
-        m_mdSimulator.m_simulator.m_system.mdio->load_state_from_file_binary(m_systemToLoad);
-        setAtomCount(m_mdSimulator.m_simulator.m_system.numAtoms());
-        setSystemSize(m_mdSimulator.m_simulator.m_system.systemSize());
+        m_mdSimulator.m_system.mdio->load_state_from_file_binary(m_systemToLoad);
+        setAtomCount(m_mdSimulator.m_system.numAtoms());
+        setSystemSize(m_mdSimulator.m_system.systemSize());
         emit systemSizeChanged(m_systemSize);
         m_systemToLoad = "";
         emit loaded();

@@ -55,19 +55,6 @@
 #include <QThread>
 #include <QMutex>
 
-class MolecularDynamicsSimulator : public QObject
-{
-    Q_OBJECT
-public:
-    Simulator m_simulator;
-
-public slots:
-    void step();
-
-signals:
-    void stepCompleted();
-};
-
 class MolecularDynamics : public QQuickFramebufferObject
 {
     Q_OBJECT
@@ -179,7 +166,7 @@ private slots:
 
 private:
     MolecularDynamicsRenderer *m_renderer;
-    MolecularDynamicsSimulator m_mdSimulator;
+    Simulator m_mdSimulator;
     double m_xPoint;
     double m_yPoint;
 
