@@ -113,9 +113,6 @@ public:
     std::vector<unsigned long> m_atomTypes;
 
 public slots:
-    void incrementRotation(double deltaPan, double deltaTilt, double deltaRoll);
-    void incrementZoom(double deltaZoom);
-
     void setThermostatValue(double arg);
     void setThermostatEnabled(bool arg);
     void setForceEnabled(bool arg);
@@ -165,6 +162,9 @@ private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
+    void setAtomCount(int arg);
+    bool loadIfPlanned();
+
     MolecularDynamicsRenderer *m_renderer;
     Simulator m_mdSimulator;
     double m_xPoint;
@@ -183,25 +183,24 @@ private:
     bool m_running;
     int m_atomCount;
     QString m_systemToLoad;
-    bool m_stepRequested;
 
-    void setAtomCount(int arg);
     bool m_didScaleVelocitiesDueToHighValues;
     double m_temperature;
+    double m_pressure;
     double m_kineticEnergy;
     double m_potentialEnergy;
-    double m_pressure;
     double m_time;
-    bool m_previousStepCompleted;
     bool m_systemSizeIsDirty;
-    bool loadIfPlanned();
+    bool m_stepRequested;
+    bool m_previousStepCompleted;
+
+    bool m_simulatorOutputDirty;
+    bool m_lastStepWasBlocked;
+
     QMutex m_simulatorInputMutex;
     QMutex m_simulatorOutputMutex;
     QMutex m_simulatorRunningMutex;
     QThread m_simulatorWorker;
-
-    bool m_simulatorOutputDirty;
-    bool m_lastStepWasBlocked;
 
     friend class MolecularDynamicsRenderer;
 };

@@ -11,9 +11,9 @@ class StatisticsSampler {
 private:
     System *system;
     Settings *settings;
-    unsigned long pressure_sampled_at;
     unsigned long temperature_sampled_at;
     unsigned long kinetic_energy_sampled_at;
+    unsigned long pressure_sampled_at;
     unsigned long potential_energy_sampled_at;
     unsigned long count_periodic_sampled_at;
 

@@ -67,9 +67,9 @@ void System::calculate_accelerations() {
                             if(head_all_atoms[cell_index_2] == EMPTY) continue;
                             unsigned long i = head_all_atoms[cell_index]; // Index of local atom i
 
-                            while (i != EMPTY) {
+                            while (int(i) != EMPTY) {
                                 unsigned long j = head_all_atoms[cell_index_2]; // Index of atom j
-                                while (j != EMPTY) {
+                                while (int(j) != EMPTY) {
                                     if(i < j) { // Newton's 3rd law
                                         dr[0] = positions[3*i+0]-positions[3*j+0];
                                         dr[1] = positions[3*i+1]-positions[3*j+1];

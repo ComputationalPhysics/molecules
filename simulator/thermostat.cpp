@@ -19,8 +19,8 @@ void Thermostat::apply(StatisticsSampler *sampler, System *system, const double 
 
         int atomCount = 0;
         QVector3D freeAtomDrift;
-        for(int n=0; n<system->numAtoms(); n++) {
-            if(system->atom_type[n] == atomType) {
+        for(int n=0; n< int(system->numAtoms()); n++) {
+            if(int(system->atom_type[n]) == atomType) {
                 freeAtomDrift += QVector3D(system->velocities[3*n+0],
                         system->velocities[3*n+1],
                         system->velocities[3*n+2]);
@@ -30,8 +30,8 @@ void Thermostat::apply(StatisticsSampler *sampler, System *system, const double 
         freeAtomDrift /= atomCount;
 
         double kinetic_energy = 0;
-        for(int n=0; n<system->numAtoms();n++) {
-            if(system->atom_type[n]==atomType) {
+        for(int n=0; n<int(system->numAtoms());n++) {
+            if(int(system->atom_type[n])==atomType) {
                 QVector3D relativeVelocity = QVector3D(system->velocities[3*n+0] - freeAtomDrift.x(),
                         system->velocities[3*n+1] - freeAtomDrift.y(),
                         system->velocities[3*n+2] - freeAtomDrift.z());
@@ -44,8 +44,8 @@ void Thermostat::apply(StatisticsSampler *sampler, System *system, const double 
         double current_temperature = 2.0/3*kinetic_energy_per_atom;
         double berendsen_factor = sqrt(1 + system->dt()/relaxation_time*(temperature/current_temperature - 1));
 
-        for(int n=0; n<system->numAtoms();n++) {
-            if(system->atom_type[n]==atomType) {
+        for(int n=0; n<int(system->numAtoms());n++) {
+            if(int(system->atom_type[n])==atomType) {
                 for(short a=0;a<3;a++) system->velocities[3*n+a] *= berendsen_factor;
             }
         }

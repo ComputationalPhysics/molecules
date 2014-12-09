@@ -30,7 +30,6 @@ private:
     QSize m_viewportSize;
 
     QVector3D m_systemSize;
-    int m_atomCount;
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_modelViewMatrix;
     QMatrix4x4 m_lightModelViewMatrix;
@@ -45,6 +44,7 @@ private:
     int m_syncCount;
     int m_renderCount;
     int m_dirtyCount;
+    int m_atomCount;
 };
 
 #endif // MOLECULARDYNAMICSRENDERER_H

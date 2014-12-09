@@ -73,6 +73,7 @@ MolecularDynamics::MolecularDynamics()
       m_pressure(0),
       m_kineticEnergy(0),
       m_potentialEnergy(0),
+      m_time(0),
       m_systemSizeIsDirty(false),
       m_stepRequested(false),
       m_previousStepCompleted(true),
@@ -99,19 +100,6 @@ MolecularDynamics::~MolecularDynamics()
 MolecularDynamicsRenderer *MolecularDynamics::createRenderer() const
 {
     return new MolecularDynamicsRenderer();
-}
-
-void MolecularDynamics::incrementRotation(double deltaPan, double deltaTilt, double deltaRoll)
-{
-    if(window()) {
-        window()->update();
-    }
-}
-
-void MolecularDynamics::incrementZoom(double deltaZoom) {
-    if(window()) {
-        window()->update();
-    }
 }
 
 void MolecularDynamics::setThermostatValue(double arg)
@@ -273,6 +261,7 @@ void MolecularDynamics::finalizeStep()
 
 void MolecularDynamics::save(QString fileName)
 {
+    qDebug() << "Saving to" << fileName;
     qWarning() << "Save not yet implemented!";
 }
 

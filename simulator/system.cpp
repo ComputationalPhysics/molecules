@@ -17,7 +17,6 @@
 
 using namespace std;
 System::System() :
-    move_queue(NULL),
     numberOfPrecomputedTwoParticleForces(0),
     deltaR2(0),
     oneOverDeltaR2(0),
@@ -202,7 +201,7 @@ void System::setSystemSize(const QVector3D &systemSize, bool autoResetCells)
     float scaleY = m_systemSize.y() == 0 ? 1 : systemSize.y()/m_systemSize.y();
     float scaleZ = m_systemSize.z() == 0 ? 1 : systemSize.z()/m_systemSize.z();
 
-    for(int n=0; n<m_numAtoms; n++) {
+    for(int n=0; n<int(m_numAtoms); n++) {
         positions[3*n+0] *= scaleX;
         positions[3*n+1] *= scaleY;
         positions[3*n+2] *= scaleZ;
@@ -232,7 +231,7 @@ void System::resetCells() {
     head_all_atoms.resize(num_cells_including_ghosts_xyz);
     head_free_atoms.resize(num_cells_including_ghosts_xyz);
     int numberOfCells = (num_cells[0]+2)*(num_cells[1]+2)*(num_cells[2]+2);
-    if(numberOfCells > is_ghost_cell.size()) {
+    if(numberOfCells > int(is_ghost_cell.size())) {
         is_ghost_cell.resize(numberOfCells);
     }
 
@@ -307,7 +306,7 @@ void System::countAtomTypes() {
     num_atoms_free = 0;
     num_atoms_fixed = 0;
     num_atoms_frozen = 0;
-    for(int i=0; i<m_numAtoms; i++) {
+    for(int i=0; i<int(m_numAtoms); i++) {
         if(atom_type[i] == FROZEN)  {
             num_atoms_frozen++;
         } else if(atom_type[i] == FIXED) {
@@ -514,7 +513,7 @@ void System::mpi_move() {
     }
 
     int ipt = 0;
-    for (int i=0; i<m_numAtoms+new_atoms; i++) {
+    for (int i=0; i<int(m_numAtoms+new_atoms); i++) {
         if (!atom_moved[i]) {
             for (int a=0; a<3; a++) {
                 positions [3*ipt+a] = positions [3*i+a];
@@ -539,7 +538,7 @@ void System::mpi_copy() {
     short local_node_id;
     for(short dimension=0;dimension<3;dimension++) {
         for (int higher=0; higher<2; higher++) move_queue[2*dimension+higher][0] = 0;
-        for(int i=0;i<m_numAtoms+new_ghost_atoms;i++) {
+        for(int i=0;i<int(m_numAtoms+new_ghost_atoms);i++) {
             for(int higher=0;higher<2;higher++) {
                 local_node_id = 2*dimension + higher;
                 if (atom_should_be_copied(&positions[3*i],local_node_id)) move_queue[local_node_id][++(move_queue[local_node_id][0])] = i;
@@ -584,7 +583,7 @@ void System::half_kick() {
     minimumSystemSizeComponentSquared *= minimumSystemSizeComponentSquared;
     double maxVelocitySquared = minimumSystemSizeComponentSquared/(m_dt*m_dt);
 
-    for(int n=0;n<m_numAtoms;n++) {
+    for(int n=0;n<int(m_numAtoms);n++) {
         if(atom_type[n] == FIXED) {
             continue;
         }
@@ -610,7 +609,7 @@ void System::half_kick() {
 }
 
 void System::full_kick() {
-    for(int n=0;n<m_numAtoms;n++) {
+    for(int n=0;n<int(m_numAtoms);n++) {
         if(atom_type[n] == FIXED) {
             continue;
         }
@@ -621,7 +620,7 @@ void System::full_kick() {
 }
 
 void System::move() {
-    for(int n=0;n<m_numAtoms;n++) {
+    for(int n=0;n<int(m_numAtoms);n++) {
         atom_moved[n] = false;
 
         if(atom_type[n] == FIXED) {
@@ -635,7 +634,7 @@ void System::move() {
 
 void System::apply_gravity() {
     double gravity_force_times_dt = settings->gravity_force*m_dt;
-    for(int n=0;n<m_numAtoms;n++) {
+    for(int n=0;n<int(m_numAtoms);n++) {
         if(atom_type[n] == FIXED) {
             continue;
         }
@@ -649,7 +648,7 @@ void System::apply_gravity() {
 void System::apply_harmonic_oscillator() {
     double spring_constant = 2000.0;
     double spring_constant_times_mass_inverse = spring_constant * mass_inverse;
-    for(int n=0; n<m_numAtoms; n++) {
+    for(int n=0; n<int(m_numAtoms); n++) {
         if(atom_type[n] == FROZEN) {
             double dx = positions[3*n+0] - initial_positions[3*n+0];
             double dy = positions[3*n+1] - initial_positions[3*n+1];
@@ -673,7 +672,7 @@ void System::reset() {
 }
 
 void System::ensureAllAtomsAreInsideSystem() {
-    for(int n=0;n<m_numAtoms;n++) {
+    for(int n=0;n<int(m_numAtoms);n++) {
         for(int a = 0; a < 3; a++) {
             if(positions[3*n+a] < 0 || positions[3*n+a] >= m_systemSize[a]) {
                 double shift = int(positions[3*n+a] / m_systemSize[a]) * m_systemSize[a];
