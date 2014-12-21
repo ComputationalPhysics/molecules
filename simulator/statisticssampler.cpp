@@ -69,7 +69,7 @@ void StatisticsSampler::sample_temperature() {
 
     QVector3D freeAtomDrift;
     for(int n=0; n < int(system->numAtoms()); n++) {
-        if(system->atom_type[n] == ARGON) {
+        if(system->atom_type[n] == AtomType::Argon) {
             freeAtomDrift += QVector3D(system->velocities[3*n+0],
                     system->velocities[3*n+1],
                     system->velocities[3*n+2]);
@@ -80,7 +80,7 @@ void StatisticsSampler::sample_temperature() {
     double kinetic_energy_free_atoms = 0;
     double kinetic_energy_frozen_atoms = 0;
     for(int n=0; n < int(system->numAtoms()); n++) {
-        if(system->atom_type[n] == ARGON) {
+        if(system->atom_type[n] == AtomType::Argon) {
             QVector3D relativeVelocity = QVector3D(system->velocities[3*n+0] - freeAtomDrift.x(),
                     system->velocities[3*n+1] - freeAtomDrift.y(),
                     system->velocities[3*n+2] - freeAtomDrift.z());

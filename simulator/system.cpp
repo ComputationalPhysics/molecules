@@ -307,11 +307,11 @@ void System::countAtomTypes() {
     num_atoms_fixed = 0;
     num_atoms_frozen = 0;
     for(int i=0; i<int(m_numAtoms); i++) {
-        if(atom_type[i] == FROZEN)  {
+        if(atom_type[i] == AtomType::Frozen)  {
             num_atoms_frozen++;
-        } else if(atom_type[i] == FIXED) {
+        } else if(atom_type[i] == AtomType::Fixed) {
             num_atoms_fixed++;
-        } else if(atom_type[i] == ARGON) {
+        } else if(atom_type[i] == AtomType::Argon) {
             num_atoms_free++;
         } else {
             cout << "WARNING: Unknown atom type in count_frozen_atoms: " << atom_type[i] << endl;
@@ -346,7 +346,7 @@ void System::create_FCC() {
                         velocities[3*currentAtomIndex+i] = rnd->nextGauss()*sqrt(T*mass_inverse);
                     }
 
-                    atom_type[currentAtomIndex] = ARGON;
+                    atom_type[currentAtomIndex] = AtomType::Argon;
                     atom_ids[currentAtomIndex] = currentAtomIndex;
 
                     currentAtomIndex++;

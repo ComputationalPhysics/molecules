@@ -216,7 +216,7 @@ void MolecularDynamics::step()
                 float temperatureKelvin = thermostatValue() + 273.15;
                 double systemTemperature = m_mdSimulator.m_system.unit_converter->temperature_from_SI(temperatureKelvin);
                 m_mdSimulator.m_thermostat->relaxation_time = 1;
-                m_mdSimulator.m_thermostat->apply(m_mdSimulator.m_sampler, &(m_mdSimulator.m_system), systemTemperature, ARGON);
+                m_mdSimulator.m_thermostat->apply(m_mdSimulator.m_sampler, &(m_mdSimulator.m_system), systemTemperature, AtomType::Argon);
             }
             if(m_systemSizeIsDirty) {
                 m_mdSimulator.m_system.setSystemSize(systemSize());
@@ -262,7 +262,7 @@ void MolecularDynamics::finalizeStep()
 void MolecularDynamics::save(QString fileName)
 {
     qDebug() << "Saving to" << fileName;
-    qWarning() << "Save not yet implemented!";
+    m_mdSimulator.m_system.mdio->save_state_to_file_binary(fileName);
 }
 
 bool MolecularDynamics::loadIfPlanned() {

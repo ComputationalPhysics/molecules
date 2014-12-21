@@ -15,5 +15,6 @@
         <file>simulations/bullets.png</file>
         <file>simulations/crystal.lmp</file>
         <file>simulations/crystal.png</file>
+        <file>simulations/diffusion2.lmp</file>
     </qresource>
 </RCC>

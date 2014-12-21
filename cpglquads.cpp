@@ -65,7 +65,8 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
     m_vertices.resize(numberOfVertices);
     m_indices.resize(6*numPoints);
 
-    QVector3D normalColor = vectorFromColor(QColor("#41b6c4"));
+    QVector3D normalColor = vectorFromColor(QColor("#1f78b4"));
+    QVector3D normalColor2 = vectorFromColor(QColor("#e31a1c"));
     QVector3D frozenColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D fixedColor =  vectorFromColor(QColor("#bcbddc"));
     QVector3D unknownColor =  vectorFromColor(QColor("#ff0000"));
@@ -88,12 +89,14 @@ void CPGLQuads::update(atomDataType *positions, long unsigned int* atomType, int
 
         QVector3D color;
 
-        if(atomType[i] == FROZEN) {
+        if(atomType[i] == AtomType::Frozen) {
             color = frozenColor;
-        } else if(atomType[i] == FIXED) {
+        } else if(atomType[i] == AtomType::Fixed) {
             color = fixedColor;
-        } else if(atomType[i] == ARGON) {
+        } else if(atomType[i] == AtomType::Argon) {
             color = normalColor;
+        } else if(atomType[i] == AtomType::Argon2) {
+            color = normalColor2;
         } else {
             color = unknownColor;
         }

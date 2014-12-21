@@ -51,6 +51,9 @@ def save_atoms(lammpsHeader, atoms, fileName):
 
 def create_fcc(nx, ny, nz, Lx=0, Ly=0, Lz=0, atom_type=18, T=0.0):
     b = 1.562
+    nx = int(nx)
+    ny = int(ny)
+    nz = int(nz)
     if Lx == 0:
         Lx = nx*b
     if Ly == 0:

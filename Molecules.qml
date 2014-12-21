@@ -399,6 +399,11 @@ Item {
             console.log("Saving state to " + saveFileName)
             molecularDynamics.save("state-"+Date.now()+".lmp")
         }
+        if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_A) {
+            console.log("zoom: " + molecularDynamics.zoom +
+                        "; pan: " + molecularDynamics.pan +
+                        "; tilt: " + molecularDynamics.tilt)
+        }
 
         if(event.key === Qt.Key_Back) {
             if(dashboard.revealed) {
