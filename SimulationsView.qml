@@ -13,7 +13,7 @@ Item {
     property list<Simulation> simulations: [
         Simulation{ name: "Chamber"; stateFile: "simulations/chamber.lmp"; imageSource: "simulations/chamber.png"},
         Simulation{ name: "Crystal"; stateFile: "simulations/crystal.lmp"; imageSource: "simulations/crystal.png"},
-        Simulation{ name: "Diffusion"; stateFile: "simulations/diffusion.lmp"; imageSource: "simulations/diffusion.png"; zoom: -30},
+        Simulation{ name: "Diffusion"; stateFile: "simulations/diffusion.lmp"; imageSource: "simulations/diffusion.png"; zoom: -18.33333333333339; pan: -0.875; tilt: -25.666666666666618},
         Simulation{ name: "Fracture"; stateFile: "simulations/fracture.lmp"; imageSource: "simulations/fracture.png"},
         Simulation{ name: "Wall crash"; stateFile: "simulations/wallcrash.lmp"; imageSource: "simulations/wallcrash.png"},
         Simulation{ name: "Bullets"; stateFile: "simulations/bullets.lmp"; imageSource: "simulations/bullets.png"; zoom: -55; pan: -80; tilt: -15}
