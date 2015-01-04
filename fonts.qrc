@@ -12,5 +12,6 @@
         <file>fonts/SourceSansPro-Regular.ttf</file>
         <file>fonts/SourceSansPro-Semibold.ttf</file>
         <file>fonts/SourceSansPro-SemiboldItalic.ttf</file>
+        <file>PackageButton.qml</file>
     </qresource>
 </RCC>

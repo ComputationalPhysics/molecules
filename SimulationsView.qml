@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.4
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 
@@ -20,7 +20,7 @@ Item {
     ]
 
     Component.onCompleted: {
-        systemsGrid.setup()
+        //        systemsGrid.setup()
     }
 
     onSimulationsChanged: {
@@ -60,6 +60,82 @@ Item {
             anchors.fill: parent
         }
 
+        StackView {
+            id: stackView
+            anchors.fill: parent
+            initialItem: mainMenu
+            delegate: StackViewDelegate {
+                pushTransition: StackViewTransition {
+                    PropertyAnimation {
+                        target: enterItem
+                        property: "x"
+                        from: enterItem.width
+                        to: 0
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                    PropertyAnimation {
+                        target: exitItem
+                        property: "x"
+                        from: 0
+                        to: -exitItem.width
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                popTransition: StackViewTransition {
+                    PropertyAnimation {
+                        target: enterItem
+                        property: "x"
+                        from: -enterItem.width
+                        to: 0
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                    PropertyAnimation {
+                        target: exitItem
+                        property: "x"
+                        from: 0
+                        to: exitItem.width
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+            }
+        }
+
+        Image {
+            id: backButton
+            anchors {
+                top: parent.top
+                left: parent.left
+                margins: parent.width*0.01
+            }
+
+            width: Style.touchableSize
+            height: width
+            source: "images/back.png"
+            enabled: stackView.depth > 1
+            opacity: stackView.depth > 1
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 1000
+                    easing.type: Easing.InOutQuad
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onPressed: {
+                    if(stackView.depth > 1) {
+                        stackView.pop()
+                    } else {
+                        simulationsView.revealed = false
+                    }
+                }
+            }
+        }
 
         Image {
             id: exitButton
@@ -80,87 +156,204 @@ Item {
                 }
             }
         }
+    }
 
-        ColumnLayout {
-            id: systemsViewColumn
-            anchors {
-                fill: parent
-                margins: systemsViewRoot.width * 0.05
+    Component {
+        id: mainMenu
+
+        Item {
+            id: mainMenuRoot
+            Column {
+                id: systemsViewColumn
+                anchors {
+                    fill: parent
+                    topMargin: systemsViewRoot.width * 0.02
+                    bottomMargin: anchors.topMargin
+                    leftMargin: systemsViewRoot.width * 0.05
+                    rightMargin: anchors.leftMargin
+                }
+
+                clip: true
+
+                spacing: systemsViewRectangle.width * 0.02
+
+                Text {
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: "Atomify"
+                    font.pixelSize: parent.width * 0.04
+                    color: "white"
+
+                    renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+                }
             }
 
-            spacing: systemsViewRectangle.width * 0.02
+            Rectangle {
+                anchors.fill: simulateText
+                anchors.margins: -width / 8
+                color: "black"
+                border.width: 2
+                border.color: "white"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: stackView.push(packageSelectionView)
+                }
+            }
 
             Text {
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                }
-                text: "Welcome to Atomify"
-                font.pixelSize: parent.width * 0.04
+                id: simulateText
+                anchors.centerIn: parent
+                text: "Simulate"
+                font.pixelSize: mainMenuRoot.width * 0.04
                 color: "white"
+            }
+        }
+    }
 
-                renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+    Component {
+        id: packageSelectionView
+
+        Item {
+
+            ListModel {
+                id: listModel
+
+                ListElement {
+                    name: "Diffusion"
+                    imageSource: "simulations/diffusion.png"
+                }
+
+                ListElement {
+                    name: "Fun"
+                    imageSource: "simulations/bullets.png"
+                }
             }
 
-            Text {
+            Column {
+                id: systemsViewColumn
                 anchors {
-                    horizontalCenter: parent.horizontalCenter
+                    fill: parent
+                    topMargin: systemsViewRoot.width * 0.02
+                    bottomMargin: anchors.topMargin
+                    leftMargin: systemsViewRoot.width * 0.05
+                    rightMargin: anchors.leftMargin
                 }
-                text: "Please select a simulation."
-                font.pixelSize: parent.width * 0.025
-                color: "white"
 
-                renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
-            }
+                clip: true
 
-//            Item {
-//                Layout.fillHeight: true
-//                Layout.fillWidth: true
-//            }
+                spacing: systemsViewRectangle.width * 0.02
 
+                Text {
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: "Select package"
+                    font.pixelSize: parent.width * 0.04
+                    color: "white"
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                    renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+                }
 
+                ListView {
+                    id: listView
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: systemsViewRectangle.height * 0.6
+                    model: listModel
+                    cacheBuffer: 10000
+                    orientation: Qt.Horizontal
+                    snapMode: ListView.SnapToItem
 
-                Grid {
-                    id: systemsGrid
-                    anchors.centerIn: parent
-                    property real targetAspectRatio: 16*3 / (2*9)
-                    property real availableAspectRatio: parent.width / parent.height
-                    height: availableAspectRatio > targetAspectRatio ? parent.height : parent.width / targetAspectRatio
-                    width: availableAspectRatio > targetAspectRatio ? parent.height * targetAspectRatio : parent.width
-                    Layout.fillWidth: true
+                    delegate: PackageButton {
+                        width: listView.width * 0.45
+                        height: listView.height
+                        name: model.name
+                        imageSource: model.imageSource
 
-                    property real elementWidth: systemsGrid.width / columns - (columns-1)/columns*spacing
-                    // property real elementHeight: systemsGrid.height / rows - (rows-1)/rows*spacing
-                    property real elementHeight: elementWidth*9/16
-
-                    columns: 3
-                    rows: 2
-                    spacing: systemsViewRectangle.width * 0.01
-
-                    function setup() {
-                        for(var i in children) {
-                            children[i].destroy()
-                        }
-
-                        for(var i in simulations) {
-                            var simulation = simulations[i]
-                            var component = Qt.createComponent("SimulationButton.qml")
-                            var properties = {
-                                width: Qt.binding(function() {return systemsGrid.elementWidth}),
-                                height: Qt.binding(function() {return systemsGrid.elementHeight}),
-                                simulation: simulation
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                stackView.push(simulationSelectionView)
                             }
-                            var button = component.createObject(systemsGrid, properties)
-                            button.loadSimulation.connect(systemsViewRoot.loadSimulation)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    Component {
+        id: simulationSelectionView
+
+        Item {
+            ListModel {
+                id: listModel
+
+                ListElement {
+                    simulation: "simulations/Bullets.qml"
+                }
+                ListElement {
+                    simulation: "simulations/Chamber.qml"
+                }
+                ListElement {
+                    simulation: "simulations/Crystal.qml"
+                }
+            }
+
+            Column {
+                id: systemsViewColumn
+                anchors {
+                    fill: parent
+                    topMargin: systemsViewRoot.width * 0.02
+                    bottomMargin: anchors.topMargin
+                    leftMargin: systemsViewRoot.width * 0.05
+                    rightMargin: anchors.leftMargin
+                }
+
+                clip: true
+
+                spacing: systemsViewRectangle.width * 0.02
+
+                Text {
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: "Select simulation"
+                    font.pixelSize: parent.width * 0.04
+                    color: "white"
+
+                    renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+                }
+
+                ListView {
+                    id: listView
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: systemsViewRectangle.height * 0.6
+                    model: listModel
+                    orientation: Qt.Horizontal
+                    snapMode: ListView.SnapToItem
+
+                    delegate: SimulationButton {
+                        width: listView.width * 0.45
+                        height: listView.height
+                        simulationSource: model.simulation
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                systemsViewRoot.loadSimulation(simulation)
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
     states: [
         State {

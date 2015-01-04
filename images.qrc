@@ -13,5 +13,6 @@
         <file>images/poweron.png</file>
         <file>images/button_disabled.png</file>
         <file>images/button_enabled.png</file>
+        <file>images/back.png</file>
     </qresource>
 </RCC>

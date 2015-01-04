@@ -2,14 +2,9 @@ import QtQuick 2.0
 
 Item {
     id: buttonRoot
-    property Simulation simulation: simulationLoader.item
-    property string simulationSource
-    signal loadSimulation(var fileName)
 
-    Loader {
-        id: simulationLoader
-        source: simulationSource
-    }
+    property string name
+    property string imageSource
 
     Rectangle {
         id: container
@@ -31,7 +26,7 @@ Item {
                 margins: buttonRoot.width * 0.05
             }
             fillMode: Image.PreserveAspectFit
-            source: simulation ? simulation.imageSource : ""
+            source: imageSource ? imageSource : ""
         }
     }
 
@@ -42,7 +37,7 @@ Item {
             margins: buttonRoot.width * 0.02
             bottom: parent.bottom
         }
-        text: simulation ? simulation.name : ""
+        text: name ? name : ""
         color: "white"
         font.pixelSize: buttonRoot.height * 0.1
 

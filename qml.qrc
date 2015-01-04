@@ -13,5 +13,8 @@
         <file>style/Style.qml</file>
         <file>controls/Thermostat.qml</file>
         <file>Simulation.qml</file>
+        <file>simulations/Bullets.qml</file>
+        <file>simulations/Chamber.qml</file>
+        <file>simulations/Crystal.qml</file>
     </qresource>
 </RCC>
