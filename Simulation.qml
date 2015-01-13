@@ -3,6 +3,7 @@ import QtQuick 2.0
 QtObject {
     property string name: "Unnamed"
     property string description: "No description"
+    property string longDescription: "No description"
     property string folder: ""
     property url stateSource: (folder && identifier) ? folder + "/" + identifier + ".lmp" : ""
     property url screenshotSource: (folder && identifier) ? folder + "/" + identifier + ".png" : ""

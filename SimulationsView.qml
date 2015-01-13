@@ -52,6 +52,9 @@ Item {
             onLoadSimulation: {
                 systemsViewRoot.loadSimulation(simulation)
             }
+            onReadMore: {
+                systemsViewRoot.readMore(text)
+            }
         }
     }
 

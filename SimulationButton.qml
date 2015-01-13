@@ -8,6 +8,7 @@ Item {
 //    property string simulationSource
     property string folder
     signal loadSimulation(var fileName)
+    signal readMore(var text)
 
     Loader {
         id: simulationLoader
@@ -118,31 +119,58 @@ Item {
             }
         }
 
-        Flickable {
-            id: descriptionFlickable
-            clip: true
-            width: parent.width * 0.45
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
+//        Flickable {
+//            id: descriptionFlickable
+//            clip: true
+//            width: parent.width * 0.45
+//            anchors {
+//                top: parent.top
+//                bottom: parent.bottom
+//                right: parent.right
+//            }
 
-            boundsBehavior: Flickable.StopAtBounds
+//            boundsBehavior: Flickable.StopAtBounds
 
-            contentWidth: descriptionText.width
-            contentHeight: descriptionText.height
+//            contentWidth: descriptionText.width
+//            contentHeight: descriptionText.height
 
             Text {
                 id: descriptionText
-                width: descriptionFlickable.width
+                width: parent.width * 0.45
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    right: parent.right
+                }
                 color: "#dedede"
                 font.pixelSize: buttonRoot.width * 0.03
                 font.weight: Font.Light
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                verticalAlignment: Text.AlignVCenter
 
                 text: simulation.description
             }
-        }
+
+            Text {
+                anchors {
+                    horizontalCenter: descriptionText.horizontalCenter
+                    top: descriptionText.bottom
+                }
+
+                color: "#dedede"
+                font.pixelSize: buttonRoot.width * 0.02
+                font.weight: Font.Light
+                font.capitalization: Font.AllUppercase
+                text: "Read more"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        readMore(simulation.description + "\n\n" + simulation.longDescription)
+                    }
+                }
+            }
+
+//        }
     }
 }

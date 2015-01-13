@@ -18,6 +18,11 @@ Item {
 
     state: revealed ? "revealed" : "hidden"
 
+    function readMore(text) {
+        descriptionText.text = text
+        stackView.push(descriptionText)
+    }
+
     function loadFirstSimulation() {
         //        loadSimulation(chamberSimulation)
     }
@@ -124,7 +129,7 @@ Item {
             anchors {
                 top: parent.top
                 left: parent.left
-                margins: parent.width*0.01
+                margins: Style.baseMargin
             }
 
             width: Style.touchableSize
@@ -215,11 +220,33 @@ Item {
 
 //    Component {
 //        id: simulationSelectionView
-        SimulationsView {
-            id: simulationSelectionView
-            visible: false
-        }
+    SimulationsView {
+        id: simulationSelectionView
+        visible: false
+    }
 //    }
+
+    Item {
+        id: descriptionText
+        property alias text: descriptionTextText.text
+        Text {
+            id: descriptionTextText
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                topMargin: Style.touchableSize * 2
+                leftMargin: Style.baseMargin
+                rightMargin: Style.baseMargin
+                bottomMargin: Style.baseMargin
+            }
+            color: "white"
+            font.pixelSize: parent.width * 0.025
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            font.weight: Font.Light
+        }
+    }
 
     states: [
         State {
