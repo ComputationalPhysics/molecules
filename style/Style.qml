@@ -1,17 +1,31 @@
 pragma Singleton
 import QtQuick 2.0
-import QtQuick.Window 2.0
 
 QtObject {
     property real windowWidth
     property real windowHeight
     property real minimumTouchableSize: windowWidth / 25
     property real maximumTouchableSize: windowWidth / 10
+    property real pixelDensity: 72
     property real touchableSize: {
-        if(Screen.pixelDensity === 0) {
+        if(pixelDensity === 0) {
             // Assume we're running on a "standard" computer monitor
-            return 56
+            return 72
         }
-        return Screen.pixelDensity * 8
+        return pixelDensity * 6
+    }
+    property real baseSize: {
+        if(pixelDensity === 0) {
+            // Assume we're running on a "standard" computer monitor
+            return 36
+        }
+        return pixelDensity * 4
+    }
+    property real baseMargin: {
+        if(pixelDensity === 0) {
+            // Assume we're running on a "standard" computer monitor
+            return 36
+        }
+        return pixelDensity * 4
     }
 }

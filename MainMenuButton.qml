@@ -17,12 +17,12 @@ Item {
             y: 1
             z: 0
         }
-        angle: 72
+        angle: 0
     }
 
     Rectangle {
         anchors.fill: parent
-        color: "#252525"
+        color: Qt.rgba(0.2, 0.2, 0.2, 0.9)
         antialiasing: true
     }
 
@@ -48,26 +48,46 @@ Item {
         }
     }
 
-    SequentialAnimation {
-        loops: Animation.Infinite
-        running: true
-        NumberAnimation {
-            id: forwardAnimation
-            target: rotationTransform
-            property: "angle"
-            duration: Math.random() * 2000 + 8000
-            easing.type: Easing.InOutQuad
-            from: 0
-            to: buttonRoot.maximumRotation
-        }
-        NumberAnimation {
-            id: backAnimation
-            target: rotationTransform
-            property: "angle"
-            duration: Math.random() * 2000 + 12000
-            easing.type: Easing.InOutQuad
-            from: buttonRoot.maximumRotation
-            to: 0
-        }
-    }
+//    ParallelAnimation {
+//        loops: Animation.Infinite
+//        running: true
+//        SequentialAnimation {
+//            NumberAnimation {
+//                id: forwardAnimation
+//                target: rotationTransform
+//                property: "angle"
+//                duration: Math.random() * 6000 + 8000
+//                easing.type: Easing.InOutQuad
+//                from: -buttonRoot.maximumRotation
+//                to: buttonRoot.maximumRotation
+//            }
+//            NumberAnimation {
+//                id: backAnimation
+//                target: rotationTransform
+//                property: "angle"
+//                duration: Math.random() * 6000 + 6000
+//                easing.type: Easing.InOutQuad
+//                from: buttonRoot.maximumRotation
+//                to: -buttonRoot.maximumRotation
+//            }
+//        }
+//        SequentialAnimation {
+//            NumberAnimation {
+//                target: rotationTransform
+//                property: "axis.x"
+//                duration: Math.random() * 6000 + 6000
+//                easing.type: Easing.InOutQuad
+//                from: 0
+//                to: 1
+//            }
+//            NumberAnimation {
+//                target: rotationTransform
+//                property: "axis.x"
+//                duration: Math.random() * 6000 + 8000
+//                easing.type: Easing.InOutQuad
+//                from: 1
+//                to: 0
+//            }
+//        }
+//    }
 }

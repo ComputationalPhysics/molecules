@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.1
+import QtQuick.Window 2.2
 import MolecularDynamics 1.0
 import "style" 1.0
 //import MoleculesStyle 1.0
@@ -26,6 +27,7 @@ Item {
     Simulation {
         id: initialSimulation
         stateSource: "simulations/pressure/crystal/crystal.lmp"
+        zoom: -10
     }
 
     width: 1280
@@ -34,8 +36,10 @@ Item {
     focus: true
 
     function resetStyle() {
+        Style.pixelDensity = Screen.pixelDensity
         Style.windowWidth = width
         Style.windowHeight = height
+        Style.reset()
     }
 
     function loadSimulation(simulation) {
@@ -48,9 +52,11 @@ Item {
     onWidthChanged: {
         resetStyle()
     }
+
     onHeightChanged: {
         resetStyle()
     }
+
     Component.onCompleted: {
         console.log("Atomify started.")
         console.log("Platform: " + Qt.platform.os)
@@ -387,6 +393,9 @@ Item {
 
     MainMenu {
         id: simulationsView
+
+        anchors.fill: parent
+
         blurSource: molecularDynamics
         Component.onCompleted: {
             loadFirstSimulation()

@@ -32,7 +32,7 @@ Item {
         anchors {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
-            topMargin: Style.touchableSize
+            topMargin: Style.baseMargin
         }
         text: simulation ? simulation.name : ""
         color: Qt.rgba(0.4, 0.4, 0.4, 1.0)
@@ -40,49 +40,109 @@ Item {
         font.weight: Font.Light
 
         renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
+
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                buttonRoot.loadSimulation(simulation)
+            }
+        }
     }
 
-
-    Rectangle {
+    Item {
         id: container
         anchors {
+            top: nameText.bottom
             left: parent.left
-            verticalCenter: parent.verticalCenter
-            margins: buttonRoot.height * 0.05
-        }
-        height: parent.height * 0.45
-        width: parent.width * 0.45
-
-        color: "black"
-        border.color: "#ababab"
-        border.width: 1.0
-
-        Image {
-            anchors {
-                fill: parent
-                margins: buttonRoot.width * 0.05
-            }
-            fillMode: Image.PreserveAspectFit
-            source: simulation.screenshotSource
-        }
-    }
-
-    Text {
-        anchors {
-            verticalCenter: parent.verticalCenter
             right: parent.right
+            bottom: parent.bottom
+            leftMargin: parent.width * 0.05
+            topMargin: parent.width * 0.03
+            bottomMargin: parent.width * 0.05
+            rightMargin: parent.width * 0.05
         }
-        width: parent.width * 0.45
-        color: "#dedede"
-        font.pixelSize: parent.width * 0.03
 
-        text: simulation.description
-    }
+        Rectangle {
+            id: imageContainer
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
+            height: parent.height * 0.7
+            width: parent.width * 0.45
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            buttonRoot.loadSimulation(simulation)
+            color: "black"
+            border.color: "#ababab"
+            border.width: 1.0
+
+            Image {
+                anchors {
+                    fill: parent
+                    margins: buttonRoot.width * 0.05
+                }
+                fillMode: Image.PreserveAspectFit
+                source: simulation.screenshotSource
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    buttonRoot.loadSimulation(simulation)
+                }
+            }
+
+//            Rectangle {
+//                anchors {
+//                    left: parent.left
+//                    bottom: parent.bottom
+//                    right: parent.right
+//                    top: startText.top
+//                }
+//                color: "black"
+//                border.color: "#ababab"
+//                border.width: 1.0
+//            }
+
+            Text {
+                id: startText
+                anchors {
+                    bottom: parent.bottom
+                    horizontalCenter: parent.horizontalCenter
+                    bottomMargin: parent.height * 0.05
+                }
+                text: "Start simulation"
+//                font.capitalization: Font.AllUppercase
+                font.pixelSize: buttonRoot.width * 0.02
+                color: Qt.rgba(0.4, 0.4, 0.4, 1.0)
+            }
+        }
+
+        Flickable {
+            id: descriptionFlickable
+            clip: true
+            width: parent.width * 0.45
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                right: parent.right
+            }
+
+            boundsBehavior: Flickable.StopAtBounds
+
+            contentWidth: descriptionText.width
+            contentHeight: descriptionText.height
+
+            Text {
+                id: descriptionText
+                width: descriptionFlickable.width
+                color: "#dedede"
+                font.pixelSize: buttonRoot.width * 0.03
+                font.weight: Font.Light
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
+                text: simulation.description
+            }
         }
     }
 }

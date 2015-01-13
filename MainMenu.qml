@@ -11,7 +11,6 @@ Item {
     property bool revealed: true
     property var blurSource: null
     signal loadSimulation(var simulation)
-    anchors.fill: parent
 
     Component.onCompleted: {
         //        systemsGrid.setup()
@@ -77,7 +76,7 @@ Item {
                 right: parent.right
                 bottom: parent.bottom
 
-                margins: Math.min(parent.width, parent.height) * 0.05
+//                margins: Math.min(parent.width, parent.height) * 0.05
             }
             initialItem: mainMenu
             delegate: StackViewDelegate {
@@ -133,6 +132,8 @@ Item {
             source: "images/back.png"
             enabled: stackView.depth > 1
             opacity: stackView.depth > 1
+
+            rotation: 90
 
             Behavior on opacity {
                 NumberAnimation {
@@ -212,12 +213,13 @@ Item {
         }
     }
 
-    Component {
-        id: simulationSelectionView
+//    Component {
+//        id: simulationSelectionView
         SimulationsView {
-
+            id: simulationSelectionView
+            visible: false
         }
-    }
+//    }
 
     states: [
         State {
@@ -245,12 +247,12 @@ Item {
             ParallelAnimation {
                 NumberAnimation {
                     properties: "opacity"
-                    duration: 250
+                    duration: 350
                     easing.type: Easing.InOutQuad
                 }
                 NumberAnimation {
                     properties: "scale"
-                    duration: 250
+                    duration: 350
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -261,12 +263,12 @@ Item {
             ParallelAnimation {
                 NumberAnimation {
                     properties: "opacity"
-                    duration: 250
+                    duration: 350
                     easing.type: Easing.InOutQuad
                 }
                 NumberAnimation {
                     properties: "scale"
-                    duration: 100
+                    duration: 200
                     easing.type: Easing.InOutQuad
                 }
             }
