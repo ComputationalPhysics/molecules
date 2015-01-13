@@ -7,11 +7,7 @@ ApplicationWindow {
     height: 1080
     title: qsTr("Molecules")
 
-    Intro {
+    Molecules {
         anchors.fill: parent
     }
-
-//    Molecules {
-//        anchors.fill: parent
-//    }
 }
