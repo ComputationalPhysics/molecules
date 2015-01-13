@@ -17,7 +17,7 @@ Item {
         }
 
         color: "black"
-        border.color: "darkgrey"
+        border.color: "#ababab"
         border.width: 1.0
 
         Image {
@@ -38,8 +38,9 @@ Item {
             bottom: parent.bottom
         }
         text: name ? name : ""
-        color: "white"
+        color: "#dedede"
         font.pixelSize: buttonRoot.height * 0.1
+        font.weight: Font.Light
 
         renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
     }

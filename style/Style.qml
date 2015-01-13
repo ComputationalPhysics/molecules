@@ -7,5 +7,11 @@ QtObject {
     property real windowHeight
     property real minimumTouchableSize: windowWidth / 25
     property real maximumTouchableSize: windowWidth / 10
-    property real touchableSize: Math.min(Math.max(Screen.pixelDensity * 6, minimumTouchableSize), maximumTouchableSize)
+    property real touchableSize: {
+        if(Screen.pixelDensity === 0) {
+            // Assume we're running on a "standard" computer monitor
+            return 56
+        }
+        return Screen.pixelDensity * 8
+    }
 }

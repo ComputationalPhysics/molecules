@@ -23,6 +23,11 @@ Item {
         }
     }
 
+    Simulation {
+        id: initialSimulation
+        stateSource: "simulations/pressure/crystal/crystal.lmp"
+    }
+
     width: 1280
     height: 720
 
@@ -36,7 +41,7 @@ Item {
     function loadSimulation(simulation) {
         dashboard.running = false
         moleculesRoot.simulation = simulation
-        molecularDynamics.load(simulation.stateFile)
+        molecularDynamics.load(simulation.stateSource)
         dashboard.running = true
     }
 
@@ -49,7 +54,7 @@ Item {
     Component.onCompleted: {
         console.log("Atomify started.")
         console.log("Platform: " + Qt.platform.os)
-
+        loadSimulation(initialSimulation)
         resetStyle()
     }
 
@@ -380,8 +385,9 @@ Item {
         }
     }
 
-    SimulationsView {
+    MainMenu {
         id: simulationsView
+        blurSource: molecularDynamics
         Component.onCompleted: {
             loadFirstSimulation()
             revealed = true
