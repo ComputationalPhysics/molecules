@@ -18,4 +18,13 @@ QtObject {
 
         return names[names.length - 1]
     }
+
+    onDescriptionChanged: {
+        var maximumCharacters = 210
+        if(description.length > maximumCharacters) {
+            console.warn("WARNING: Number of characters in description for " +
+                         name + " is longer than the recommended maximum of " +
+                         maximumCharacters + ".")
+        }
+    }
 }
