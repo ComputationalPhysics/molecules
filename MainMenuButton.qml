@@ -22,7 +22,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0.2, 0.2, 0.2, 0.9)
+        color: Qt.rgba(0.15, 0.15, 0.15, 0.9)
         antialiasing: true
     }
 

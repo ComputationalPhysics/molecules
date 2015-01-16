@@ -112,10 +112,11 @@ Item {
                     horizontalCenter: parent.horizontalCenter
                     bottomMargin: parent.height * 0.05
                 }
-                text: "Start simulation"
-//                font.capitalization: Font.AllUppercase
+                text: "Tap to start"
+                font.capitalization: Font.AllUppercase
                 font.pixelSize: buttonRoot.width * 0.02
-                color: Qt.rgba(0.4, 0.4, 0.4, 1.0)
+                font.weight: Font.Light
+                color: "#dedede"
             }
         }
 

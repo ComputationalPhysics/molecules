@@ -70,7 +70,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(0.05, 0.05, 0.05, 0.7)
+            color: Qt.rgba(0.05, 0.05, 0.05, 0.6)
         }
 
         StackView {
