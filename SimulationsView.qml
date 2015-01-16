@@ -14,15 +14,15 @@ Item {
         }
 
         ListElement {
-            folder: "simulations/fun/bullets"
-        }
-
-        ListElement {
             folder: "simulations/diffusion/chamber"
         }
 
         ListElement {
             folder: "simulations/pressure/crystal"
+        }
+
+        ListElement {
+            folder: "simulations/fun/bullets"
         }
     }
 
