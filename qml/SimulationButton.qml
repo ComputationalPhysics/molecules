@@ -1,31 +1,18 @@
 import QtQuick 2.0
 import Qt.labs.settings 1.0
 import "style"
+import "tools"
 
 Item {
     id: buttonRoot
     property Simulation simulation: simulationLoader.item
 //    property string simulationSource
-    property string folder
+    property alias folder: simulationLoader.folder
     signal loadSimulation(var fileName)
     signal readMore(var text)
 
-    Loader {
+    SimulationLoader {
         id: simulationLoader
-
-        function identifier(folder) {
-            var names = folder.split("/")
-            if(folder === "") {
-                return ""
-            }
-
-            return names[names.length - 1]
-        }
-
-        source: folder + "/" + identifier(folder) + ".qml"
-        onLoaded: {
-            item.folder = buttonRoot.folder
-        }
     }
 
     Text {
@@ -83,7 +70,7 @@ Item {
                     margins: buttonRoot.width * 0.05
                 }
                 fillMode: Image.PreserveAspectFit
-                source: simulation.screenshotSource
+                source: simulation ? simulation.screenshotSource : ""
             }
 
             MouseArea {
@@ -149,7 +136,7 @@ Item {
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 verticalAlignment: Text.AlignVCenter
 
-                text: simulation.description
+                text: simulation ? simulation.description : ""
             }
 
             Text {

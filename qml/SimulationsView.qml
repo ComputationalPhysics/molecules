@@ -10,19 +10,27 @@ Item {
         id: simulationsModel
 
         ListElement {
-            folder: "simulations/diffusion/simple_diffusion"
+            folder: "../simulations/diffusion/simple_diffusion"
         }
 
         ListElement {
-            folder: "simulations/diffusion/chamber"
+            folder: "../simulations/diffusion/chamber"
         }
 
         ListElement {
-            folder: "simulations/pressure/crystal"
+            folder: "../simulations/fractures/simple_fracture"
         }
 
         ListElement {
-            folder: "simulations/fun/bullets"
+            folder: "../simulations/pressure/crystal"
+        }
+
+        ListElement {
+            folder: "../simulations/fun/bullets"
+        }
+
+        ListElement {
+            folder: "../simulations/fun/wallcrash"
         }
     }
 

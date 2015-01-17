@@ -2,19 +2,5 @@
     <qresource prefix="/">
         <file>simulations/fractures/simple_fracture/fracture.lmp</file>
         <file>simulations/fractures/simple_fracture/fracture.png</file>
-        <file>simulations/fun/wallcrash/wallcrash.lmp</file>
-        <file>simulations/fun/wallcrash/wallcrash.png</file>
-        <file>simulations/pressure/crystal/crystal.lmp</file>
-        <file>simulations/pressure/crystal/crystal.png</file>
-        <file>simulations/pressure/crystal/crystal.qml</file>
-        <file>simulations/diffusion/chamber/chamber.lmp</file>
-        <file>simulations/diffusion/chamber/chamber.png</file>
-        <file>simulations/diffusion/chamber/chamber.qml</file>
-        <file>simulations/fun/bullets/bullets.lmp</file>
-        <file>simulations/fun/bullets/bullets.png</file>
-        <file>simulations/fun/bullets/bullets.qml</file>
-        <file>simulations/diffusion/simple_diffusion/simple_diffusion.lmp</file>
-        <file>simulations/diffusion/simple_diffusion/simple_diffusion.png</file>
-        <file>simulations/diffusion/simple_diffusion/simple_diffusion.qml</file>
     </qresource>
 </RCC>

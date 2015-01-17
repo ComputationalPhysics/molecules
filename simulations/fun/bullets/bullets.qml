@@ -4,9 +4,9 @@ import "../../.."
 Simulation {
     name: "Bullets"
 
-    zoom: -55
-    pan: -80
-    tilt: -15
+    zoom: -35
+    pan: -5
+    tilt: -5
 
     description: "See what happens when a block of atoms is hit by a stream " +
                  "of other atoms."

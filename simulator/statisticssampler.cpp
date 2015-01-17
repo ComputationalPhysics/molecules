@@ -119,7 +119,7 @@ void StatisticsSampler::sample() {
     cout.setf(ios::fixed);
     cout.precision(5);
     double total_energy = kinetic_energy + potential_energy;
-    cout << "Timestep " << setw(6) << system->steps << "   t=" << t_in_pico_seconds << " ps   T=" << system->unit_converter->temperature_to_SI(temperature) << " K   T(gas)=" << system->unit_converter->temperature_to_SI(temperature_free_atoms) << "K   E=" << system->unit_converter->energy_to_ev(total_energy) << " eV   Pot=" << system->unit_converter->energy_to_ev(potential_energy) << " eV" << endl;
+//    cout << "Timestep " << setw(6) << system->steps << "   t=" << t_in_pico_seconds << " ps   T=" << system->unit_converter->temperature_to_SI(temperature) << " K   T(gas)=" << system->unit_converter->temperature_to_SI(temperature_free_atoms) << "K   E=" << system->unit_converter->energy_to_ev(total_energy) << " eV   Pot=" << system->unit_converter->energy_to_ev(potential_energy) << " eV" << endl;
 }
 
 void StatisticsSampler::sample_velocity_distribution() {

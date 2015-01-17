@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.1
 import QtQuick.Window 2.2
 import MolecularDynamics 1.0
 import "style" 1.0
+import "tools"
 //import MoleculesStyle 1.0
 
 Item {
@@ -24,10 +25,9 @@ Item {
         }
     }
 
-    Simulation {
-        id: initialSimulation
-        stateSource: "simulations/pressure/crystal/crystal.lmp"
-        zoom: -10
+    SimulationLoader {
+        id: simulationLoader
+        folder: "../simulations/diffusion/chamber"
     }
 
     width: 1280
@@ -39,12 +39,13 @@ Item {
         Style.pixelDensity = Screen.pixelDensity
         Style.windowWidth = width
         Style.windowHeight = height
-        Style.reset()
     }
 
     function loadSimulation(simulation) {
         dashboard.running = false
+        console.log("Loading simulation " + simulation)
         moleculesRoot.simulation = simulation
+        console.log("MoleculesRoot simulation tilt: " + moleculesRoot.simulation.tilt)
         molecularDynamics.load(simulation.stateSource)
         dashboard.running = true
     }
@@ -60,7 +61,7 @@ Item {
     Component.onCompleted: {
         console.log("Atomify started.")
         console.log("Platform: " + Qt.platform.os)
-        loadSimulation(initialSimulation)
+        loadSimulation(simulationLoader.item)
         resetStyle()
     }
 
@@ -92,6 +93,11 @@ Item {
             molecularDynamics.targetPan  = moleculesRoot.simulation.pan
             molecularDynamics.targetTilt = moleculesRoot.simulation.tilt
             molecularDynamics.targetZoom = moleculesRoot.simulation.zoom
+
+            console.log("Target pan: " + molecularDynamics.targetPan)
+            console.log("Target tilt: " + molecularDynamics.targetTilt)
+            console.log("Target zoom: " + molecularDynamics.targetZoom)
+
             zoomAnimation.restart()
             panAnimation.restart()
             tiltAnimation.restart()
@@ -104,7 +110,7 @@ Item {
             property: "zoom"
             from: molecularDynamics.zoom
             to: molecularDynamics.targetZoom
-            duration: 400
+            duration: 700
             easing.type: Easing.InOutQuad
         }
 
@@ -114,7 +120,7 @@ Item {
             property: "pan"
             from: molecularDynamics.pan
             to: molecularDynamics.targetPan
-            duration: 450
+            duration: 700
             easing.type: Easing.InOutQuad
         }
 
@@ -124,7 +130,7 @@ Item {
             property: "tilt"
             from: molecularDynamics.tilt
             to: molecularDynamics.targetTilt
-            duration: 430
+            duration: 700
             easing.type: Easing.InOutQuad
         }
 
@@ -176,7 +182,7 @@ Item {
                 property bool movedTooFarToHide: false
 
                 onPressed: {
-                    simulationsView.revealed = false
+                    mainMenu.revealed = false
                     dashboard.revealed = false
                     lastPosition = Qt.point(mouse.x, mouse.y)
                     pressedPosition = Qt.point(mouse.x, mouse.y)
@@ -243,7 +249,7 @@ Item {
 
     Item {
         id: revealDashboardButton
-        property bool revealed: !dashboard.revealed && !simulationsView.revealed
+        property bool revealed: !dashboard.revealed && !mainMenu.revealed
         anchors {
             right: parent.right
             bottom: parent.bottom
@@ -293,7 +299,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onPressed: {
-                simulationsView.revealed = false
+                mainMenu.revealed = false
                 dashboard.revealed = true
             }
         }
@@ -303,7 +309,7 @@ Item {
 
     Item {
         id: revealSimulationsViewButton
-        property bool revealed: !dashboard.revealed && !simulationsView.revealed
+        property bool revealed: !dashboard.revealed && !mainMenu.revealed
 
         anchors {
             top: moleculesRoot.top
@@ -353,7 +359,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             onPressed: {
-                simulationsView.revealed = true
+                mainMenu.revealed = true
             }
         }
     }
@@ -392,7 +398,7 @@ Item {
     }
 
     MainMenu {
-        id: simulationsView
+        id: mainMenu
 
         anchors.fill: parent
 
@@ -409,23 +415,35 @@ Item {
     }
 
     Keys.onPressed: {
+        // Development keys
+        if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_D) {
+            var component = Qt.createComponent("simulations/fun/wallcrash/wallcrash.qml")
+            var bullet = component.createObject(moleculesRoot,
+                                                {
+                                                    folder: "simulations/fun/wallcrash"
+                                                })
+            mainMenu.loadSimulation(bullet)
+        }
+        if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_A) {
+            console.log("Copy these settings: "+
+                        "\nzoom: " + molecularDynamics.zoom +
+                        "\npan: " + molecularDynamics.pan +
+                        "\ntilt: " + molecularDynamics.tilt)
+        }
         if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
             var saveFileName = "state-"+Date.now()+".lmp"
             console.log("Saving state to " + saveFileName)
             molecularDynamics.save("state-"+Date.now()+".lmp")
         }
-        if(event.modifiers & Qt.ControlModifier && event.key === Qt.Key_A) {
-            console.log("zoom: " + molecularDynamics.zoom +
-                        "; pan: " + molecularDynamics.pan +
-                        "; tilt: " + molecularDynamics.tilt)
-        }
+
+        // End development keys
 
         if(event.key === Qt.Key_Back) {
             if(dashboard.revealed) {
                 dashboard.revealed = false
                 event.accepted = true
-            } else if(simulationsView.revealed) {
-                simulationsView.revealed = false
+            } else if(mainMenu.revealed) {
+                mainMenu.revealed = false
                 event.accepted = true
             } else {
                 console.log("Nothing to hide, quitting because back button pressed.")

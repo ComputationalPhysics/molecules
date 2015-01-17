@@ -25,10 +25,13 @@ SOURCES += main.cpp \
     cpglcube.cpp \
     moleculardynamicsrenderer.cpp
 
-RESOURCES += qml.qrc \
+RESOURCES += qml/qml.qrc \
     images.qrc \
     fonts.qrc \
-    simulations.qrc
+    simulations/diffusion/diffusion.qrc \
+    simulations/fun/fun.qrc \
+    simulations/pressure/pressure.qrc \
+    simulations/fractures/fractures.qrc
 
 OTHER_FILES += \
     android/com/compphys/atomify/AtomifyActivity.java \

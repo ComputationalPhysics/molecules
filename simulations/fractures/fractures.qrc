@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/simulations/fractures">
+        <file>simple_fracture/simple_fracture.lmp</file>
+        <file>simple_fracture/simple_fracture.png</file>
+        <file>simple_fracture/simple_fracture.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/simulations/pressure">
+        <file>crystal/crystal.lmp</file>
+        <file>crystal/crystal.png</file>
+        <file>crystal/crystal.qml</file>
+    </qresource>
+</RCC>
