@@ -3,6 +3,7 @@
 from pylab import *
 from lammpsreader import *
 from sys import argv
+from generators import *
 
 fileName = argv[1]
 
@@ -22,7 +23,7 @@ nx,ny,nz = 10,int(Ly/1.56),int(Lz/1.56)
 index = 0
 
 # First wall
-atoms = create_fcc(1, ny, nz, T=0.0)
+atoms = create_fcc(4, ny, nz, T=0.0)
 for atom in atoms:
     atom["position"][0] += Lx / 2.0
     

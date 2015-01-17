@@ -2,6 +2,7 @@ from pylab import *
 from sys import argv
 from os.path import expanduser
 from lammpsreader import save_atoms, load_atoms
+from generators import *
 
 class Ball:
     radius = 0

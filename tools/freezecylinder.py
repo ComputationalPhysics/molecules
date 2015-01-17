@@ -3,6 +3,8 @@
 from pylab import *
 from lammpsreader import load_atoms, save_atoms
 from sys import argv
+from generators import *
+
 fileName = argv[1]
 lammpsHeader, atoms, system_lengths = load_atoms(fileName)
 

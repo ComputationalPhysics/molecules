@@ -3,6 +3,7 @@
 from pylab import *
 from lammpsreader import *
 from sys import argv
+from generators import *
 
 fileName = argv[1]
 
