@@ -75,8 +75,8 @@ Item {
             bottomMargin: Style.touchableSize * 0.7
             horizontalCenter: parent.horizontalCenter
         }
-        height: Style.baseSize * 0.3
-        spacing: Style.baseSize * 0.2
+        height: Style.baseSize * 1.2
+        spacing: Style.baseSize * 0.8
 
         Repeater {
             id: dotsRepeater
@@ -102,7 +102,7 @@ Item {
                 id: dot
                 property bool selected: false
                 anchors.verticalCenter: parent.verticalCenter
-                width: Style.baseSize * 0.2
+                width: Style.baseSize * 0.8
                 height: width
                 color: "grey"
 
@@ -118,7 +118,7 @@ Item {
                         }
                         PropertyChanges {
                             target: dot
-                            width: Style.baseSize * 0.3
+                            width: Style.baseSize * 1.2
                         }
                     }
                 ]

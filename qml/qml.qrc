@@ -19,5 +19,7 @@
         <file>style/qmldir</file>
         <file>style/Style.qml</file>
         <file>tools/SimulationLoader.qml</file>
+        <file>About.qml</file>
+        <file>Heading.qml</file>
     </qresource>
 </RCC>

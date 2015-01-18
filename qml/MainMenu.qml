@@ -196,12 +196,14 @@ Item {
                     height: mainMenuRoot.width * 0.07
                     width: parent.width
                     text: "About"
+                    onClicked: {
+                        stackView.push(aboutView)
+                    }
                 }
             }
 
             Intro {
                 anchors.fill: parent
-                title: "Atomify."
                 Component.onCompleted: {
                     state = "started"
                 }
@@ -217,8 +219,6 @@ Item {
         }
     }
 
-//    Component {
-//        id: simulationSelectionView
     SimulationsView {
         id: simulationSelectionView
         visible: false
@@ -230,7 +230,11 @@ Item {
             mainMenuRoot.readMore(text)
         }
     }
-//    }
+
+    About {
+        id: aboutView
+        visible: false
+    }
 
     Item {
         id: descriptionText

@@ -15,7 +15,7 @@ Item {
         id: simulationLoader
     }
 
-    Text {
+    Heading {
         id: nameText
         anchors {
             top: parent.top
@@ -23,12 +23,6 @@ Item {
             topMargin: Style.baseMargin
         }
         text: simulation ? simulation.name : ""
-        color: Qt.rgba(0.4, 0.4, 0.4, 1.0)
-        font.pixelSize: parent.width * 0.05
-        font.weight: Font.Light
-
-        renderType: Qt.platform.os === "linux" ? Text.NativeRendering : Text.QtRendering
-
 
         MouseArea {
             anchors.fill: parent

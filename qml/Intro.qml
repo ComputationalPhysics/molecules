@@ -63,13 +63,9 @@ Item {
         opacity: 1
     }
 
-    Text {
+    Heading {
         id: welcomeText
-        text: "Welcome."
-        color: Qt.rgba(0.4, 0.4, 0.4, 1.0)
-        font.family: "Roboto"
-        font.weight: Font.Light
-        font.pixelSize: parent.width * 0.05
+        text: "Atomify."
     }
 
     MouseArea {

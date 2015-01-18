@@ -30,15 +30,13 @@ Item {
         folder: "../simulations/diffusion/chamber"
     }
 
-    width: 1280
-    height: 720
+    width: 960
+    height: 540
 
     focus: true
 
     function resetStyle() {
-        Style.pixelDensity = Screen.pixelDensity
-        Style.windowWidth = width
-        Style.windowHeight = height
+        Style.reset(width, height, Screen.pixelDensity)
     }
 
     function loadSimulation(simulation) {

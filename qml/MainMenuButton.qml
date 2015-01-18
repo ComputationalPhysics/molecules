@@ -35,10 +35,10 @@ Item {
         }
 
         text: "Begin"
-        font.pixelSize: 40
+        font.pixelSize: Style.font.button.size
         font.weight: Font.Light
         renderType: Text.QtRendering
-        color: "#dedede"
+        color: Style.font.color
     }
 
     MouseArea {
