@@ -4,10 +4,9 @@ import QtQuick.Layouts 1.1
 import QtGraphicalEffects 1.0
 
 import "style"
-import "simulations"
 
 Item {
-    id: systemsViewRoot
+    id: mainMenuRoot
     property bool revealed: true
     property var blurSource: null
     signal loadSimulation(var simulation)
@@ -28,7 +27,7 @@ Item {
     }
 
     function hide() {
-        systemsViewRoot.revealed = false
+        mainMenuRoot.revealed = false
     }
 
     //    Chamber {
@@ -36,10 +35,10 @@ Item {
     //    }
 
     MouseArea {
-        enabled: systemsViewRoot.revealed
+        enabled: mainMenuRoot.revealed
         anchors.fill: parent
         onPressed: {
-            systemsViewRoot.revealed = false
+            mainMenuRoot.revealed = false
         }
     }
 
@@ -58,7 +57,7 @@ Item {
 
         MouseArea {
             // Dummy mouse area to avoid interacting with underlying simulation
-            enabled: systemsViewRoot.revealed
+            enabled: mainMenuRoot.revealed
             anchors.fill: parent
         }
 
@@ -223,6 +222,13 @@ Item {
     SimulationsView {
         id: simulationSelectionView
         visible: false
+        onLoadSimulation: {
+            mainMenuRoot.loadSimulation(simulation)
+            stackView.pop(0)
+        }
+        onReadMore: {
+            mainMenuRoot.readMore(text)
+        }
     }
 //    }
 

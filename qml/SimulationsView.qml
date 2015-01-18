@@ -5,6 +5,8 @@ Item {
     id: simulationSelectionView
     property alias model: listView.model
     property string title: "Select simulation"
+    signal loadSimulation(var simulation)
+    signal readMore(var text)
 
     ListModel {
         id: simulationsModel
@@ -58,10 +60,10 @@ Item {
             height: listView.height
             folder: model.folder
             onLoadSimulation: {
-                systemsViewRoot.loadSimulation(simulation)
+                simulationSelectionView.loadSimulation(simulation)
             }
             onReadMore: {
-                systemsViewRoot.readMore(text)
+                simulationSelectionView.readMore(text)
             }
         }
     }
