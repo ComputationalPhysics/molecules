@@ -313,6 +313,8 @@ void System::countAtomTypes() {
             num_atoms_fixed++;
         } else if(atom_type[i] == AtomType::Argon) {
             num_atoms_free++;
+        } else if(atom_type[i] == AtomType::Argon2) {
+            num_atoms_free++;
         } else {
             cout << "WARNING: Unknown atom type in count_frozen_atoms: " << atom_type[i] << endl;
         }

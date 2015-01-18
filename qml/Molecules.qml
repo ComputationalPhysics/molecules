@@ -43,9 +43,7 @@ Item {
 
     function loadSimulation(simulation) {
         dashboard.running = false
-        console.log("Loading simulation " + simulation)
         moleculesRoot.simulation = simulation
-        console.log("MoleculesRoot simulation tilt: " + moleculesRoot.simulation.tilt)
         molecularDynamics.load(simulation.stateSource)
         dashboard.running = true
     }
@@ -93,10 +91,6 @@ Item {
             molecularDynamics.targetPan  = moleculesRoot.simulation.pan
             molecularDynamics.targetTilt = moleculesRoot.simulation.tilt
             molecularDynamics.targetZoom = moleculesRoot.simulation.zoom
-
-            console.log("Target pan: " + molecularDynamics.targetPan)
-            console.log("Target tilt: " + molecularDynamics.targetTilt)
-            console.log("Target zoom: " + molecularDynamics.targetZoom)
 
             zoomAnimation.restart()
             panAnimation.restart()
