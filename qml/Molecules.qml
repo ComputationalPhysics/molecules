@@ -136,9 +136,7 @@ Item {
             }
 
             isSettingSystemSize = true
-            dashboard.systemSizeX = systemSize.x
-            dashboard.systemSizeY = systemSize.y
-            dashboard.systemSizeZ = systemSize.z
+            dashboard.resetSystemSize(systemSize.x, systemSize.y, systemSize.z)
             isSettingSystemSize = false
         }
 

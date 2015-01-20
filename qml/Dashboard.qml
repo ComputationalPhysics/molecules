@@ -19,9 +19,9 @@ Item {
     property double forceValue: 0
     property bool forceEnabled: false
 
-    property alias systemSizeX: systemSizeXSlider.value
-    property alias systemSizeY: systemSizeYSlider.value
-    property alias systemSizeZ: systemSizeZSlider.value
+    readonly property alias systemSizeX: systemSizeXSlider.expValue
+    readonly property alias systemSizeY: systemSizeYSlider.expValue
+    readonly property alias systemSizeZ: systemSizeZSlider.expValue
     property real  minimumSystemSizeSliderValue: 1.0
 
     property real temperature: 0.0
@@ -37,6 +37,12 @@ Item {
 
     anchors.fill: parent
     state: revealed ? "revealed" : "hidden"
+
+    function resetSystemSize(sizeX, sizeY, sizeZ) {
+        systemSizeXSlider.value = Math.log(sizeX)
+        systemSizeYSlider.value = Math.log(sizeY)
+        systemSizeZSlider.value = Math.log(sizeZ)
+    }
 
     function resetControls() {
         running = true
@@ -565,12 +571,14 @@ Item {
 
                 Slider {
                     id: systemSizeXSlider
+                    property real expValue: Math.exp(value)
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                    maximumValue: 100
-                    value: 10
+                    minimumValue: Math.log(dashboardRoot.minimumSystemSizeSliderValue)
+                    maximumValue: Math.log(100)
+                    value: Math.log(10)
+
                     opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
                     onPressedChanged: {
                         if(pressed) {
@@ -592,12 +600,13 @@ Item {
 
                 Slider {
                     id: systemSizeYSlider
+                    property real expValue: Math.exp(value)
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                    maximumValue: 100
-                    value: 10
+                    minimumValue: Math.log(dashboardRoot.minimumSystemSizeSliderValue)
+                    maximumValue: Math.log(100)
+                    value: Math.log(10)
                     opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
                     onPressedChanged: {
                         if(pressed) {
@@ -619,12 +628,13 @@ Item {
 
                 Slider {
                     id: systemSizeZSlider
+                    property real expValue: Math.exp(value)
                     orientation: Qt.Horizontal
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    minimumValue: dashboardRoot.minimumSystemSizeSliderValue
-                    maximumValue: 100
-                    value: 10
+                    minimumValue: Math.log(dashboardRoot.minimumSystemSizeSliderValue)
+                    maximumValue: Math.log(100)
+                    value: Math.log(10)
                     opacity: pressed || !othersPressed ? 1.0 : hiddenOpacity
                     onPressedChanged: {
                         if(pressed) {
