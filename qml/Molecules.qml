@@ -43,7 +43,8 @@ Item {
         dashboard.running = false
         moleculesRoot.simulation = simulation
         molecularDynamics.load(simulation.stateSource)
-        dashboard.running = true
+//        dashboard.running = true
+        mainMenu.wasPausedByReveal = true
     }
 
     onWidthChanged: {
