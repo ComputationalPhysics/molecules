@@ -10,12 +10,17 @@ Item {
     property bool revealed: true
     property var blurSource: null
     signal loadSimulation(var simulation)
+    signal startIntroAnimation
 
     Component.onCompleted: {
         //        systemsGrid.setup()
     }
 
     state: revealed ? "revealed" : "hidden"
+
+//    function startIntroAnimation() {
+//        intro.startAnimation()
+//    }
 
     function readMore(text) {
         descriptionText.text = text
@@ -161,11 +166,13 @@ Item {
         id: mainMenu
 
         Item {
-            id: mainMenuRoot
+            id: mainMenuRoot2
             property string title: "Atomify"
 
             width: parent.width
             height: parent.height
+
+            Component.onCompleted: mainMenuRoot.startIntroAnimation.connect(intro.startAnimation)
 
             Column {
                 anchors {
@@ -173,11 +180,11 @@ Item {
                     leftMargin: Style.touchableSize
                     verticalCenter: parent.verticalCenter
                 }
-                width: mainMenuRoot.width * 0.4
-                spacing: mainMenuRoot.width * 0.02
+                width: mainMenuRoot2.width * 0.4
+                spacing: mainMenuRoot2.width * 0.02
 //                height: mainMenuRoot.width * 0.4
                 MainMenuButton {
-                    height: mainMenuRoot.width * 0.07
+                    height: mainMenuRoot2.width * 0.07
                     width: parent.width
                     text: "Return to simulation"
                     onClicked: {
@@ -185,7 +192,7 @@ Item {
                     }
                 }
                 MainMenuButton {
-                    height: mainMenuRoot.width * 0.07
+                    height: mainMenuRoot2.width * 0.07
                     width: parent.width
                     text: "Select simulation"
                     onClicked: {
@@ -193,7 +200,7 @@ Item {
                     }
                 }
                 MainMenuButton {
-                    height: mainMenuRoot.width * 0.07
+                    height: mainMenuRoot2.width * 0.07
                     width: parent.width
                     text: "About"
                     onClicked: {
@@ -203,10 +210,9 @@ Item {
             }
 
             Intro {
+                id: intro
                 anchors.fill: parent
-                Component.onCompleted: {
-                    state = "started"
-                }
+                state: "started"
             }
         }
     }

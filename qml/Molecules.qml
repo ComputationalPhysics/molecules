@@ -59,6 +59,8 @@ Item {
         console.log("Platform: " + Qt.platform.os)
         loadSimulation(simulationLoader.item)
         resetStyle()
+
+        mainMenu.startIntroAnimation()
     }
 
     MolecularDynamics {

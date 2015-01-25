@@ -36,6 +36,8 @@ Item {
     }
 
     function reset(width, height, pixelDensity) {
+        console.log("Resetting style")
+
         styleRoot.windowWidth = width
         styleRoot.windowHeight = height
         styleRoot.pixelDensity = pixelDensity

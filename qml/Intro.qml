@@ -10,7 +10,6 @@ Item {
     property int currentExperimentIndex: 0
     width: 100
     height: 62
-
     Component.onCompleted: {
         resetRunning()
     }
@@ -27,6 +26,12 @@ Item {
             }
         }
     }
+
+    function startAnimation() {
+        console.log("Starting intro animation")
+        state = "started"
+    }
+
 
     onCurrentExperimentIndexChanged: {
         if(currentExperimentIndex >= experimentsRow.children.length) {
