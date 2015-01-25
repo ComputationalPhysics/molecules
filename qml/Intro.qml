@@ -65,6 +65,7 @@ Item {
 
     Heading {
         id: welcomeText
+        anchors.horizontalCenter: introRoot.horizontalCenter
         text: "Atomify."
     }
 
@@ -169,7 +170,6 @@ Item {
             name: "welcome"
             AnchorChanges {
                 target: welcomeText
-                anchors.horizontalCenter: introRoot.horizontalCenter
                 anchors.verticalCenter: introRoot.verticalCenter
             }
             PropertyChanges {
