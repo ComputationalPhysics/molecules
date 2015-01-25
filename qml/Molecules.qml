@@ -43,7 +43,7 @@ Item {
         dashboard.running = false
         moleculesRoot.simulation = simulation
         molecularDynamics.load(simulation.stateSource)
-//        dashboard.running = true
+        dashboard.running = true
         mainMenu.wasPausedByReveal = true
     }
 
@@ -62,6 +62,19 @@ Item {
         resetStyle()
 
         mainMenu.startIntroAnimation()
+    }
+
+    Timer {
+        id: pauseAfterInitializeTimer
+        running: true
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            if(dashboard.running && mainMenu.revealed) {
+                console.log("Stopping simulation after initialization")
+                dashboard.running = false
+            }
+        }
     }
 
     MolecularDynamics {
