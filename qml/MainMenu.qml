@@ -186,7 +186,7 @@ Item {
                 MainMenuButton {
                     height: mainMenuRoot2.width * 0.07
                     width: parent.width
-                    text: "Return to simulation"
+                    text: "Continue simulation"
                     onClicked: {
                         hide()
                     }

@@ -37,6 +37,7 @@ Item {
         text: "Begin"
         font.pixelSize: Style.font.button.size
         font.weight: Font.Light
+        font.family: "Roboto"
         renderType: Text.QtRendering
         color: Style.font.color
     }
