@@ -31,7 +31,7 @@ Item {
         Item {
             id: buttonObject
             property color color: "#dedede"
-            property real size: 1.8 * font.size
+            property real size: 1.6 * font.size
         }
     }
 
