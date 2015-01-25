@@ -1,5 +1,7 @@
 TEMPLATE = app
 
+VERSION = 1.1
+
 android {
     TARGET = Atomify
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
