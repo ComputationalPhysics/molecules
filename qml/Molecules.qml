@@ -390,6 +390,8 @@ Item {
     MainMenu {
         id: mainMenu
 
+        property bool wasPausedByReveal: false
+
         anchors.fill: parent
 
         blurSource: molecularDynamics
@@ -401,6 +403,18 @@ Item {
         onLoadSimulation: {
             moleculesRoot.loadSimulation(simulation)
             revealed = false
+        }
+
+        onRevealedChanged: {
+            if(revealed) {
+                if(dashboard.running) {
+                    wasPausedByReveal = true
+                    dashboard.running = false
+                }
+            } else if(wasPausedByReveal) {
+                dashboard.running = true
+                wasPausedByReveal = false
+            }
         }
     }
 
