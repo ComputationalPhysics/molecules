@@ -74,17 +74,17 @@ Item {
         text: "Atomify."
     }
 
-    MouseArea {
-        id: skipArea
-        anchors.fill: parent
-        onClicked: {
-            transition.enabled = false
-            introRoot.state = "tmp"
-            introRoot.state = "started"
-            introRoot.running = true
-            skipArea.enabled = false
-        }
-    }
+//    MouseArea {
+//        id: skipArea
+//        anchors.fill: parent
+//        onClicked: {
+//            transition.enabled = false
+//            introRoot.state = "tmp"
+//            introRoot.state = "started"
+//            introRoot.running = true
+//            skipArea.enabled = false
+//        }
+//    }
 
     RadialGradient {
         id: startRectangle
