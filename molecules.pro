@@ -1,5 +1,5 @@
-ofjasdofjasodfjaaaaaa
-TEMPLATE = app
+
+TEMPLATE = apps
 
 VERSION = 1.1
 
