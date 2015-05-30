@@ -1,5 +1,5 @@
 
-TEMPLATE = apps
+TEMPLATE = appss
 
 VERSION = 1.1
 
